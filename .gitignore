@@ -1,0 +1,26 @@
+.DS_Store
+.env
+.env.*
+node_modules/
+
+# Generated reports and private usage sources
+codex-consumption-report/
+report-output/
+qa/
+codex-consumption-report.html
+codex-consumption-report.pdf
+codex-consumption-report-*.png
+codex-consumption-source.json
+codex-consumption-source.json.gz
+codex-lifecycle-ledger.json
+codex-lifecycle-ledger.json.gz
+codex-official-usage.json
+codex-official-usage.json.gz
+codex-consumption-data.json
+codex-consumption-data.json.gz
+codeburn-*.json
+.codex-consumption-*
+*.db
+*.sqlite
+*.sqlite3
+*.mp4

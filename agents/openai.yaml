@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex 消耗报告"
+  short_description: "汇总官方账户与多设备本地明细，生成交互式 Codex 消耗报告"
+  default_prompt: "使用 $generate-codex-consumption-report 汇总 Codex 官方账户及已导入设备的消耗，并生成可筛选的动态 HTML 报告。"

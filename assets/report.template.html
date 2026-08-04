@@ -1,0 +1,3425 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Codex 使用消耗报告</title>
+  <style>
+    :root {
+      --paper: #efeee8;
+      --paper-2: #f7f6f1;
+      --ink: #191917;
+      --ink-2: #32322f;
+      --muted: #74736c;
+      --faint: #aaa89f;
+      --line: #d7d5cd;
+      --line-dark: #b9b7ae;
+      --blue: #315cf4;
+      --blue-open: #dfe6ff;
+      --orange: #cd6a39;
+      --orange-open: #f1dfd6;
+      --white: #fbfaf6;
+      --max: 1320px;
+      --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", Arial, sans-serif;
+      --mono: "SFMono-Regular", "Roboto Mono", "IBM Plex Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--paper); }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    a { color: inherit; }
+    button { font: inherit; }
+    .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      height: 48px;
+      padding: 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      color: #f8f7f2;
+      background: var(--ink);
+      border-bottom: 1px solid #000;
+    }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 190px;
+      font: 600 10px/1 var(--mono);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .topbar-brand::before {
+      width: 8px;
+      height: 8px;
+      content: "";
+      background: var(--blue);
+    }
+    .topbar nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .topbar nav a {
+      color: #b8b6ae;
+      font: 500 10px/1 var(--mono);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .topbar nav a:hover,
+    .topbar nav a:focus-visible { color: #fff; }
+    .topbar-actions { display: flex; align-items: center; gap: 8px; }
+    .ghost-button {
+      min-height: 30px;
+      padding: 0 12px;
+      color: inherit;
+      background: transparent;
+      border: 1px solid #77766f;
+      border-radius: 4px;
+      font: 600 10px/1 var(--mono);
+      cursor: pointer;
+    }
+    .ghost-button:hover,
+    .ghost-button:focus-visible { border-color: #fff; outline: none; }
+    main { width: min(calc(100% - 48px), var(--max)); margin: 0 auto; }
+    .report-title {
+      min-height: 500px;
+      padding: 78px 0 66px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr);
+      gap: 64px;
+      align-items: end;
+      border-bottom: 1px solid var(--line);
+    }
+    .eyebrow {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font: 600 10px/1.4 var(--mono);
+      text-transform: uppercase;
+    }
+    h1 {
+      max-width: 850px;
+      margin: 0;
+      font-size: clamp(64px, 8vw, 116px);
+      line-height: .89;
+      font-weight: 800;
+    }
+    h1 .soft { color: #9b9a93; }
+    .title-side { padding-bottom: 6px; }
+    .title-side p {
+      max-width: 440px;
+      margin: 0 0 34px;
+      color: var(--ink-2);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+    .title-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      border-top: 1px solid var(--ink);
+    }
+    .title-meta div {
+      min-height: 72px;
+      padding: 14px 12px 0 0;
+      border-right: 1px solid var(--line);
+    }
+    .title-meta div:last-child { padding-left: 16px; border-right: 0; }
+    .title-meta span { display: block; }
+    .title-meta .meta-value { font: 600 13px/1.3 var(--mono); }
+    .title-meta .meta-label { margin-top: 7px; color: var(--faint); font: 500 9px/1.3 var(--mono); text-transform: uppercase; }
+    .executive {
+      padding: 72px 0 66px;
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 64px;
+      border-bottom: 1px solid var(--line);
+    }
+    .executive h2 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.05;
+    }
+    .executive-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 28px 42px;
+    }
+    .executive-item {
+      margin: 0;
+      padding-top: 14px;
+      border-top: 2px solid var(--ink);
+      color: var(--ink-2);
+      font-size: 15px;
+      line-height: 1.68;
+    }
+    .executive-item strong {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--ink);
+      font-size: 17px;
+    }
+    .scope {
+      padding: 28px 0;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1fr;
+      gap: 24px;
+      border-bottom: 1px solid var(--line);
+    }
+    .scope-item { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; }
+    .scope-index {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      color: var(--white);
+      background: var(--ink);
+      font: 600 9px/1 var(--mono);
+    }
+    .scope-item strong { display: block; margin-bottom: 4px; font-size: 13px; }
+    .scope-item span { display: block; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .metrics {
+      padding: 38px 0 10px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 0;
+    }
+    .metrics-source-note {
+      grid-column: 1 / -1;
+      margin: 12px 0 0;
+      color: var(--faint);
+      font-size: 11px;
+      line-height: 1.5;
+      text-align: right;
+    }
+    .metric {
+      min-height: 116px;
+      padding: 18px 20px 14px 0;
+      border-top: 1px solid var(--ink);
+      border-right: 1px solid var(--line);
+    }
+    .metric:not(:first-child) { padding-left: 20px; }
+    .metric:last-child { border-right: 0; }
+    .metric-value {
+      display: block;
+      font: 650 clamp(25px, 2.5vw, 38px)/1 var(--mono);
+      white-space: nowrap;
+    }
+    .metric-label { display: block; margin-top: 12px; color: var(--muted); font-size: 11px; }
+    .metric-note { display: block; margin-top: 4px; color: var(--faint); font: 500 9px/1.4 var(--mono); text-transform: uppercase; }
+    .story-section {
+      padding: 104px 0 86px;
+      border-bottom: 1px solid var(--line);
+      scroll-margin-top: 48px;
+    }
+    .section-head {
+      margin-bottom: 38px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr);
+      gap: 64px;
+      align-items: end;
+    }
+    .section-no {
+      display: block;
+      margin-bottom: 18px;
+      color: var(--blue);
+      font: 700 10px/1 var(--mono);
+      text-transform: uppercase;
+    }
+    .section-head h2 {
+      max-width: 850px;
+      margin: 0;
+      font-size: clamp(40px, 5.3vw, 74px);
+      line-height: .98;
+      font-weight: 760;
+    }
+    .section-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.78;
+    }
+    .section-head p strong { color: var(--ink); }
+    .chart-shell {
+      position: relative;
+      overflow: hidden;
+      background: var(--paper-2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+    .chart-header {
+      min-height: 76px;
+      padding: 20px 22px;
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .chart-header h3 { margin: 0; font-size: 17px; line-height: 1.25; }
+    .chart-header p { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
+    .chart-tag {
+      flex: 0 0 auto;
+      padding: 7px 9px;
+      color: var(--muted);
+      border: 1px solid var(--line-dark);
+      border-radius: 3px;
+      font: 600 8px/1 var(--mono);
+      text-transform: uppercase;
+    }
+    .chart-body { position: relative; padding: 8px 14px 12px; }
+    .chart { width: 100%; height: 500px; }
+    .chart.tall { height: 560px; }
+    .chart.medium { height: 410px; }
+    .chart.short { height: 330px; }
+    .chart-summary {
+      padding: 16px 22px 20px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      border-top: 1px solid var(--line);
+    }
+    .chart-summary-item { min-height: 54px; padding-left: 12px; border-left: 2px solid var(--line-dark); }
+    .chart-summary-item.focus { border-left-color: var(--blue); }
+    .chart-summary-item.warm { border-left-color: var(--orange); }
+    .chart-summary-item strong { display: block; font: 650 18px/1.2 var(--mono); }
+    .chart-summary-item span { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; }
+    .timeline-counter {
+      position: absolute;
+      z-index: 4;
+      top: 40px;
+      left: 62px;
+      pointer-events: none;
+    }
+    .timeline-counter .label { display: block; color: var(--muted); font: 600 9px/1 var(--mono); text-transform: uppercase; }
+    .timeline-counter .value { display: block; margin-top: 7px; font: 650 clamp(34px, 4vw, 58px)/1 var(--mono); }
+    .timeline-counter .unit { color: var(--faint); font-size: 12px; }
+    .figure-button {
+      padding: 7px 10px;
+      color: var(--ink);
+      background: transparent;
+      border: 1px solid var(--line-dark);
+      border-radius: 3px;
+      font: 600 9px/1 var(--mono);
+      cursor: pointer;
+    }
+    .figure-button:hover,
+    .figure-button:focus-visible { border-color: var(--ink); outline: none; }
+    .two-up {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(330px, .75fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+    .composition-ruler {
+      margin: 0 22px 22px;
+      height: 74px;
+      position: relative;
+      border-top: 1px solid var(--ink);
+    }
+    .composition-track {
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      height: 10px;
+      display: flex;
+      overflow: hidden;
+      background: #dddcd5;
+    }
+    .composition-track span { min-width: 1px; }
+    .composition-track .cache { background: var(--ink); }
+    .composition-track .write { background: var(--faint); }
+    .composition-track .input { background: var(--blue); }
+    .composition-track .output { background: var(--orange); }
+    .composition-labels {
+      position: absolute;
+      top: 39px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      color: var(--muted);
+      font: 600 9px/1.4 var(--mono);
+    }
+    .composition-detail {
+      margin: -6px 26px 24px;
+      padding: 13px 14px 12px;
+      display: grid;
+      grid-template-columns: 185px minmax(0, 1fr);
+      gap: 18px;
+      align-items: center;
+      background: #eeede6;
+      border-radius: 4px;
+    }
+    .composition-detail-copy strong { display: block; font: 650 12px/1.2 var(--mono); }
+    .composition-detail-copy span { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .composition-detail-track { height: 8px; display: flex; overflow: hidden; background: var(--line); }
+    .composition-detail-track .input { background: var(--blue); }
+    .composition-detail-track .output { background: var(--orange); min-width: 2px; }
+    .composition-detail-labels { margin-top: 6px; display: flex; justify-content: space-between; color: var(--muted); font: 600 9px/1.3 var(--mono); }
+    .session-legend {
+      position: absolute;
+      z-index: 4;
+      top: 14px;
+      right: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 7px 13px;
+      max-width: 70%;
+      color: var(--muted);
+      font: 600 8px/1.2 var(--mono);
+      pointer-events: none;
+    }
+    .session-legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .session-legend i { width: 7px; height: 7px; display: inline-block; border-radius: 50%; }
+    .inline-note {
+      margin: 18px 0 0;
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 18px;
+      color: var(--muted);
+      border-left: 3px solid var(--orange);
+      background: rgba(255,255,255,.32);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+    .inline-note strong { color: var(--ink); font-size: 12px; }
+    .segmented {
+      flex: none;
+      display: inline-flex;
+      padding: 2px;
+      gap: 2px;
+      background: #e1e0da;
+      border-radius: 4px;
+    }
+    .segmented button {
+      min-width: 42px;
+      min-height: 26px;
+      padding: 0 10px;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      border-radius: 3px;
+      font: 600 9px/1 var(--mono);
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .segmented button.active { color: var(--ink); background: var(--white); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+    .details {
+      border-top: 1px solid var(--line);
+      background: rgba(255,255,255,.18);
+    }
+    .details summary {
+      padding: 13px 20px;
+      color: var(--muted);
+      font: 600 9px/1.4 var(--mono);
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+    .table-scroll { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; padding: 0 20px 18px; contain: inline-size layout paint; overscroll-behavior-inline: contain; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { padding: 9px 10px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    th { color: var(--muted); font: 600 9px/1 var(--mono); text-transform: uppercase; }
+    th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    td.num { font-family: var(--mono); }
+    td.empty-table-cell {
+      height: 86px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+      white-space: normal;
+    }
+    .actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .action-panel {
+      padding: 28px;
+      background: var(--paper-2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+    .action-panel h3 { margin: 0 0 18px; font-size: 21px; }
+    .action-list { margin: 0; padding: 0; list-style: none; counter-reset: action; }
+    .action-list li {
+      position: relative;
+      padding: 18px 0 18px 42px;
+      border-top: 1px solid var(--line);
+      color: var(--ink-2);
+      font-size: 14px;
+      line-height: 1.65;
+      counter-increment: action;
+    }
+    .action-list li::before {
+      position: absolute;
+      left: 0;
+      top: 20px;
+      content: "0" counter(action);
+      color: var(--blue);
+      font: 650 10px/1 var(--mono);
+    }
+    .action-list strong { color: var(--ink); }
+    .caveats {
+      padding: 80px 0 120px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 64px;
+    }
+    .caveats h2 { margin: 0; font-size: 27px; }
+    .caveat-list { margin: 0; padding: 0; list-style: none; }
+    .caveat-list li {
+      padding: 15px 0;
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 20px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+    .caveat-list strong { color: var(--ink); }
+    footer {
+      padding: 20px 22px;
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      color: #a8a69e;
+      background: var(--ink);
+      font: 500 9px/1.5 var(--mono);
+      text-transform: uppercase;
+    }
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 600ms ease, transform 600ms cubic-bezier(.2,.8,.2,1);
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+    .echarts-tooltip {
+      min-width: 170px;
+      color: #f7f6f1;
+      font: 11px/1.55 var(--sans);
+    }
+    .echarts-tooltip .tt-date { margin-bottom: 6px; color: #aaa9a2; font: 600 9px/1.2 var(--mono); }
+    .echarts-tooltip .tt-row { display: flex; justify-content: space-between; gap: 20px; }
+    .echarts-tooltip .tt-row b { font-family: var(--mono); font-weight: 600; }
+    :focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+    @media (max-width: 980px) {
+      .topbar nav { display: none; }
+      .report-title { min-height: auto; grid-template-columns: 1fr; gap: 48px; }
+      .title-side { max-width: 680px; }
+      .executive { grid-template-columns: 1fr; gap: 28px; }
+      .section-head { grid-template-columns: 1fr; gap: 26px; }
+      .metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .metric:nth-child(3) { border-right: 0; }
+      .two-up, .actions-grid { grid-template-columns: 1fr; }
+      .caveats { grid-template-columns: 1fr; gap: 30px; }
+    }
+    @media (max-width: 640px) {
+      main { width: min(calc(100% - 28px), var(--max)); }
+      .topbar { padding: 0 14px; }
+      .topbar-brand { min-width: 0; }
+      .topbar-actions .ghost-button:first-child { display: none; }
+      .report-title { padding: 56px 0 48px; }
+      h1 { font-size: 57px; }
+      .title-meta { grid-template-columns: 1fr; }
+      .title-meta div, .title-meta div:last-child { min-height: 58px; padding: 12px 0; border-right: 0; border-bottom: 1px solid var(--line); }
+      .executive { padding: 52px 0; }
+      .executive-grid { grid-template-columns: 1fr; gap: 22px; }
+      .scope { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .metric, .metric:not(:first-child) { padding: 16px 12px 12px 0; }
+      .metric:nth-child(even) { padding-left: 14px; border-right: 0; }
+      .metric:nth-child(3), .metric:nth-child(5) { border-right: 1px solid var(--line); }
+      .story-section { padding: 72px 0 62px; }
+      .section-head h2 { font-size: 42px; }
+      .chart-header { min-height: 90px; padding: 16px; }
+      .chart-tag { display: none; }
+      .chart-body { padding: 4px 2px 8px; }
+      .chart, .chart.tall { height: 430px; }
+      .chart.medium { height: 370px; }
+      .chart.short { height: 320px; }
+      .timeline-counter { top: 32px; left: 38px; }
+      .timeline-counter .value { font-size: 34px; }
+      .chart-summary { grid-template-columns: 1fr; padding: 16px; }
+      .composition-labels { flex-direction: column; gap: 2px; }
+      .composition-ruler { height: 105px; }
+      .inline-note { grid-template-columns: 1fr; gap: 4px; }
+      .caveat-list li { grid-template-columns: 1fr; gap: 5px; }
+      footer { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .001ms !important; animation-delay: 0ms !important; transition-duration: .001ms !important; }
+      .reveal { opacity: 1; transform: none; }
+      #tokenLedger .rung { opacity: 1; transform: none; }
+    }
+    @media print {
+      @page { size: A4; margin: 11mm; }
+      html, body { width: 188mm; background: #fff; }
+      body { margin: 0 auto; color: #111; }
+      .topbar, .figure-button, .segmented, .details { display: none !important; }
+      main { width: 178mm; max-width: 178mm; margin: 0 auto; }
+      .report-title { min-height: auto; padding-top: 20px; }
+      .section-head, .two-up, .actions-grid { grid-template-columns: 1fr; }
+      .two-up { gap: 18px; }
+      .story-section { padding: 54px 0 42px; break-before: page; }
+      .chart-shell, .action-panel { background: #fff; break-inside: avoid; box-shadow: none; }
+      .chart, .chart.tall, .chart.medium, .chart.short { height: 410px; }
+      .reveal { opacity: 1; transform: none; }
+      footer { width: 188mm; box-sizing: border-box; color: #444; background: #fff; border-top: 1px solid #111; }
+    }
+
+    /* Chart-first visual edition */
+    :root {
+      --paper: #ecebe4;
+      --paper-2: #faf9f4;
+      --ink: #151513;
+      --ink-2: #32322e;
+      --muted: #6f6e66;
+      --faint: #9a988f;
+      --line: #d1cfc5;
+      --line-dark: #aaa89f;
+      --blue: #2f5bff;
+      --blue-open: #dfe6ff;
+      --orange: #d56736;
+      --orange-open: #f1ddd2;
+      --max: 1380px;
+    }
+    body { font-size: 15px; }
+    .topbar { height: 44px; padding: 0 18px; }
+    .topbar nav { gap: 24px; }
+    main { width: min(calc(100% - 40px), var(--max)); }
+    .report-title {
+      position: relative;
+      min-height: 350px;
+      margin-top: 18px;
+      padding: 42px 48px 38px;
+      grid-template-columns: minmax(0, 1.08fr) minmax(420px, .92fr);
+      gap: 72px;
+      align-items: stretch;
+      overflow: hidden;
+      color: #f5f3eb;
+      background: #171716;
+      border: 0;
+      border-radius: 8px;
+    }
+    .report-title::before {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 58%;
+      width: 1px;
+      content: "";
+      background: #393936;
+    }
+    .hero-copy { position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    .report-title .eyebrow { margin: 0; color: #a5a39b; }
+    .report-title h1 {
+      max-width: none;
+      margin-top: 28px;
+      font-size: 82px;
+      line-height: .86;
+      font-weight: 780;
+      letter-spacing: 0;
+    }
+    .report-title h1 .soft { color: #6f8cff; }
+    .hero-deck {
+      max-width: 620px;
+      margin: 28px 0 0;
+      color: #aaa8a0;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .title-side {
+      position: relative;
+      z-index: 1;
+      min-width: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .hero-number {
+      display: block;
+      color: #fff;
+      font: 650 68px/.92 var(--mono);
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+    .hero-number-label {
+      display: block;
+      margin-top: 12px;
+      color: #8d8b84;
+      font: 600 9px/1.45 var(--mono);
+      text-transform: uppercase;
+    }
+    .hero-range {
+      margin-top: 34px;
+      padding-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      border-top: 1px solid #4d4c47;
+      color: #d1cfc7;
+      font-size: 12px;
+    }
+    .hero-range span:last-child { color: #77766f; font-family: var(--mono); font-size: 9px; text-transform: uppercase; }
+    .title-meta { margin-top: 18px; border-top-color: #393936; }
+    .title-meta div { min-height: 54px; padding-top: 12px; border-right-color: #393936; }
+    .title-meta .meta-value { color: #d8d6ce; font-size: 11px; }
+    .title-meta .meta-label { margin-top: 4px; color: #6f6e68; }
+    .executive {
+      padding: 24px 0 26px;
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: 28px;
+      align-items: stretch;
+    }
+    .executive-intro { display: flex; flex-direction: column; justify-content: space-between; padding: 10px 0; }
+    .executive-intro .section-no { margin: 0; }
+    .executive h2 { font-size: 23px; line-height: 1.08; }
+    .executive-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      border-top: 1px solid var(--ink);
+      border-bottom: 1px solid var(--line);
+    }
+    .executive-item {
+      min-height: 108px;
+      margin: 0;
+      padding: 17px 18px 14px;
+      border-top: 0;
+      border-right: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+    .executive-item:last-child { border-right: 0; }
+    .executive-item strong {
+      margin: 0 0 9px;
+      color: var(--ink);
+      font: 650 28px/1 var(--mono);
+      letter-spacing: 0;
+    }
+    .executive-item span { display: block; }
+    .metrics { padding: 16px 0 42px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .metric { min-height: 94px; padding-top: 14px; }
+    .metric-value { font-size: 30px; letter-spacing: 0; }
+    .metric-label { margin-top: 9px; }
+    .story-section { padding: 72px 0 70px; scroll-margin-top: 44px; }
+    .section-head {
+      margin-bottom: 20px;
+      grid-template-columns: minmax(260px, .6fr) minmax(0, 1.4fr);
+      gap: 36px;
+      align-items: end;
+    }
+    .section-no { margin-bottom: 10px; }
+    .section-head h2 {
+      max-width: 560px;
+      font-size: 35px;
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+    .section-head p {
+      min-height: 68px;
+      margin: 0;
+      padding: 8px 0 8px 24px;
+      display: grid;
+      grid-template-columns: 140px minmax(0, 1fr);
+      gap: 22px;
+      align-items: center;
+      border-left: 1px solid var(--line-dark);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .section-head p strong {
+      display: block;
+      color: var(--ink);
+      font: 650 34px/1 var(--mono);
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+    .section-head p span { display: block; max-width: 720px; }
+    .chart-shell {
+      background: var(--paper-2);
+      border-color: #cbc9bf;
+      border-radius: 8px;
+      box-shadow: 0 16px 44px rgba(31, 30, 26, .075);
+    }
+    .chart-header {
+      min-height: 64px;
+      padding: 15px 18px 13px;
+      align-items: center;
+      background: rgba(255,255,255,.25);
+    }
+    .chart-header h3 { font-size: 15px; }
+    .chart-header p { margin-top: 4px; font-size: 10px; }
+    .chart-tag { padding: 6px 8px; }
+    .chart-body { padding: 12px 16px 18px; }
+    .chart { height: 540px; }
+    .chart.tall { height: 600px; }
+    .chart.medium { height: 470px; }
+    .two-up { grid-template-columns: minmax(0, 1.45fr) minmax(380px, .85fr); gap: 22px; }
+    .chart-summary { padding: 0; gap: 0; background: #f1f0ea; }
+    .chart-summary-item {
+      min-height: 74px;
+      padding: 17px 20px 15px;
+      border-left: 0;
+      border-right: 1px solid var(--line);
+      box-shadow: inset 0 3px 0 var(--line-dark);
+    }
+    .chart-summary-item:last-child { border-right: 0; }
+    .chart-summary-item.focus { box-shadow: inset 0 3px 0 var(--blue); }
+    .chart-summary-item.warm { box-shadow: inset 0 3px 0 var(--orange); }
+    .chart-summary-item strong { font-size: 21px; }
+    .timeline-counter { top: 46px; left: 68px; }
+    .timeline-counter .value { font-size: 52px; }
+    .token-ledger-wrap { padding: 30px 26px 8px; }
+    .composition-ruler { margin: 0 26px 24px; }
+    .inline-note {
+      margin-top: 14px;
+      padding: 14px 18px;
+      grid-template-columns: 120px 1fr;
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--orange);
+      background: transparent;
+      border-radius: 4px;
+    }
+    .details { background: rgba(255,255,255,.16); }
+    .action-rail { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--ink); }
+    .action-rail li {
+      min-height: 112px;
+      padding: 22px 18px 22px 0;
+      display: grid;
+      grid-template-columns: 64px minmax(0, 1fr) 190px;
+      gap: 24px;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+    }
+    .action-number {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--ink);
+      font: 650 10px/1 var(--mono);
+    }
+    .action-copy strong { display: block; margin-bottom: 5px; font-size: 17px; }
+    .action-copy span { display: block; max-width: 720px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .action-metric { text-align: right; }
+    .action-metric strong { display: block; color: var(--blue); font: 650 27px/1 var(--mono); letter-spacing: 0; }
+    .action-metric span { display: block; margin-top: 7px; color: var(--faint); font: 600 8px/1.3 var(--mono); text-transform: uppercase; }
+    #actions .section-head p { grid-template-columns: minmax(178px, max-content) minmax(0, 1fr); }
+    .scope {
+      margin-top: 64px;
+      padding: 20px 22px;
+      background: #1a1a18;
+      border: 0;
+      border-radius: 6px;
+    }
+    .scope-index { color: var(--ink); background: #f3f1e9; }
+    .scope-item strong { color: #f1efe7; }
+    .scope-item span { color: #85837c; }
+    .caveats { padding: 54px 0 84px; grid-template-columns: 220px 1fr; gap: 30px; }
+    .caveats h2 { font-size: 22px; }
+    .caveat-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; }
+    .caveat-list li { padding: 12px 0; grid-template-columns: 115px 1fr; gap: 14px; font-size: 11px; }
+    footer { padding: 17px 20px; }
+
+    @media (max-width: 980px) {
+      .report-title { min-height: 330px; padding: 38px; grid-template-columns: minmax(0, 1fr) minmax(330px, .85fr); gap: 44px; }
+      .report-title::before { left: 55%; }
+      .report-title h1 { font-size: 68px; }
+      .hero-number { font-size: 50px; }
+      .executive { grid-template-columns: 1fr; gap: 16px; }
+      .executive-intro { flex-direction: row; align-items: end; }
+      .executive-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .executive-item:nth-child(2) { border-right: 0; }
+      .executive-item:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .metric:nth-child(even) { border-right: 0; }
+      .section-head { grid-template-columns: minmax(220px, .7fr) minmax(0, 1.3fr); gap: 24px; }
+      .two-up { grid-template-columns: 1fr; }
+      .caveats { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      main { width: min(calc(100% - 20px), var(--max)); }
+      .report-title {
+        min-height: auto;
+        margin-top: 10px;
+        padding: 26px 22px 24px;
+        grid-template-columns: 1fr;
+        gap: 36px;
+      }
+      .report-title::before { display: none; }
+      .report-title h1 { margin-top: 20px; font-size: 54px; letter-spacing: 0; }
+      .hero-deck { margin-top: 20px; font-size: 12px; }
+      .hero-number { font-size: 43px; letter-spacing: 0; }
+      .hero-range { margin-top: 24px; }
+      .title-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .title-meta div, .title-meta div:last-child { min-height: 52px; padding: 10px 10px 0 0; border-right: 1px solid #393936; border-bottom: 0; }
+      .title-meta div:last-child { padding-left: 10px; border-right: 0; }
+      .executive { padding: 18px 0 20px; }
+      .executive h2 { font-size: 19px; }
+      .executive-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .executive-item { min-height: 110px; padding: 15px 12px; }
+      .executive-item strong { font-size: 23px; }
+      .executive-item:nth-child(odd) { padding-left: 0; }
+      .executive-item:nth-child(even) { padding-right: 0; }
+      .metrics { padding-bottom: 28px; }
+      .metric-value { font-size: 24px; }
+      .story-section { padding: 52px 0 50px; }
+      .section-head { grid-template-columns: 1fr; gap: 14px; margin-bottom: 16px; }
+      .section-head h2 { font-size: 30px; }
+      .section-head p { min-height: 58px; padding: 8px 0 8px 14px; grid-template-columns: 96px 1fr; gap: 12px; }
+      .section-head p strong { font-size: 25px; letter-spacing: 0; }
+      .section-head p span { font-size: 10px; line-height: 1.55; }
+      .chart-shell { border-radius: 6px; box-shadow: 0 10px 30px rgba(31,30,26,.06); }
+      .chart-header { min-height: 78px; padding: 14px; }
+      .chart, .chart.tall { height: 450px; }
+      .chart.medium { height: 390px; }
+      .chart-summary-item { min-height: 66px; padding: 14px 16px; border-right: 0; }
+      .chart-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .chart-summary-item:first-child { grid-column: 1 / -1; }
+      .timeline-counter { top: 34px; left: 40px; }
+      .timeline-counter .value { font-size: 32px; }
+      .token-ledger-wrap { padding: 20px 8px 4px; }
+      .inline-note { grid-template-columns: 1fr; gap: 3px; }
+      .composition-detail { margin: -4px 14px 18px; grid-template-columns: 1fr; gap: 10px; }
+      .session-legend { top: 10px; right: 10px; left: 10px; max-width: none; justify-content: flex-start; gap: 5px 9px; font-size: 7px; }
+      .action-rail li { padding: 18px 0; grid-template-columns: 44px 1fr; gap: 12px; }
+      .action-metric { grid-column: 2; text-align: left; }
+      .action-metric strong { font-size: 22px; }
+      #actions .section-head p { min-height: 0; grid-template-columns: 1fr; gap: 7px; }
+      .scope { margin-top: 44px; padding: 18px; }
+      .caveats { padding: 44px 0 62px; }
+      .caveat-list { grid-template-columns: 1fr; }
+      .caveat-list li { grid-template-columns: 100px 1fr; }
+    }
+    @media print {
+      .report-title { min-height: auto; margin-top: 0; padding: 24px; color: #111; background: #fff; border: 1px solid #bbb; }
+      .report-title::before { display: none; }
+      .report-title .eyebrow, .hero-deck, .hero-number-label, .hero-range span:last-child, .title-meta .meta-label { color: #555; }
+      .report-title h1 .soft, .hero-number { color: #111; }
+      .hero-number { font-size: 42px; }
+      .executive { grid-template-columns: 1fr; }
+      .executive-grid { grid-template-columns: repeat(4, 1fr); }
+      .section-head { grid-template-columns: 1fr; gap: 12px; }
+      .two-up { grid-template-columns: 1fr; }
+      .section-head p { border-left: 0; border-top: 1px solid #bbb; }
+      .story-section { padding: 32px 0 28px; break-before: auto; page-break-before: auto; break-inside: auto; }
+      .section-head { margin-bottom: 12px; break-inside: avoid-page; page-break-inside: avoid; break-after: avoid-page; page-break-after: avoid; }
+      .chart-shell { box-shadow: none; break-inside: avoid-page; page-break-inside: avoid; }
+      .two-up { gap: 10px; }
+      .two-up .chart, .two-up .chart.medium { height: 250px; }
+      .chart, .chart.tall { height: 380px; }
+      .chart-summary-item { min-height: 58px; padding: 12px 14px; }
+      #actions { break-before: page; page-break-before: always; }
+      .action-rail li { min-height: 0; padding: 14px 8px 14px 0; grid-template-columns: 48px minmax(0, 1fr) 150px; gap: 14px; break-inside: avoid-page; page-break-inside: avoid; }
+      .action-copy strong { font-size: 15px; }
+      .action-copy span { font-size: 10px; line-height: 1.45; }
+      .action-metric strong { font-size: 23px; }
+      .scope { margin-top: 28px; }
+      .caveats { padding: 22px 0 30px; }
+      .scope { color: #111; background: #fff; border: 1px solid #bbb; }
+      .scope-item strong { color: #111; }
+      .scope-item span { color: #555; }
+      .caveat-list { grid-template-columns: 1fr; }
+    }
+
+    /* Report navigation and global date explorer */
+    .report-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 80;
+      color: var(--ink);
+      background: rgba(250,249,244,.94);
+      border-bottom: 1px solid rgba(21,21,19,.16);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .toolbar-inner {
+      width: min(calc(100% - 36px), 1420px);
+      min-height: 56px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(190px, auto) minmax(0, 1fr) auto;
+      align-items: stretch;
+      gap: 28px;
+    }
+    .report-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 720;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .brand-mark { width: 9px; height: 9px; background: var(--blue); }
+    .section-nav {
+      min-width: 0;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      gap: 3px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .section-nav::-webkit-scrollbar { display: none; }
+    .section-nav a {
+      position: relative;
+      min-height: 55px;
+      padding: 0 10px;
+      display: grid;
+      place-items: center;
+      color: #77756d;
+      font-size: 11px;
+      font-weight: 580;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .section-nav a::after {
+      position: absolute;
+      right: 10px;
+      bottom: -1px;
+      left: 10px;
+      height: 2px;
+      content: "";
+      background: transparent;
+    }
+    .section-nav a:hover { color: var(--ink); }
+    .section-nav a[aria-current="location"] { color: var(--ink); }
+    .section-nav a[aria-current="location"]::after { background: var(--blue); }
+    .toolbar-context {
+      min-width: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .range-trigger {
+      min-width: 178px;
+      padding: 8px 12px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 3px 10px;
+      align-content: center;
+      color: var(--ink);
+      background: transparent;
+      border: 0;
+      border-left: 1px solid var(--line);
+      cursor: pointer;
+      text-align: left;
+    }
+    .range-trigger-label { color: var(--faint); font-size: 8px; font-weight: 650; text-transform: uppercase; }
+    .range-trigger output { grid-column: 1; font: 650 10px/1.2 var(--mono); white-space: nowrap; }
+    .range-trigger::after { grid-column: 2; grid-row: 1 / span 2; align-self: center; content: "⌄"; color: var(--muted); font-size: 14px; }
+    .range-trigger[aria-expanded="true"]::after { content: "⌃"; }
+    .range-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+    }
+    .range-layer[hidden] { display: none; }
+    .range-scrim { position: absolute; inset: 0; padding: 0; background: rgba(17,17,15,.18); border: 0; cursor: default; }
+    .range-panel {
+      position: absolute;
+      top: 68px;
+      right: max(18px, calc((100vw - 1420px) / 2));
+      width: min(520px, calc(100vw - 36px));
+      padding: 22px;
+      background: #faf9f4;
+      border: 1px solid #bbb9af;
+      border-radius: 7px;
+      box-shadow: 0 24px 70px rgba(20,20,18,.2);
+    }
+    .range-panel-head { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
+    .range-panel-head h2 { margin: 0; font-size: 19px; line-height: 1.15; }
+    .range-panel-head p { margin: 5px 0 0; color: var(--muted); font-size: 10px; }
+    .range-close { width: 34px; height: 34px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 4px; cursor: pointer; }
+    .range-presets { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 7px; }
+    .range-preset {
+      min-height: 34px;
+      padding: 0 12px;
+      color: var(--muted);
+      background: #f1f0ea;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .range-preset:hover { color: var(--ink); border-color: var(--line-dark); }
+    .range-preset[aria-pressed="true"] { color: #fff; background: var(--ink); }
+    .range-fields { margin-top: 20px; padding-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-top: 1px solid var(--line); }
+    .range-field span { display: block; margin-bottom: 6px; color: var(--muted); font-size: 10px; }
+    .range-field input {
+      width: 100%;
+      min-height: 42px;
+      padding: 0 10px;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line-dark);
+      border-radius: 4px;
+      font: 600 11px/1 var(--mono);
+    }
+    .range-error { min-height: 18px; margin: 8px 0 0; color: #a64422; font-size: 10px; }
+    .range-panel-actions { margin-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .range-current { color: var(--muted); font-size: 10px; }
+    .range-apply {
+      min-width: 92px;
+      min-height: 40px;
+      padding: 0 16px;
+      color: #fff;
+      background: var(--blue);
+      border: 0;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .range-apply:disabled { opacity: .42; cursor: not-allowed; }
+    .sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .story-section, .report-title { scroll-margin-top: 70px; }
+
+    .chapter-rail {
+      position: fixed;
+      top: 50%;
+      left: 0;
+      z-index: 76;
+      width: 54px;
+      padding: 10px 0;
+      display: grid;
+      gap: 1px;
+      transform: translateY(-50%);
+    }
+    .chapter-rail a {
+      position: relative;
+      width: 54px;
+      height: 27px;
+      padding-right: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      text-decoration: none;
+    }
+    .chapter-rail a span {
+      width: 11px;
+      height: 3px;
+      background: #c6c7c4;
+      transition: width .18s ease, background-color .18s ease;
+    }
+    .chapter-rail a:nth-child(2n) span { width: 18px; }
+    .chapter-rail a:nth-child(3n) span { width: 14px; }
+    .chapter-rail a[aria-current="location"] span { width: 35px; background: var(--ink); }
+    .chapter-rail a:hover span,
+    .chapter-rail a:focus-visible span { width: 35px; background: var(--blue); }
+    .chapter-rail a b {
+      position: absolute;
+      top: 50%;
+      left: 48px;
+      padding: 4px 7px;
+      color: #fff;
+      background: var(--ink);
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: 650;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(4px, -50%);
+      transition: opacity .14s ease, transform .14s ease;
+    }
+    .chapter-rail a:hover b,
+    .chapter-rail a:focus-visible b { opacity: 1; transform: translate(0, -50%); }
+
+    @media (min-width: 1101px) {
+      .toolbar-inner { grid-template-columns: minmax(190px, auto) minmax(0, 1fr) auto; }
+      .section-nav { display: none; }
+      .toolbar-context { display: flex; }
+    }
+
+    @media (max-width: 980px) {
+      .toolbar-inner {
+        width: 100%;
+        min-height: 92px;
+        padding: 0 14px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas: "brand range" "nav nav";
+        gap: 0 12px;
+      }
+      .report-brand { grid-area: brand; min-height: 52px; }
+      .section-nav { grid-area: nav; justify-content: flex-start; margin: 0 -14px; padding: 0 6px; border-top: 1px solid var(--line); scroll-snap-type: x proximity; }
+      .section-nav a { min-height: 39px; padding: 0 10px; scroll-snap-align: center; }
+      .range-trigger { grid-area: range; min-width: 0; min-height: 42px; margin: 5px 0; padding: 6px 8px 6px 12px; border: 1px solid var(--line); border-radius: 4px; }
+      .range-trigger-label { display: none; }
+      .range-trigger output { font-size: 9px; }
+      .story-section, .report-title { scroll-margin-top: 104px; }
+      .range-panel { top: 104px; right: 14px; }
+    }
+    @media (max-width: 1100px) {
+      .chapter-rail { display: none; }
+    }
+    @media (max-width: 640px) {
+      .report-brand { font-size: 11px; }
+      .range-layer { display: flex; align-items: end; }
+      .range-scrim { background: rgba(17,17,15,.34); }
+      .range-panel {
+        position: relative;
+        top: auto;
+        right: auto;
+        width: 100%;
+        max-height: calc(100vh - 50px);
+        padding: 22px 18px calc(18px + env(safe-area-inset-bottom));
+        overflow-y: auto;
+        border: 0;
+        border-radius: 10px 10px 0 0;
+      }
+      .range-presets { display: grid; grid-template-columns: repeat(3, 1fr); }
+      .range-preset { padding: 0 6px; }
+      .range-fields { grid-template-columns: 1fr; }
+      .range-panel-actions { align-items: end; }
+      .range-current { max-width: 190px; }
+    }
+    @media print {
+      .report-toolbar, .chapter-rail, .range-layer, .sr-only { display: none !important; }
+      .story-section, .report-title { scroll-margin-top: 0; }
+    }
+
+    /* Editorial readability system · 2026-08 */
+    :root {
+      --paper: #f1f0eb;
+      --paper-2: #fcfbf7;
+      --ink: #171714;
+      --ink-2: #3d3c37;
+      --muted: #62615a;
+      --faint: #74736c;
+      --line: #dad8cf;
+      --line-dark: #b9b6ac;
+      --orange: #c96538;
+      --max: 1480px;
+      --card-radius: 12px;
+      --card-shadow: 0 1px 0 rgba(20,20,18,.04), 0 18px 52px rgba(31,30,26,.055);
+    }
+    body { font-size: 16px; font-weight: 400; }
+    main { width: min(calc(100% - 80px), var(--max)); }
+    figure.chart-shell {
+      width: 100%;
+      min-width: 0;
+      margin: 0;
+    }
+    .two-up > * { width: 100%; min-width: 0; }
+
+    .toolbar-inner { min-height: 64px; }
+    .report-brand { gap: 12px; font-size: 14px; font-weight: 700; }
+    .brand-mark { width: 10px; height: 10px; }
+    .toolbar-context { font-size: 12px; }
+    .section-nav a { min-height: 63px; padding: 0 12px; font-size: 12px; font-weight: 600; }
+    .range-trigger { min-width: 208px; padding: 10px 16px; }
+    .range-trigger-label { font-size: 10px; }
+    .range-trigger output { font-size: 12px; }
+    .story-section, .report-title { scroll-margin-top: 78px; }
+
+    .report-title {
+      min-height: 370px;
+      margin-top: 24px;
+      padding: 46px 52px 44px;
+      grid-template-columns: minmax(0, 1.05fr) minmax(430px, .95fr);
+      gap: 76px;
+      border-radius: 12px;
+    }
+    .report-title .eyebrow { font-size: 11px; }
+    .report-title h1 { margin-top: 30px; font-size: 84px; line-height: .88; font-weight: 700; }
+    .hero-deck { max-width: 660px; margin-top: 30px; font-size: 15px; line-height: 1.65; }
+    .hero-number { font-size: 76px; font-weight: 700; }
+    .hero-number-label { margin-top: 14px; font-size: 10px; }
+    .hero-range { margin-top: 36px; padding-top: 16px; font-size: 13px; }
+    .hero-range span:last-child { font-size: 10px; }
+    .title-meta { margin-top: 20px; }
+    .title-meta div { min-height: 62px; padding-top: 14px; }
+    .title-meta .meta-value { font-size: 12px; }
+    .title-meta .meta-label { margin-top: 6px; font-size: 9px; }
+
+    .executive { padding: 30px 0 32px; grid-template-columns: 240px minmax(0, 1fr); gap: 34px; }
+    .executive h2 { font-size: 27px; font-weight: 700; }
+    .executive-item { min-height: 118px; padding: 20px 20px 17px; font-size: 13px; line-height: 1.55; }
+    .executive-item strong { margin-bottom: 11px; font-size: 32px; font-weight: 700; }
+    .metrics { padding: 22px 0 48px; }
+    .metric { min-height: 108px; padding-top: 18px; }
+    .metric-value { font-size: 34px; font-weight: 700; }
+    .metric-label { margin-top: 11px; font-size: 13px; }
+    .metric-note { margin-top: 6px; font-size: 10px; }
+
+    .story-section { padding: 82px 0 78px; }
+    .section-head {
+      min-height: 94px;
+      margin-bottom: 30px;
+      grid-template-columns: minmax(340px, 5fr) minmax(0, 7fr);
+      gap: 40px;
+      align-items: end;
+    }
+    .section-no { margin-bottom: 12px; font-size: 11px; line-height: 1.2; }
+    .section-head h2 { max-width: 620px; font-size: 42px; line-height: 1.04; font-weight: 700; }
+    .section-head p {
+      min-height: 82px;
+      padding: 12px 0 12px 28px;
+      grid-template-columns: 154px minmax(0, 1fr);
+      gap: 28px;
+      font-size: 14px;
+      line-height: 1.58;
+    }
+    .section-head p strong { font-size: 40px; font-weight: 700; }
+
+    .chart-shell {
+      background: var(--paper-2);
+      border: 1px solid #cfcdc3;
+      border-radius: var(--card-radius);
+      box-shadow: var(--card-shadow);
+    }
+    .chart-header { min-height: 80px; padding: 19px 22px 17px; align-items: center; }
+    .chart-header h3 { font-size: 18px; line-height: 1.25; font-weight: 700; }
+    .chart-header p { margin-top: 5px; font-size: 13px; line-height: 1.45; }
+    .chart-tag { padding: 7px 10px; font-size: 10px; font-weight: 600; }
+    .chart-body { padding: 14px 16px 20px; }
+    .chart { height: 540px; }
+    .chart.medium { height: 500px; }
+    .chart.tall { height: 600px; }
+    #timelineChart { height: 580px; }
+    #sessionScatter { height: 620px; }
+    .two-up { grid-template-columns: minmax(0, 7fr) minmax(520px, 5fr); gap: 24px; }
+    .chart-summary-item { min-height: 88px; padding: 20px 24px 18px; }
+    .chart-summary-item strong { font-size: 24px; line-height: 1.15; font-weight: 700; }
+    .chart-summary-item span { margin-top: 7px; font-size: 12px; line-height: 1.45; }
+    .timeline-counter { top: 50px; left: 70px; }
+    .timeline-counter .label { font-size: 10px; }
+    .timeline-counter .value { margin-top: 9px; font-size: 56px; font-weight: 700; }
+    .composition-ruler { margin: 0 26px 28px; }
+    .composition-labels { font-size: 11px; }
+    .composition-detail { margin: -4px 26px 26px; padding: 16px; grid-template-columns: 210px minmax(0, 1fr); }
+    .composition-detail-copy strong { font-size: 14px; }
+    .composition-detail-copy span { margin-top: 5px; font-size: 12px; }
+    .composition-detail-labels { font-size: 11px; }
+    .session-legend { top: 16px; right: 20px; gap: 8px 14px; font-size: 10px; }
+    .session-legend i { width: 8px; height: 8px; }
+    .inline-note { padding: 17px 20px; grid-template-columns: 140px 1fr; font-size: 14px; line-height: 1.6; }
+    .inline-note strong { font-size: 14px; }
+    .segmented button { min-width: 50px; min-height: 34px; font-size: 10px; }
+    .details summary { min-height: 46px; padding: 14px 20px; font-size: 11px; }
+    table { font-size: 13px; }
+    th { font-size: 10px; }
+
+    .action-rail li { min-height: 124px; padding: 24px 20px 24px 0; grid-template-columns: 68px minmax(0, 1fr) 220px; }
+    .action-copy strong { font-size: 19px; }
+    .action-copy span { margin-top: 7px; font-size: 14px; }
+    .action-metric strong { font-size: 31px; font-weight: 700; }
+    .action-metric span { font-size: 9px; }
+    .scope { padding: 24px 26px; }
+    .scope-item strong { font-size: 14px; }
+    .scope-item span { font-size: 13px; }
+    .caveats { padding: 62px 0 92px; }
+    .caveats h2 { font-size: 26px; }
+    .caveat-list li { padding: 16px 0; font-size: 13px; }
+    footer { font-size: 10px; }
+
+    .range-panel { padding: 26px; border-radius: 10px; }
+    .range-panel-head h2 { font-size: 22px; }
+    .range-panel-head p { font-size: 12px; }
+    .range-close { width: 44px; height: 44px; }
+    .range-preset { min-height: 42px; font-size: 12px; }
+    .range-field span { font-size: 12px; }
+    .range-field input { min-height: 48px; font-size: 14px; }
+    .range-error, .range-current { font-size: 12px; }
+    .range-apply { min-height: 48px; font-size: 13px; }
+
+    @media (min-width: 1101px) and (max-width: 1535px) {
+      main { width: auto; margin-left: 72px; margin-right: 24px; }
+    }
+    @media (max-width: 1279px) {
+      .two-up { grid-template-columns: 1fr; gap: 24px; }
+    }
+    @media (max-width: 980px) {
+      .report-toolbar { overflow-x: hidden; }
+      main { width: min(calc(100% - 40px), var(--max)); }
+      .toolbar-inner { min-height: 104px; overflow: hidden; }
+      .report-brand { min-height: 58px; font-size: 13px; }
+      .section-nav { width: 100%; max-width: 100%; min-width: 0; margin: 0; padding-inline: 0; gap: 1px; overflow-y: hidden; contain: inline-size layout paint; scroll-padding-inline: 12px; overscroll-behavior-inline: contain; }
+      .section-nav a { width: 44px; min-width: 44px; min-height: 44px; padding-inline: 3px; font-size: 12px; }
+      .range-trigger { min-height: 44px; }
+      .range-trigger output { font-size: 11px; }
+      .story-section, .report-title { scroll-margin-top: 116px; }
+      .report-title { grid-template-columns: 1fr; gap: 42px; }
+      .section-head { grid-template-columns: 1fr; gap: 18px; }
+    }
+    @media (max-width: 640px) {
+      main { width: calc(100% - 24px); }
+      .report-title { margin-top: 12px; padding: 30px 24px 28px; gap: 34px; border-radius: 10px; }
+      .report-title h1 { margin-top: 22px; font-size: 52px; line-height: .9; }
+      .hero-deck { margin-top: 22px; font-size: 14px; line-height: 1.6; }
+      .hero-number { font-size: 44px; }
+      .hero-number-label { font-size: 10px; }
+      .hero-range { margin-top: 26px; font-size: 12px; }
+      .title-meta .meta-value { font-size: 12px; }
+      .title-meta .meta-label { font-size: 9px; }
+      .executive { padding: 24px 0 26px; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+      .executive-intro { min-width: 0; }
+      .executive h2 { font-size: 22px; }
+      .executive-grid { width: 100%; min-width: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .executive-item { min-width: 0; min-height: 118px; padding: 17px 14px; font-size: 12px; }
+      .executive-item strong { font-size: 26px; overflow-wrap: anywhere; }
+      .metrics { padding-bottom: 34px; }
+      .metric { min-height: 104px; }
+      .metric-value { font-size: 27px; }
+      .metric-label { font-size: 12px; }
+      .metric-note { font-size: 9px; }
+      .story-section { padding: 44px 0 48px; }
+      .section-head { min-height: 0; margin-bottom: 24px; gap: 16px; }
+      .section-no { margin-bottom: 10px; font-size: 11px; }
+      .section-head h2 { font-size: 32px; line-height: 1.12; }
+      .section-head p { min-height: 72px; padding: 10px 0 10px 16px; grid-template-columns: 94px minmax(0, 1fr); gap: 14px; font-size: 13px; line-height: 1.55; }
+      .section-head p strong { font-size: 27px; }
+      .chart-shell { border-radius: 10px; box-shadow: 0 1px 0 rgba(20,20,18,.04), 0 14px 36px rgba(31,30,26,.055); }
+      .chart-header { min-height: 88px; padding: 16px; }
+      .chart-header h3 { font-size: 18px; }
+      .chart-header p { margin-top: 6px; font-size: 12px; line-height: 1.45; }
+      .chart-body { padding: 8px 4px 14px; }
+      #timelineChart { height: 500px; }
+      #tokenLedger { height: 440px; }
+      #projectBars { height: 460px; }
+      #projectMatrix, #modelStrip { height: 420px; }
+      #activityBars { height: 430px; }
+      #sessionScatter { height: 520px; }
+      #rhythmHeat { height: 500px; }
+      .two-up { gap: 24px; }
+      .chart-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .chart-summary-item { min-height: 80px; padding: 17px 16px 15px; }
+      .chart-summary-item strong { font-size: 24px; }
+      .chart-summary-item span { font-size: 12px; line-height: 1.42; }
+      .timeline-counter { top: 34px; left: 42px; }
+      .timeline-counter .label { font-size: 10px; }
+      .timeline-counter .value { font-size: 36px; }
+      .composition-labels { font-size: 10px; }
+      .composition-detail { margin: -2px 14px 20px; padding: 14px; }
+      .composition-detail-copy strong { font-size: 13px; }
+      .composition-detail-copy span { font-size: 12px; }
+      .composition-detail-labels { font-size: 10px; }
+      .session-legend { top: 12px; right: 12px; left: 12px; gap: 6px 10px; font-size: 10px; }
+      .inline-note { padding: 16px; font-size: 13px; }
+      .inline-note strong { font-size: 13px; }
+      .segmented button { min-width: 48px; min-height: 44px; font-size: 11px; }
+      .details summary { min-height: 44px; padding: 14px 16px; font-size: 12px; }
+      .action-rail li { min-height: 0; padding: 22px 0; grid-template-columns: 44px minmax(0, 1fr); gap: 14px; }
+      .action-copy strong { font-size: 18px; }
+      .action-copy span { font-size: 13px; }
+      .action-metric strong { font-size: 27px; }
+      .scope-item strong { font-size: 14px; }
+      .scope-item span { font-size: 12px; }
+      .caveat-list li { grid-template-columns: 1fr; gap: 6px; font-size: 12px; }
+      .range-panel { padding: 24px 18px calc(20px + env(safe-area-inset-bottom)); }
+      .range-presets { gap: 8px; }
+      .range-preset { min-height: 44px; }
+      .range-panel-actions { position: sticky; bottom: calc(-20px - env(safe-area-inset-bottom)); margin: 12px -18px 0; padding: 14px 18px calc(20px + env(safe-area-inset-bottom)); background: #faf9f4; border-top: 1px solid var(--line); }
+    }
+    @media print {
+      body { font-size: 11px; }
+      main { width: 178mm; max-width: 178mm; margin: 0 auto; }
+      figure.chart-shell { margin: 0; }
+      .story-section { padding: 32px 0 28px; }
+      .section-head h2 { font-size: 28px; }
+      .section-head p { font-size: 10px; }
+      .chart-header h3 { font-size: 14px; }
+      .chart-header p { font-size: 9px; }
+      .chart, .chart.tall, .chart.medium, .chart.short, #timelineChart, #sessionScatter { height: 380px; }
+      .two-up .chart, .two-up .chart.medium { height: 250px; }
+      .chart-summary-item { min-height: 58px; padding: 12px 14px; }
+      .chart-summary-item strong { font-size: 18px; }
+      .chart-summary-item span { font-size: 9px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="report-toolbar">
+    <div class="toolbar-inner">
+      <a class="report-brand" href="#overview"><span class="brand-mark" aria-hidden="true"></span><span>Codex 消耗报告</span></a>
+      <nav class="section-nav" aria-label="报告章节">
+        <a href="#overview" aria-current="location">总览</a>
+        <a href="#when">日期</a>
+        <a href="#tokens">Token</a>
+        <a href="#projects">项目</a>
+        <a href="#models">模型</a>
+        <a href="#sessions">会话</a>
+        <a href="#rhythm">时段</a>
+        <a href="#actions">摘要</a>
+      </nav>
+      <div class="toolbar-context" id="toolbarContext" aria-live="polite">总览 · 消耗分布</div>
+      <button class="range-trigger" type="button" id="rangeTrigger" aria-expanded="false" aria-controls="rangePanel">
+        <span class="range-trigger-label">日期范围</span><output id="navRange">全周期</output>
+      </button>
+    </div>
+  </header>
+  <aside class="chapter-rail" aria-label="章节导航">
+    <a href="#overview" aria-label="总览" aria-current="location"><span></span><b>总览</b></a>
+    <a href="#when" aria-label="日期"><span></span><b>日期</b></a>
+    <a href="#tokens" aria-label="Token"><span></span><b>Token</b></a>
+    <a href="#projects" aria-label="项目"><span></span><b>项目</b></a>
+    <a href="#models" aria-label="模型"><span></span><b>模型</b></a>
+    <a href="#sessions" aria-label="会话"><span></span><b>会话</b></a>
+    <a href="#rhythm" aria-label="时段"><span></span><b>时段</b></a>
+    <a href="#actions" aria-label="范围摘要"><span></span><b>摘要</b></a>
+  </aside>
+  <div class="range-layer" id="rangeLayer" hidden>
+    <button class="range-scrim" id="rangeScrim" type="button" aria-label="关闭日期选择"></button>
+    <section class="range-panel" id="rangePanel" role="dialog" aria-modal="true" aria-labelledby="rangePanelTitle">
+      <div class="range-panel-head"><div><h2 id="rangePanelTitle">选择日期范围</h2><p>日期以模型调用时间为准；所有图表会同步更新。</p></div><button class="range-close" id="rangeClose" type="button" aria-label="关闭">×</button></div>
+      <div class="range-presets" role="group" aria-label="快捷日期范围">
+        <button class="range-preset" type="button" data-range-preset="all" aria-pressed="true">全部</button>
+        <button class="range-preset" type="button" data-range-preset="7" aria-pressed="false">最近 7 天</button>
+        <button class="range-preset" type="button" data-range-preset="30" aria-pressed="false">最近 30 天</button>
+        <button class="range-preset" type="button" data-range-preset="month" aria-pressed="false">本月</button>
+        <button class="range-preset" type="button" data-range-preset="previous-month" aria-pressed="false">上月</button>
+      </div>
+      <div class="range-fields">
+        <label class="range-field"><span>开始日期</span><input id="rangeFrom" type="date"></label>
+        <label class="range-field"><span>结束日期</span><input id="rangeTo" type="date"></label>
+      </div>
+      <p class="range-error" id="rangeError" role="alert"></p>
+      <div class="range-panel-actions"><output class="range-current" id="rangeCurrent"></output><button class="range-apply" id="rangeApply" type="button">查看该范围</button></div>
+    </section>
+  </div>
+  <div class="sr-only" id="filterAnnouncement" aria-live="polite"></div>
+
+  <main>
+    <header class="report-title reveal" id="overview">
+      <div class="hero-copy">
+        <p class="eyebrow">Codex 使用消耗报告</p>
+        <div><h1>消耗<br><span class="soft">分布</span></h1><p class="hero-deck">按日期、项目、模型和会话拆分 Token 与估算成本。</p></div>
+      </div>
+      <div class="title-side">
+        <span class="hero-number" id="heroCost">{{TOTAL_TOKENS}}</span>
+        <span class="hero-number-label" id="heroNumberLabel">当前本地 CodeBurn 快照 Token</span>
+        <div class="hero-range"><span id="heroRange">{{RANGE_LABEL}}</span><span id="heroDays">{{ACTIVE_DAYS}} 个活跃日 / 共 {{CALENDAR_DAYS}} 天</span></div>
+        <div class="title-meta">
+          <div><span class="meta-value" id="snapshotGeneratedLabel">{{GENERATED_LOCAL}}</span><span class="meta-label">数据快照 · {{TIMEZONE}}</span></div>
+          <div><span class="meta-value" id="heroSourceValue">当前本地 CodeBurn 快照</span><span class="meta-label">仅统计 Codex · 不展示提示词或代码</span></div>
+        </div>
+      </div>
+    </header>
+
+    <section class="metrics reveal" id="metricsOverview" aria-label="所选日期范围的已采集本地 Token 概览">
+      <div class="metric"><span class="metric-value" id="metricTokens">{{TOTAL_TOKENS}}</span><span class="metric-label" id="metricTokensLabel">已采集本地 Token 总量</span><span class="metric-note" id="metricTotalNote">所选日期范围</span></div>
+      <div class="metric"><span class="metric-value" id="metricAverage">{{OFFICIAL_DAILY_AVERAGE}}</span><span class="metric-label" id="metricAverageLabel">平均每天本地 Token</span><span class="metric-note" id="metricAverageNote">按所选 {{CALENDAR_DAYS}} 个自然日计算</span></div>
+      <div class="metric"><span class="metric-value" id="metricPeak">{{OFFICIAL_PEAK_TOKENS}}</span><span class="metric-label" id="metricPeakLabel">本地单日最高 Token</span><span class="metric-note" id="metricPeakNote">{{OFFICIAL_PEAK_DATE}}</span></div>
+      <div class="metric"><span class="metric-value" id="metricActiveDays">{{OFFICIAL_ACTIVE_DAYS}} / {{CALENDAR_DAYS}} 天</span><span class="metric-label" id="metricActiveDaysLabel">有本地 Token 记录</span><span class="metric-note" id="metricActiveDaysNote">活跃天数 / 所选天数</span></div>
+      <p class="metrics-source-note" id="metricsSourceNote">以上均为当前本地 CodeBurn 快照口径，随日期范围更新。</p>
+    </section>
+
+    <section class="story-section reveal" id="when">
+      <div class="section-head">
+        <div><span class="section-no">01 / 日期</span><h2 id="whenSectionTitle">当前本地 Token 活动趋势</h2></div>
+        <p><strong id="whenValue">{{OFFICIAL_PEAK_TOKENS}}</strong><span id="whenInsight">当前本地 CodeBurn 快照的单日 Token 峰值。</span></p>
+      </div>
+      <figure class="chart-shell" aria-labelledby="timeline-title">
+        <figcaption class="chart-header">
+          <div><h3 id="timeline-title">每日与累计本地 Token</h3><p id="timelineRange">{{RANGE_LABEL}} · 折线：本地累计 Token · 柱形：本地每日 Token</p></div>
+          <span class="chart-tag" id="timelineSourceTag">CodeBurn 快照</span>
+        </figcaption>
+        <div class="chart-body">
+          <div class="timeline-counter" aria-hidden="true"><span class="label" id="timelineCounterLabel">已采集本地累计</span><span class="value mono" id="timelineCounter">0</span><span class="unit"> Token</span></div>
+          <div id="timelineChart" class="chart tall" role="img" aria-label="{{RANGE_LABEL}}的每日和累计估算成本图"></div>
+        </div>
+        <details class="details"><summary>查看当前范围每日数据 · 按实际调用日期</summary><div class="table-scroll" id="dailyTable">{{DAILY_TABLE}}</div></details>
+      </figure>
+    </section>
+
+    <section class="story-section reveal" id="tokens">
+      <div class="section-head">
+        <div><span class="section-no">02 / Token</span><h2 id="tokenSectionTitle">本地重建 Token 构成</h2></div>
+        <p><strong id="tokenValue">{{CACHE_SHARE}}</strong><span id="tokenInsight">为当前本地 CodeBurn 快照中可拆分账本的缓存读取占比。</span></p>
+      </div>
+      <figure class="chart-shell" aria-labelledby="token-title">
+        <figcaption class="chart-header">
+          <div><h3 id="token-title">可重建 Token 总量及构成</h3><p id="tokenScaleNote">每条横线代表固定数量 Token，各时间段使用同一刻度{{MONTH_SCOPE_NOTE}}</p></div>
+          <span class="chart-tag" id="tokenGrainTag">本地账本</span>
+        </figcaption>
+        <div class="chart-body"><div id="tokenLedger" class="chart medium" role="img" aria-label="统计周期内 Token 总量和类型构成"></div></div>
+        <div class="composition-ruler" aria-label="统计周期 Token 构成">
+          <div class="composition-track"><span class="cache" id="compositionCache" style="width:{{CACHE_SHARE_RAW}}%"></span><span class="write" id="compositionWrite" style="width:{{CACHE_WRITE_SHARE_RAW}}%"></span><span class="input" id="compositionInput" style="width:{{INPUT_SHARE_RAW}}%"></span><span class="output" id="compositionOutput" style="width:{{OUTPUT_SHARE_RAW}}%"></span></div>
+          <div class="composition-labels"><span id="compositionCacheLabel">缓存读取 {{CACHE_SHARE}}</span><span id="compositionWriteLabel">缓存写入 {{CACHE_WRITE_SHARE}}</span><span id="compositionInputLabel">新输入 {{INPUT_SHARE}}</span><span id="compositionOutputLabel">输出 {{OUTPUT_SHARE}}</span></div>
+        </div>
+        <div class="composition-detail" aria-label="新输入与输出构成放大图">
+          <div class="composition-detail-copy"><strong id="nonCacheValue">新输入与输出合计 {{NON_CACHE_SHARE}}</strong><span>其中新输入与输出分别占比</span></div>
+          <div><div class="composition-detail-track"><span class="input" id="nonCacheInput" style="width:{{INPUT_WITHIN_NON_CACHE_RAW}}%"></span><span class="output" id="nonCacheOutput" style="width:{{OUTPUT_WITHIN_NON_CACHE_RAW}}%"></span></div><div class="composition-detail-labels"><span id="nonCacheInputLabel">新输入 {{INPUT_WITHIN_NON_CACHE_SHARE}}</span><span id="nonCacheOutputLabel">输出 {{OUTPUT_WITHIN_NON_CACHE_SHARE}}</span></div></div>
+        </div>
+      </figure>
+      <div class="inline-note"><strong id="dataScopeLabel">数据口径</strong><span id="sessionNote">Token 组件、项目、模型、会话和时段均来自当前本地 CodeBurn 快照。</span></div>
+    </section>
+
+    <section class="story-section reveal" id="projects">
+      <div class="section-head">
+        <div><span class="section-no">03 / 项目</span><h2>项目消耗分布</h2></div>
+        <p><strong id="projectValue">{{PROJECT_TOKEN_COVERAGE}}</strong><span id="projectInsight">为本地重建 Token 的项目可归属率；无法从现存日志恢复的旧会话统一显示为“历史未归属”。</span></p>
+      </div>
+      <div class="two-up">
+        <figure class="chart-shell" aria-labelledby="project-rank-title">
+          <figcaption class="chart-header"><div><h3 id="project-rank-title">项目估算成本排名</h3><p id="projectRankSubtitle">Codex 临时工作目录已并入所属项目 · 前 8 名</p></div><span class="chart-tag" id="projectRankTag">前 8 名</span></figcaption>
+          <div class="chart-body"><div id="projectBars" class="chart medium" role="img" aria-label="项目估算成本横向排名图"></div></div>
+        </figure>
+        <figure class="chart-shell" aria-labelledby="project-week-title">
+          <figcaption class="chart-header"><div><h3 id="project-week-title">项目消耗随日期分布</h3><p id="projectTrendSubtitle">按所选日期范围显示各项目估算成本</p></div><span class="chart-tag" id="projectTrendTag">按日期</span></figcaption>
+          <div class="chart-body"><div id="projectMatrix" class="chart medium" role="img" aria-label="主要项目按所选范围日期统计的估算成本堆叠图"></div></div>
+        </figure>
+      </div>
+      <details class="details" style="margin-top:18px;border:1px solid var(--line)"><summary>查看项目数据</summary><div class="table-scroll" id="projectTable">{{PROJECT_TABLE}}</div></details>
+    </section>
+
+    <section class="story-section reveal" id="models">
+      <div class="section-head">
+        <div><span class="section-no">04 / 模型与任务</span><h2>模型与任务类型</h2></div>
+        <p><strong id="modelValue">{{TOP_MODEL_SHARE}}</strong><span id="modelInsight">是 {{TOP_MODEL}} 在模型估算成本中的占比；{{TOP_ACTIVITY_PAIR}}合计占任务类型估算成本的 {{TOP_ACTIVITY_SHARE}}。任务类型由 CodeBurn 自动推断。</span></p>
+      </div>
+      <div class="two-up">
+        <figure class="chart-shell" aria-labelledby="model-title">
+          <figcaption class="chart-header"><div><h3 id="model-title">模型消耗随日期分布</h3><p id="modelTrendSubtitle">颜色深浅表示同一时间段内的模型估算成本</p></div><span class="chart-tag" id="modelTrendTag">按日期</span></figcaption>
+          <div class="chart-body"><div id="modelStrip" class="chart medium" role="img" aria-label="各模型在统计周期内的使用日期和估算成本图"></div></div>
+        </figure>
+        <figure class="chart-shell" aria-labelledby="activity-title">
+          <figcaption class="chart-header"><div><h3 id="activity-title">按任务类型统计的估算成本</h3><p id="activitySubtitle">CodeBurn 自动归类 · 按估算成本显示前 6 项</p></div><span class="chart-tag" id="activityTag">前 6 名</span></figcaption>
+          <div class="chart-body"><div id="activityBars" class="chart medium" role="img" aria-label="编码、任务委派等任务类型的估算成本排名图"></div></div>
+        </figure>
+      </div>
+      <details class="details" style="margin-top:18px;border:1px solid var(--line)"><summary>查看模型与任务类型数据</summary><div class="table-scroll" id="modelActivityTable">{{MODEL_ACTIVITY_TABLE}}</div></details>
+    </section>
+
+    <section class="story-section reveal" id="sessions">
+      <div class="section-head">
+        <div><span class="section-no">05 / 会话</span><h2>会话消耗分布</h2></div>
+        <p><strong id="sessionValue">{{TOP5_SESSION_SHARE}}</strong><span id="sessionInsight">是成本最高的 5 个会话合计占比。单会话估算成本：中位数 {{SESSION_MEDIAN}}，P95 {{SESSION_P95}}，最高值 {{TOP_SESSION_COST}}。</span></p>
+      </div>
+      <figure class="chart-shell" aria-labelledby="session-title">
+        <figcaption class="chart-header">
+          <div><h3 id="session-title">会话消耗分布</h3><p id="sessionChartSubtitle">每个点代表所选范围内的一个会话，点面积表示 Token</p></div>
+          <span class="chart-tag" id="sessionCountTag">{{SESSION_COUNT}} 个会话 · 对数轴</span>
+        </figcaption>
+        <div class="chart-body"><div id="sessionLegend" class="session-legend" aria-label="项目颜色图例"></div><div id="sessionScatter" class="chart tall" role="img" aria-label="{{SESSION_COUNT}} 个 Codex 会话按开始时间和估算成本绘制的散点图"></div></div>
+        <div class="chart-summary">
+          <div class="chart-summary-item focus"><strong id="topSessionValue">{{TOP_SESSION_COST}}</strong><span id="topSessionLabel">最高单会话估算成本 · {{TOP_SESSION_PROJECT}} · {{TOP_SESSION_DATE}}</span></div>
+          <div class="chart-summary-item"><strong id="sessionMedianValue">{{SESSION_MEDIAN}}</strong><span>单会话估算成本中位数</span></div>
+          <div class="chart-summary-item warm"><strong id="top10SessionValue">{{TOP10_SESSION_SHARE}}</strong><span>成本最高的 10 个会话合计占比</span></div>
+        </div>
+        <details class="details"><summary>查看全部会话明细</summary><div class="table-scroll" id="sessionTable">{{SESSION_TABLE}}</div></details>
+      </figure>
+    </section>
+
+    <section class="story-section reveal" id="rhythm">
+      <div class="section-head">
+        <div><span class="section-no">06 / 时段</span><h2>调用时段分布</h2></div>
+        <p><strong id="rhythmValue">{{NIGHT_TOKEN_SHARE}}</strong><span id="rhythmInsight">的 Token 记录在 00:00–05:59；周末占 {{WEEKEND_TOKEN_SHARE}}。时间来自模型调用记录，不能作为人工工时。</span></p>
+      </div>
+      <figure class="chart-shell" aria-labelledby="rhythm-title">
+        <figcaption class="chart-header">
+          <div><h3 id="rhythm-title">调用日期与时段分布</h3><p id="rhythmSubtitle">{{TIMEZONE}} · 圆越大，Token 或调用次数越多</p></div>
+          <div class="segmented" role="group" aria-label="热力图指标"><button class="active" type="button" data-heat-metric="tokens">Token</button><button type="button" data-heat-metric="calls">调用</button></div>
+        </figcaption>
+        <div class="chart-body"><div id="rhythmHeat" class="chart" role="img" aria-label="{{TIMEZONE}} 时区下按星期和小时统计的 Token 与调用次数圆点图"></div></div>
+        <div class="chart-summary">
+          <div class="chart-summary-item focus"><strong id="nightValue">{{NIGHT_TOKEN_SHARE}}</strong><span>00:00–05:59 的 Token 占比</span></div>
+          <div class="chart-summary-item"><strong id="weekendValue">{{WEEKEND_TOKEN_SHARE}}</strong><span>周六、周日的 Token 占比</span></div>
+          <div class="chart-summary-item warm"><strong id="heatPeakValue">{{HEAT_PEAK_LABEL}}</strong><span id="heatPeakLabel">Token 最高时段 · {{HEAT_PEAK_TOKENS}}</span></div>
+        </div>
+      </figure>
+    </section>
+
+    <section class="story-section reveal" id="actions">
+      <div class="section-head">
+        <div><span class="section-no">07 / 范围摘要</span><h2 id="rangeSummaryTitle">所选日期范围</h2></div>
+        <p><strong id="actionValue">{{TOTAL_COST}}</strong><span id="actionInsight">{{RANGE_LABEL}} · 共 {{TOTAL_CALLS}} 次模型调用</span></p>
+      </div>
+      <ol class="action-rail">
+        <li><span class="action-number">01</span><div class="action-copy"><strong id="factTitle1">消耗最高的一天</strong><span id="actionProjectCopy">{{PEAK_DATE}} · {{PEAK_CALLS}} 次模型调用</span></div><div class="action-metric"><strong id="actionProjectMetric">{{PEAK_COST}}</strong><span>当日估算成本</span></div></li>
+        <li><span class="action-number">02</span><div class="action-copy"><strong id="factTitle2">占比最高的项目</strong><span id="actionSessionCopy">{{TOP_PROJECT}}</span></div><div class="action-metric"><strong id="actionSessionMetric">{{TOP2_PROJECT_SHARE}}</strong><span>该项目估算成本占比</span></div></li>
+        <li><span class="action-number">03</span><div class="action-copy"><strong id="factTitle3">估算成本占比最高的模型</strong><span id="actionActivityCopy">{{TOP_MODEL}}</span></div><div class="action-metric"><strong id="actionActivityMetric">{{TOP_MODEL_SHARE}}</strong><span id="actionActivityLabel">模型估算成本占比</span></div></li>
+      </ol>
+    </section>
+
+    <section class="scope reveal" aria-label="报告口径">
+      <div class="scope-item"><span class="scope-index">01</span><div><strong id="scopePrimaryTitle">当前本地快照</strong><span id="scopePrimaryText">累计与每日 Token 来自当前设备的 CodeBurn 快照，只覆盖仍可采集的本地记录。</span></div></div>
+      <div class="scope-item"><span class="scope-index">02</span><div><strong id="scopeLocalTitle">已采集本地 Token · {{FULL_LOCAL_LEDGER_TOKENS}}</strong><span id="scopeLocalText">项目、模型、会话和时段均由当前本地 CodeBurn 明细重建，不代表同一账户在其他设备上的总量。</span></div></div>
+      <div class="scope-item"><span class="scope-index">03</span><div><strong>归属限制</strong><span>已删除日志造成的项目或任务信息缺失标为“历史未归属”；尚未导入的电脑不会出现在项目、模型、会话和时段明细中。</span></div></div>
+    </section>
+
+    <section class="caveats reveal" aria-labelledby="caveats-title">
+      <h2 id="caveats-title">统计口径与限制</h2>
+      <ul class="caveat-list">
+        <li><strong id="caveatPrimaryTitle">本地 Token</strong><span id="caveatPrimaryText">累计与每日 Token 均来自当前本地 CodeBurn 快照，不是订阅剩余额度或账单金额。</span></li>
+        <li><strong id="caveatSourceTitle">本地范围</strong><span id="caveatSourceText">当前报告只覆盖已采集到的本地记录；其他设备和已删除日志不在统计范围内，因此不能代表同一账户的总量。</span></li>
+        <li id="multiDeviceCaveat" hidden><strong>多设备合并</strong><span id="multiDeviceCaveatText"></span></li>
+        <li><strong>自动分类</strong><span>{{TOP_ACTIVITY_PAIR}}由 CodeBurn 自动归类，并非人工标注。本报告只展示模型使用时间与估算成本的关系，不据此判断模型更换导致成本变化。</span></li>
+        <li><strong>时间口径</strong><span>本页按模型调用日期统计；CodeBurn 原始日报按对话轮次日期统计，因此两者的单日数值可能不同。</span></li>
+        <li><strong>缺少交付数据</strong><span>数据中不含 commit、PR 或验收结果，无法统计单项交付成本。</span></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <span id="footerSource">数据来源 · 当前本地 CodeBurn 快照 / {{GENERATED_LOCAL}}</span>
+    <span>图表 · Apache ECharts 6.1.0 + 自定义 SVG / 离线 HTML</span>
+  </footer>
+
+  <script>/*__ECHARTS__*/</script>
+  <script>
+    "use strict";
+    const BASE_REPORT = /*__REPORT_DATA__*/;
+    const HAS_OFFICIAL_SOURCE = BASE_REPORT.meta && BASE_REPORT.meta.officialSourceAvailable === true;
+    const LOCAL_LEDGER_SOURCE = BASE_REPORT.sources && BASE_REPORT.sources.ledger ? BASE_REPORT.sources.ledger : null;
+    const IMPORTED_DEVICES = LOCAL_LEDGER_SOURCE && Array.isArray(LOCAL_LEDGER_SOURCE.devices) ? LOCAL_LEDGER_SOURCE.devices : [];
+    const COMPACT_DEDUP = LOCAL_LEDGER_SOURCE ? LOCAL_LEDGER_SOURCE.deduplication : null;
+    if (IMPORTED_DEVICES.length > 1) {
+      const caveat = document.getElementById("multiDeviceCaveat");
+      const caveatText = document.getElementById("multiDeviceCaveatText");
+      const labels = IMPORTED_DEVICES.map(function(row) { return row.device; }).filter(Boolean);
+      caveat.hidden = false;
+      caveatText.textContent = "本地明细合并自 " + labels.join("、") + "。当前为 compact 账本过渡合并，不能替代事件级去重；报告仅在未发现疑似重叠组时生成。";
+      if (COMPACT_DEDUP && COMPACT_DEDUP.eventLevelReliable === true) {
+        caveatText.textContent = "本地明细合并自 " + labels.join("、") + "，并已通过事件级标识去重。";
+      }
+    }
+    const SEARCH_PARAMS = new URLSearchParams(location.search);
+    let REPORT = null;
+    const STATIC = SEARCH_PARAMS.get("static") === "1";
+    const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const ANIMATE = !STATIC && !REDUCED;
+    const COLORS = {
+      paper: "#f1f0eb", card: "#fcfbf7", ink: "#171714", ink2: "#3d3c37",
+      muted: "#62615a", faint: "#74736c", line: "#dad8cf", lineDark: "#b9b6ac", blue: "#2f5bff",
+      blueOpen: "#dfe6ff", orange: "#c96538", orangeOpen: "#f1ddd2"
+    };
+    const FONT = '-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",Arial,sans-serif';
+    const MONO = '"SFMono-Regular","Roboto Mono",Menlo,Consolas,monospace';
+    const NARROW_QUERY = window.matchMedia("(max-width: 768px)");
+    let NARROW = NARROW_QUERY.matches;
+    const charts = new Map();
+    const initialized = new Set();
+    const pending = new Map();
+
+    function chartFont(kind) {
+      const compactScale = { axis: 10, category: 10, legend: 10, value: 10, annotation: 10, tooltip: 13 };
+      const wideScale = { axis: 10, category: 12, legend: 10, value: 10, annotation: 11, tooltip: 13 };
+      return (NARROW ? compactScale : wideScale)[kind] || 10;
+    }
+
+    function esc(value) {
+      return String(value == null ? "" : value)
+        .replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+    }
+    function money(value, digits) {
+      const decimals = digits == null ? 2 : digits;
+      return "$" + Number(value).toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    }
+    function compact(value, digits) {
+      const n = Number(value);
+      const d = digits == null ? 1 : digits;
+      if (Math.abs(n) >= 1e9) return (n / 1e9).toFixed(d) + "B";
+      if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(d) + "M";
+      if (Math.abs(n) >= 1e3) return (n / 1e3).toFixed(d) + "k";
+      return n.toLocaleString("en-US");
+    }
+    function compactZh(value, digits) {
+      const n = Number(value);
+      const d = digits == null ? 2 : digits;
+      if (Math.abs(n) >= 1e8) return (n / 1e8).toFixed(d) + "亿";
+      if (Math.abs(n) >= 1e4) return (n / 1e4).toFixed(d) + "万";
+      return n.toLocaleString("zh-CN");
+    }
+    function pct(value, digits) { return (Number(value) * 100).toFixed(digits == null ? 1 : digits) + "%"; }
+    const ACTIVITY_LABELS = {
+      Coding: "编码", Delegation: "任务委派", Exploration: "探索", Conversation: "对话",
+      "Feature Dev": "功能开发", Brainstorming: "方案构思", Debugging: "调试", Testing: "测试",
+      Refactoring: "重构", "Git Ops": "Git 操作"
+    };
+    function activityLabel(value) { return ACTIVITY_LABELS[value] || value; }
+    function projectLabel(value) {
+      if (value === "Other") return "其他";
+      if (value === "Codex scratch") return "Codex 临时工作区";
+      return value;
+    }
+    function shortDate(value) {
+      const parts = String(value).split("-");
+      return Number(parts[1]) + "月" + Number(parts[2]) + "日";
+    }
+    function zhDate(value, includeYear) {
+      const parts = String(value).slice(0, 10).split("-").map(Number);
+      return (includeYear ? parts[0] + "年" : "") + parts[1] + "月" + parts[2] + "日";
+    }
+    function zhMonth(value, includeYear) {
+      const parts = String(value).split("-").map(Number);
+      return (includeYear ? parts[0] + "年" : "") + parts[1] + "月";
+    }
+    function addDays(value, amount) {
+      const date = new Date(value + "T00:00:00Z");
+      date.setUTCDate(date.getUTCDate() + amount);
+      return date.toISOString().slice(0, 10);
+    }
+    function startOfMonth(value) { return String(value).slice(0, 7) + "-01"; }
+    function endOfMonth(value) {
+      const date = new Date(startOfMonth(value) + "T00:00:00Z");
+      date.setUTCMonth(date.getUTCMonth() + 1);
+      date.setUTCDate(0);
+      return date.toISOString().slice(0, 10);
+    }
+    function weekStart(value) {
+      const date = new Date(value + "T00:00:00Z");
+      const offset = (date.getUTCDay() + 6) % 7;
+      return addDays(value, -offset);
+    }
+    function dateCount(from, to) { return Math.round((new Date(to + "T00:00:00Z") - new Date(from + "T00:00:00Z")) / 86400000) + 1; }
+    function quantile(values, q) {
+      if (!values.length) return 0;
+      const sorted = values.slice().sort(function(a, b) { return a - b; });
+      const index = (sorted.length - 1) * q;
+      const lower = Math.floor(index);
+      const upper = Math.ceil(index);
+      if (lower === upper) return sorted[lower];
+      return sorted[lower] + (sorted[upper] - sorted[lower]) * (index - lower);
+    }
+    function analysisGrain() {
+      const days = REPORT ? REPORT.summary.calendarDays : dateCount(BASE_REPORT.meta.rangeStart, BASE_REPORT.meta.rangeEnd);
+      return days <= 14 ? "daily" : days <= 92 ? "weekly" : "monthly";
+    }
+    function grainZh(grain) { return grain === "daily" ? "每日" : grain === "weekly" ? "每周" : "每月"; }
+    function bucketKey(date, grain) {
+      if (grain === "daily") return date;
+      if (grain === "weekly") return weekStart(date);
+      return startOfMonth(date);
+    }
+    function bucketKeys(grain) {
+      const keys = [];
+      let value = bucketKey(REPORT.meta.rangeStart, grain);
+      const last = bucketKey(REPORT.meta.rangeEnd, grain);
+      while (value <= last) {
+        keys.push(value);
+        if (grain === "daily") value = addDays(value, 1);
+        else if (grain === "weekly") value = addDays(value, 7);
+        else {
+          const date = new Date(value + "T00:00:00Z");
+          date.setUTCMonth(date.getUTCMonth() + 1);
+          value = date.toISOString().slice(0, 10);
+        }
+      }
+      return keys;
+    }
+    function bucketLabel(key, grain) {
+      if (grain === "daily") return key.slice(5).replace("-", "/");
+      if (grain === "weekly") {
+        const from = key < REPORT.meta.rangeStart ? REPORT.meta.rangeStart : key;
+        const rawTo = addDays(key, 6);
+        const to = rawTo > REPORT.meta.rangeEnd ? REPORT.meta.rangeEnd : rawTo;
+        return from.slice(5).replace("-", "/") + "–" + to.slice(5).replace("-", "/");
+      }
+      return Number(key.slice(5, 7)) + "月";
+    }
+    function tokenPeriods(grain) {
+      const map = new Map(bucketKeys(grain).map(function(key) { return [key, { month: key, label: bucketLabel(key, grain), cost: 0, calls: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 0, tokens: 0, calendarDays: 0, activeDays: 0, isPartial: false }]; }));
+      REPORT.daily.forEach(function(day) {
+        const row = map.get(bucketKey(day.date, grain));
+        if (!row) return;
+        row.cost += day.cost;
+        row.calls += day.calls;
+        row.input += day.input;
+        row.output += day.output;
+        row.cacheRead += day.cacheRead;
+        row.cacheWrite += day.cacheWrite;
+        row.tokens += day.tokens;
+        row.calendarDays += 1;
+        row.activeDays += day.calls > 0 ? 1 : 0;
+      });
+      map.forEach(function(row, key) {
+        const expectedDays = grain === "daily" ? 1 : grain === "weekly" ? 7 : Number(endOfMonth(key).slice(8, 10));
+        row.isPartial = row.calendarDays < expectedDays;
+      });
+      return Array.from(map.values());
+    }
+    function dimensionPeriods(field, names, grain) {
+      const periods = bucketKeys(grain);
+      const nameSet = new Set(names);
+      const map = new Map();
+      periods.forEach(function(period) {
+        names.concat(["Other"]).forEach(function(name) { map.set(period + "|" + name, { period: period, name: name, cost: 0, calls: 0, tokens: 0 }); });
+      });
+      (REPORT.filterFacts || []).forEach(function(fact) {
+        const rawName = fact[field];
+        const name = nameSet.has(rawName) ? rawName : "Other";
+        const key = bucketKey(fact.date, grain) + "|" + name;
+        const row = map.get(key);
+        if (!row) return;
+        row.cost += Number(fact.cost || 0);
+        row.calls += Number(fact.calls || 0);
+        row.tokens += Number(fact.input || 0) + Number(fact.output || 0) + Number(fact.cacheRead || 0) + Number(fact.cacheWrite || 0);
+      });
+      return { periods: periods, rows: Array.from(map.values()) };
+    }
+    function dateHourRows() {
+      const map = new Map();
+      REPORT.daily.forEach(function(day) {
+        for (let hour = 0; hour < 24; hour += 1) map.set(day.date + "|" + hour, { date: day.date, hour: hour, calls: 0, tokens: 0, cost: 0 });
+      });
+      (REPORT.filterFacts || []).forEach(function(fact) {
+        const row = map.get(fact.date + "|" + fact.hour);
+        if (!row) return;
+        row.calls += Number(fact.calls || 0);
+        row.tokens += Number(fact.input || 0) + Number(fact.output || 0) + Number(fact.cacheRead || 0) + Number(fact.cacheWrite || 0);
+        row.cost += Number(fact.cost || 0);
+      });
+      return Array.from(map.values());
+    }
+    function rangeLabel(from, to) {
+      return zhDate(from, true) + "—" + zhDate(to, from.slice(0, 4) !== to.slice(0, 4));
+    }
+    function compactRangeLabel(from, to) {
+      function md(value) { return value.slice(5).replace("-", "/"); }
+      return md(from) + "–" + md(to);
+    }
+    function isDateString(value) { return /^\d{4}-\d{2}-\d{2}$/.test(String(value || "")); }
+    function clampDate(value) { return value < BASE_REPORT.meta.rangeStart ? BASE_REPORT.meta.rangeStart : value > BASE_REPORT.meta.rangeEnd ? BASE_REPORT.meta.rangeEnd : value; }
+    function sumRows(rows, key) { return rows.reduce(function(total, row) { return total + Number(row[key] || 0); }, 0); }
+    function isHistoricalUnattributed(value) { return /^历史未归(?:属|类)(?:\s*·|$)/u.test(String(value || "")); }
+
+    function deriveView(from, to) {
+      const facts = (BASE_REPORT.filterFacts || []).filter(function(row) { return row.date >= from && row.date <= to; });
+      const officialDaily = (BASE_REPORT.officialDaily || []).filter(function(row) { return row.date >= from && row.date <= to; });
+      if (!facts.length && !officialDaily.length) return null;
+      const weekdayOrder = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+      const dailyMap = new Map();
+      for (let date = from; date <= to; date = addDays(date, 1)) {
+        dailyMap.set(date, { date: date, cost: 0, calls: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 0, sessionIds: new Set() });
+      }
+      const monthMap = new Map();
+      const projectMap = new Map();
+      const modelMap = new Map();
+      const modelDailyMap = new Map();
+      const activityMap = new Map();
+      const sessionMap = new Map();
+      const heatmapMap = new Map();
+      dailyMap.forEach(function(row) {
+        const monthKey = row.date.slice(0, 7);
+        if (!monthMap.has(monthKey)) monthMap.set(monthKey, { month: monthKey, cost: 0, calls: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 0, sessionIds: new Set() });
+      });
+      weekdayOrder.forEach(function(weekday, weekdayIndex) {
+        for (let hour = 0; hour < 24; hour += 1) heatmapMap.set(weekday + "|" + hour, { weekday: weekday, weekdayIndex: weekdayIndex, hour: hour, calls: 0, tokens: 0, approximateCost: 0 });
+      });
+
+      facts.forEach(function(fact) {
+        const tokenCount = Number(fact.input || 0) + Number(fact.output || 0) + Number(fact.cacheRead || 0) + Number(fact.cacheWrite || 0);
+        const daily = dailyMap.get(fact.date);
+        daily.cost += Number(fact.cost || 0);
+        daily.calls += Number(fact.calls || 0);
+        daily.input += Number(fact.input || 0);
+        daily.output += Number(fact.output || 0);
+        daily.cacheRead += Number(fact.cacheRead || 0);
+        daily.cacheWrite += Number(fact.cacheWrite || 0);
+        daily.sessionIds.add(fact.sessionId);
+
+        const monthKey = fact.date.slice(0, 7);
+        const month = monthMap.get(monthKey) || { month: monthKey, cost: 0, calls: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 0, sessionIds: new Set() };
+        month.cost += Number(fact.cost || 0);
+        month.calls += Number(fact.calls || 0);
+        month.input += Number(fact.input || 0);
+        month.output += Number(fact.output || 0);
+        month.cacheRead += Number(fact.cacheRead || 0);
+        month.cacheWrite += Number(fact.cacheWrite || 0);
+        month.sessionIds.add(fact.sessionId);
+        monthMap.set(monthKey, month);
+
+        const project = projectMap.get(fact.project) || { name: fact.project, cost: 0, calls: 0, sessionIds: new Set() };
+        project.cost += Number(fact.cost || 0);
+        project.calls += Number(fact.calls || 0);
+        project.sessionIds.add(fact.sessionId);
+        projectMap.set(fact.project, project);
+
+        const model = modelMap.get(fact.model) || { model: fact.model, cost: 0, calls: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 0, firstDate: fact.date, lastDate: fact.date };
+        model.cost += Number(fact.cost || 0);
+        model.calls += Number(fact.calls || 0);
+        model.input += Number(fact.input || 0);
+        model.output += Number(fact.output || 0);
+        model.cacheRead += Number(fact.cacheRead || 0);
+        model.cacheWrite += Number(fact.cacheWrite || 0);
+        if (fact.date < model.firstDate) model.firstDate = fact.date;
+        if (fact.date > model.lastDate) model.lastDate = fact.date;
+        modelMap.set(fact.model, model);
+        const modelDailyKey = fact.model + "|" + fact.date;
+        const modelDaily = modelDailyMap.get(modelDailyKey) || { model: fact.model, date: fact.date, cost: 0, calls: 0, tokens: 0 };
+        modelDaily.cost += Number(fact.cost || 0);
+        modelDaily.calls += Number(fact.calls || 0);
+        modelDaily.tokens += tokenCount;
+        modelDailyMap.set(modelDailyKey, modelDaily);
+
+        const activity = activityMap.get(fact.activity) || { activity: fact.activity, cost: 0, calls: 0, tokens: 0 };
+        activity.cost += Number(fact.cost || 0);
+        activity.calls += Number(fact.calls || 0);
+        activity.tokens += tokenCount;
+        activityMap.set(fact.activity, activity);
+
+        const session = sessionMap.get(fact.sessionId) || {
+          id: fact.sessionId,
+          shortId: String(fact.sessionId || fact.shortId || "").slice(-12),
+          project: fact.project,
+          date: fact.date,
+          startedAt: fact.firstCallAt,
+          lastCallAt: fact.lastCallAt,
+          cost: 0,
+          calls: 0,
+          input: 0,
+          output: 0,
+          cacheRead: 0,
+          cacheWrite: 0,
+          models: new Set()
+        };
+        session.cost += Number(fact.cost || 0);
+        session.calls += Number(fact.calls || 0);
+        session.input += Number(fact.input || 0);
+        session.output += Number(fact.output || 0);
+        session.cacheRead += Number(fact.cacheRead || 0);
+        session.cacheWrite += Number(fact.cacheWrite || 0);
+        session.models.add(fact.model);
+        if (!session.startedAt || fact.firstCallAt < session.startedAt) { session.startedAt = fact.firstCallAt; session.date = fact.date; }
+        if (!session.lastCallAt || fact.lastCallAt > session.lastCallAt) session.lastCallAt = fact.lastCallAt;
+        sessionMap.set(fact.sessionId, session);
+
+        const heat = heatmapMap.get(fact.weekday + "|" + fact.hour);
+        if (heat) {
+          heat.calls += Number(fact.calls || 0);
+          heat.tokens += tokenCount;
+          heat.approximateCost += Number(fact.cost || 0);
+        }
+      });
+
+      const officialMap = new Map(officialDaily.map(function(row) { return [row.date, Number(row.tokens || 0)]; }));
+      let cumulativeCost = 0;
+      let cumulativeOfficialTokens = 0;
+      const daily = Array.from(dailyMap.values()).map(function(row) {
+        row.tokens = row.input + row.output + row.cacheRead + row.cacheWrite;
+        row.officialTokens = officialMap.has(row.date) ? officialMap.get(row.date) : null;
+        cumulativeOfficialTokens += Number(row.officialTokens || 0);
+        row.cumulativeOfficialTokens = cumulativeOfficialTokens;
+        row.sessions = row.sessionIds.size;
+        delete row.sessionIds;
+        cumulativeCost += row.cost;
+        row.cumulativeCost = cumulativeCost;
+        return row;
+      });
+      daily.forEach(function(row) {
+        const month = monthMap.get(row.date.slice(0, 7));
+        if (month) month.calendarDays = Number(month.calendarDays || 0) + 1;
+      });
+      const months = Array.from(monthMap.values()).sort(function(a, b) { return a.month.localeCompare(b.month); }).map(function(row) {
+        const daysInMonth = Number(endOfMonth(row.month + "-01").slice(8, 10));
+        return {
+          month: row.month,
+          cost: row.cost,
+          calls: row.calls,
+          sessions: row.sessionIds.size,
+          activeDays: daily.filter(function(day) { return day.date.slice(0, 7) === row.month && day.calls > 0; }).length,
+          calendarDays: row.calendarDays,
+          input: row.input,
+          output: row.output,
+          cacheRead: row.cacheRead,
+          cacheWrite: row.cacheWrite,
+          tokens: row.input + row.output + row.cacheRead + row.cacheWrite,
+          daysInMonth: daysInMonth,
+          isPartial: row.calendarDays < daysInMonth
+        };
+      });
+      const totalCost = sumRows(facts, "cost");
+      const totalCalls = sumRows(facts, "calls");
+      const input = sumRows(facts, "input");
+      const output = sumRows(facts, "output");
+      const cacheRead = sumRows(facts, "cacheRead");
+      const cacheWrite = sumRows(facts, "cacheWrite");
+      const totalTokens = input + output + cacheRead + cacheWrite;
+      const officialTokens = officialDaily.reduce(function(total, row) { return total + Number(row.tokens || 0); }, 0);
+      const knownProjectTokens = facts.filter(function(row) { return !isHistoricalUnattributed(row.project); }).reduce(function(total, row) {
+        return total + Number(row.input || 0) + Number(row.output || 0) + Number(row.cacheRead || 0) + Number(row.cacheWrite || 0);
+      }, 0);
+      const knownActivityTokens = facts.filter(function(row) { return !isHistoricalUnattributed(row.activity); }).reduce(function(total, row) {
+        return total + Number(row.input || 0) + Number(row.output || 0) + Number(row.cacheRead || 0) + Number(row.cacheWrite || 0);
+      }, 0);
+      const signedGapTokens = officialTokens - totalTokens;
+      const reconstruction = {
+        officialTokens: officialTokens,
+        reconstructedTokens: totalTokens,
+        netGapTokens: signedGapTokens,
+        absoluteGapTokens: Math.abs(signedGapTokens),
+        absoluteGapRate: officialTokens ? Math.abs(signedGapTokens) / officialTokens : 0,
+        reconstructedToOfficialRatio: officialTokens ? totalTokens / officialTokens : 0,
+        fullLocalLedgerTokens: BASE_REPORT.summary.reconstruction ? BASE_REPORT.summary.reconstruction.fullLocalLedgerTokens : totalTokens,
+        outsideOfficialDateRangeTokens: BASE_REPORT.summary.reconstruction ? BASE_REPORT.summary.reconstruction.outsideOfficialDateRangeTokens : 0,
+        knownProjectTokens: knownProjectTokens,
+        historicalUnattributedProjectTokens: totalTokens - knownProjectTokens,
+        projectTokenCoverage: totalTokens ? knownProjectTokens / totalTokens : 0,
+        knownActivityTokens: knownActivityTokens,
+        historicalUnattributedActivityTokens: totalTokens - knownActivityTokens,
+        activityTokenCoverage: totalTokens ? knownActivityTokens / totalTokens : 0
+      };
+
+      let cumulativeProjectShare = 0;
+      const projects = Array.from(projectMap.values()).sort(function(a, b) { return b.cost - a.cost; }).map(function(row, index) {
+        const share = totalCost ? row.cost / totalCost : 0;
+        cumulativeProjectShare += share;
+        return { rank: index + 1, name: row.name, cost: row.cost, share: share, cumulativeShare: cumulativeProjectShare, calls: row.calls, sessions: row.sessionIds.size };
+      });
+      const models = Array.from(modelMap.values()).sort(function(a, b) { return b.cost - a.cost; }).map(function(row, index) {
+        const tokens = row.input + row.output + row.cacheRead + row.cacheWrite;
+        return Object.assign({}, row, { rank: index + 1, share: totalCost ? row.cost / totalCost : 0, tokens: tokens });
+      });
+      const modelDaily = Array.from(modelDailyMap.values()).sort(function(a, b) { return a.date.localeCompare(b.date) || a.model.localeCompare(b.model); });
+      const activities = Array.from(activityMap.values()).sort(function(a, b) { return b.cost - a.cost; }).map(function(row, index) {
+        return Object.assign({}, row, { rank: index + 1, share: totalCost ? row.cost / totalCost : 0, turns: null });
+      });
+      const sessions = Array.from(sessionMap.values()).map(function(row) {
+        const tokens = row.input + row.output + row.cacheRead + row.cacheWrite;
+        return Object.assign({}, row, { tokens: tokens, cacheShare: tokens ? row.cacheRead / tokens : 0, models: Array.from(row.models) });
+      }).sort(function(a, b) { return b.cost - a.cost; }).map(function(row, index) { row.rank = index + 1; return row; });
+
+      const topProjectNames = projects.slice(0, 5).map(function(row) { return row.name; });
+      const projectWeekMap = new Map();
+      sessions.forEach(function(session) {
+        const project = topProjectNames.includes(session.project) ? session.project : "Other";
+        const week = weekStart(session.date);
+        const key = project + "|" + week;
+        const row = projectWeekMap.get(key) || { project: project, week: week, cost: 0, sessions: 0, calls: 0 };
+        row.cost += session.cost;
+        row.sessions += 1;
+        row.calls += session.calls;
+        projectWeekMap.set(key, row);
+      });
+      const weeks = [];
+      for (let week = weekStart(from); week <= weekStart(to); week = addDays(week, 7)) weeks.push(week);
+      const projectWeekRows = topProjectNames.concat(projects.length > 5 ? ["Other"] : []);
+      const projectWeeks = Array.from(projectWeekMap.values());
+      const heatmap = Array.from(heatmapMap.values()).map(function(row) { return Object.assign({}, row, { tokenShare: totalTokens ? row.tokens / totalTokens : 0 }); });
+
+      const dominantMonth = months.slice().sort(function(a, b) { return b.cost - a.cost; })[0];
+      const dominantIndex = months.findIndex(function(row) { return row.month === dominantMonth.month; });
+      const previousMonth = dominantIndex > 0 ? months[dominantIndex - 1] : null;
+      const activeDaily = daily.filter(function(row) { return row.calls > 0; });
+      const peakDay = activeDaily.slice().sort(function(a, b) { return b.cost - a.cost; })[0];
+      const topSession = sessions[0];
+      const topHeat = heatmap.slice().sort(function(a, b) { return b.tokens - a.tokens; })[0];
+      const nightTokens = heatmap.filter(function(row) { return row.hour < 6; }).reduce(function(total, row) { return total + row.tokens; }, 0);
+      const weekendTokens = heatmap.filter(function(row) { return row.weekday === "Sat" || row.weekday === "Sun"; }).reduce(function(total, row) { return total + row.tokens; }, 0);
+      const sessionCosts = sessions.map(function(row) { return row.cost; });
+      const factsSummary = {
+        dominantMonth: dominantMonth.month,
+        dominantMonthCost: dominantMonth.cost,
+        dominantMonthShare: totalCost ? dominantMonth.cost / totalCost : 0,
+        dominantMonthIsPartial: dominantMonth.isPartial,
+        previousMonth: previousMonth ? previousMonth.month : null,
+        dominantVsPrevious: previousMonth && previousMonth.cost ? dominantMonth.cost / previousMonth.cost : null,
+        costBeforeDominant: months.slice(0, dominantIndex).reduce(function(total, row) { return total + row.cost; }, 0),
+        peakDay: peakDay,
+        topTenDayShare: totalCost ? activeDaily.slice().sort(function(a, b) { return b.cost - a.cost; }).slice(0, 10).reduce(function(total, row) { return total + row.cost; }, 0) / totalCost : 0,
+        activeDayMedianCost: quantile(activeDaily.map(function(row) { return row.cost; }), .5),
+        activeDayP95Cost: quantile(activeDaily.map(function(row) { return row.cost; }), .95),
+        cacheTokenShare: totalTokens ? cacheRead / totalTokens : 0,
+        cacheWriteTokenShare: totalTokens ? cacheWrite / totalTokens : 0,
+        inputTokenShare: totalTokens ? input / totalTokens : 0,
+        outputTokenShare: totalTokens ? output / totalTokens : 0,
+        topTwoProjectShare: totalCost ? projects.slice(0, 2).reduce(function(total, row) { return total + row.cost; }, 0) / totalCost : 0,
+        topFiveProjectShare: totalCost ? projects.slice(0, 5).reduce(function(total, row) { return total + row.cost; }, 0) / totalCost : 0,
+        topModelShare: models[0] ? models[0].share : 0,
+        topModel: models[0] ? models[0].model : "—",
+        topModelFirstDate: models[0] ? models[0].firstDate : null,
+        topProject: projects[0] ? projects[0].name : "—",
+        secondProject: projects[1] ? projects[1].name : null,
+        topSessionProject: topSession ? topSession.project : "—",
+        topActivities: activities.slice(0, 2).map(function(row) { return row.activity; }),
+        codingDelegationShare: totalCost ? activities.slice(0, 2).reduce(function(total, row) { return total + row.cost; }, 0) / totalCost : 0,
+        topFiveSessionShare: totalCost ? sessions.slice(0, 5).reduce(function(total, row) { return total + row.cost; }, 0) / totalCost : 0,
+        topTenSessionShare: totalCost ? sessions.slice(0, 10).reduce(function(total, row) { return total + row.cost; }, 0) / totalCost : 0,
+        sessionMedianCost: quantile(sessionCosts, .5),
+        sessionP95Cost: quantile(sessionCosts, .95),
+        nightTokenShare: totalTokens ? nightTokens / totalTokens : 0,
+        weekendTokenShare: totalTokens ? weekendTokens / totalTokens : 0,
+        heatPeak: topHeat
+      };
+      [
+        ["日期", sumRows(daily, "cost")],
+        ["项目", sumRows(projects, "cost")],
+        ["模型", sumRows(models, "cost")],
+        ["任务类型", sumRows(activities, "cost")],
+        ["会话", sumRows(sessions, "cost")],
+        ["时段", sumRows(heatmap, "approximateCost")]
+      ].forEach(function(check) {
+        if (Math.abs(check[1] - totalCost) > .02) throw new Error(check[0] + "维度与筛选总额无法对账");
+      });
+      return {
+        meta: Object.assign({}, BASE_REPORT.meta, { rangeStart: from, rangeEnd: to, dailyDefinition: BASE_REPORT.meta.filterDefinition }),
+        summary: {
+          cost: totalCost,
+          calls: totalCalls,
+          sessions: sessions.length,
+          projectPaths: projects.length,
+          logicalProjects: projects.length,
+          activeDays: activeDaily.length,
+          calendarDays: daily.length,
+          tokens: totalTokens,
+          officialTokens: officialTokens,
+          reconstructedTokens: totalTokens,
+          cacheHitRate: input + cacheRead ? cacheRead / (input + cacheRead) : 0,
+          tokenComponents: { input: input, output: output, cacheRead: cacheRead, cacheWrite: cacheWrite },
+          reconstruction: reconstruction
+        },
+        officialDaily: officialDaily,
+        daily: daily,
+        months: months,
+        projects: projects,
+        projectWeeks: projectWeeks,
+        projectWeekRows: projectWeekRows,
+        weeks: weeks,
+        models: models,
+        modelDaily: modelDaily,
+        activities: activities,
+        sessions: sessions,
+        heatmap: heatmap,
+        filterFacts: facts,
+        facts: Object.assign({}, factsSummary, { reconstruction: reconstruction, officialPeakDay: officialDaily.slice().sort(function(a, b) { return b.tokens - a.tokens; })[0] || null })
+      };
+    }
+
+    const requestedFrom = SEARCH_PARAMS.get("from");
+    const requestedTo = SEARCH_PARAMS.get("to");
+    const validRequestedRange = isDateString(requestedFrom) && isDateString(requestedTo)
+      && requestedFrom >= BASE_REPORT.meta.rangeStart && requestedTo <= BASE_REPORT.meta.rangeEnd && requestedFrom <= requestedTo;
+    REPORT = validRequestedRange ? deriveView(requestedFrom, requestedTo) : null;
+    if (!REPORT) REPORT = deriveView(BASE_REPORT.meta.rangeStart, BASE_REPORT.meta.rangeEnd) || BASE_REPORT;
+    document.documentElement.dataset.filterFrom = REPORT.meta.rangeStart;
+    document.documentElement.dataset.filterTo = REPORT.meta.rangeEnd;
+    function axisDate(value) {
+      const parts = String(value).split("-");
+      const day = Number(parts[2]);
+      const multiYear = REPORT.meta.rangeStart.slice(0, 4) !== REPORT.meta.rangeEnd.slice(0, 4);
+      if (REPORT.summary.calendarDays <= 14) return Number(parts[1]) + "/" + day;
+      if (value === REPORT.meta.rangeStart || value === REPORT.meta.rangeEnd) return (multiYear ? parts[0].slice(2) + "·" : "") + Number(parts[1]) + "/" + day;
+      if (REPORT.summary.calendarDays <= 92) {
+        const weekday = new Date(value + "T00:00:00Z").getUTCDay();
+        return weekday === 1 ? Number(parts[1]) + "/" + day : "";
+      }
+      if (day !== 1) return "";
+      const daysToEnd = (new Date(REPORT.meta.rangeEnd + "T12:00:00+08:00") - new Date(value + "T12:00:00+08:00")) / 86400000;
+      if (daysToEnd <= 3) return "";
+      return multiYear && Number(parts[1]) === 1 ? parts[0].slice(2) + "·1/1" : Number(parts[1]) + "/" + day;
+    }
+    function setText(id, value) {
+      const node = document.getElementById(id);
+      if (node) node.textContent = value;
+    }
+    function setWidth(id, value) {
+      const node = document.getElementById(id);
+      if (node) node.style.width = Math.max(0, Math.min(100, Number(value || 0) * 100)) + "%";
+    }
+    function tableHtml(headers, rows, emptyLabel) {
+      const body = rows.length ? rows.map(function(row) {
+        return "<tr>" + row.map(function(cell) {
+          const objectCell = cell && typeof cell === "object";
+          const value = objectCell ? cell.value : cell;
+          return '<td class="' + (objectCell && cell.numeric ? "num" : "") + '">' + esc(value) + "</td>";
+        }).join("") + "</tr>";
+      }).join("") : '<tr><td class="empty-table-cell" colspan="' + headers.length + '">' + esc(emptyLabel || "所选日期没有已采集的本地明细") + "</td></tr>";
+      return "<table><thead><tr>" + headers.map(function(header) {
+        const objectHeader = header && typeof header === "object";
+        const value = objectHeader ? header.value : header;
+        const numeric = objectHeader && header.numeric;
+        const title = objectHeader && header.title ? ' title="' + esc(header.title) + '"' : "";
+        return '<th scope="col" class="' + (numeric ? "num" : "") + '"' + title + ">" + esc(value) + "</th>";
+      }).join("") + "</tr></thead><tbody>" + body + "</tbody></table>";
+    }
+    function renderDynamicCopy() {
+      const facts = REPORT.facts;
+      const summary = REPORT.summary;
+      const reconstruction = summary.reconstruction || { officialTokens: summary.tokens, reconstructedTokens: summary.tokens, netGapTokens: 0, reconstructedToOfficialRatio: 1, projectTokenCoverage: 1, activityTokenCoverage: 1 };
+      const officialRows = REPORT.officialDaily && REPORT.officialDaily.length
+        ? REPORT.officialDaily
+        : REPORT.daily.map(function(row) { return { date: row.date, tokens: row.tokens }; });
+      const hasLocalDetails = Boolean(REPORT.filterFacts && REPORT.filterFacts.length);
+      const peak = facts.peakDay || null;
+      const officialPeak = facts.officialPeakDay || officialRows.slice().sort(function(a, b) { return Number(b.tokens || 0) - Number(a.tokens || 0); })[0] || { date: REPORT.meta.rangeStart, tokens: 0 };
+      const officialActiveDays = officialRows.filter(function(row) { return Number(row.tokens || 0) > 0; }).length;
+      const officialDailyAverage = reconstruction.officialTokens / Math.max(1, summary.calendarDays);
+      const topSession = REPORT.sessions.length ? REPORT.sessions[0] : null;
+      const grain = analysisGrain();
+      const periodRows = tokenPeriods(grain);
+      const heatRows = summary.calendarDays <= 14 ? dateHourRows() : REPORT.heatmap;
+      const topHeat = heatRows.slice().sort(function(a, b) { return b[heatMetric] - a[heatMetric]; })[0];
+      const weekdayLabels = { Mon: "周一", Tue: "周二", Wed: "周三", Thu: "周四", Fri: "周五", Sat: "周六", Sun: "周日" };
+      const fullRange = REPORT.meta.rangeStart === BASE_REPORT.meta.rangeStart && REPORT.meta.rangeEnd === BASE_REPORT.meta.rangeEnd;
+      const selectedRange = rangeLabel(REPORT.meta.rangeStart, REPORT.meta.rangeEnd);
+      const topActivityPair = facts.topActivities.map(activityLabel).join("、");
+      const nonCache = facts.inputTokenShare + facts.outputTokenShare;
+      const inputWithinNonCache = nonCache ? facts.inputTokenShare / nonCache : 0;
+      const outputWithinNonCache = nonCache ? facts.outputTokenShare / nonCache : 0;
+      const partialPeriods = periodRows.filter(function(row) { return row.isPartial; }).map(function(row) { return row.label; });
+      const heatPeakLabel = summary.calendarDays <= 14
+        ? topHeat.date.slice(5).replace("-", "/") + " " + String(topHeat.hour).padStart(2, "0") + ":00"
+        : weekdayLabels[topHeat.weekday] + " " + String(topHeat.hour).padStart(2, "0") + ":00";
+      document.documentElement.dataset.localDetail = hasLocalDetails ? "available" : "empty";
+      document.documentElement.dataset.officialSource = HAS_OFFICIAL_SOURCE ? "available" : "unavailable";
+
+      setText("heroCost", compactZh(reconstruction.officialTokens));
+      setText("heroNumberLabel", HAS_OFFICIAL_SOURCE ? "Codex 官方账户 Token" : "当前本地 CodeBurn 快照 Token");
+      setText("heroSourceValue", HAS_OFFICIAL_SOURCE ? "官方账户 + 已采集本地账本" : "当前本地 CodeBurn 快照");
+      setText("heroRange", selectedRange);
+      setText("heroDays", officialActiveDays + " 个活跃日 / 共 " + summary.calendarDays + " 天");
+      setText("navRange", (fullRange ? "全周期 · " : "") + compactRangeLabel(REPORT.meta.rangeStart, REPORT.meta.rangeEnd));
+      setText("metricTokens", compactZh(reconstruction.officialTokens));
+      setText("metricTokensLabel", HAS_OFFICIAL_SOURCE ? "Token 总量" : "已采集本地 Token 总量");
+      setText("metricTotalNote", selectedRange);
+      setText("metricAverage", compactZh(officialDailyAverage));
+      setText("metricAverageLabel", HAS_OFFICIAL_SOURCE ? "平均每天 Token" : "平均每天本地 Token");
+      setText("metricAverageNote", "按所选 " + summary.calendarDays + " 个自然日计算");
+      setText("metricPeak", compactZh(officialPeak.tokens));
+      setText("metricPeakLabel", HAS_OFFICIAL_SOURCE ? "单日最高 Token" : "本地单日最高 Token");
+      setText("metricPeakNote", zhDate(officialPeak.date, true));
+      setText("metricActiveDays", officialActiveDays + " / " + summary.calendarDays + " 天");
+      setText("metricActiveDaysLabel", HAS_OFFICIAL_SOURCE ? "有 Token 记录" : "有本地 Token 记录");
+      setText("metricActiveDaysNote", "活跃天数 / 所选天数");
+      setText("metricsSourceNote", HAS_OFFICIAL_SOURCE ? "以上均为 Codex 官方账户口径，随日期范围更新。" : "以上均为当前本地 CodeBurn 快照口径，随日期范围更新。");
+      document.getElementById("metricsOverview").setAttribute("aria-label", HAS_OFFICIAL_SOURCE ? "所选日期范围的官方 Token 概览" : "所选日期范围的已采集本地 Token 概览");
+
+      setText("whenValue", compactZh(officialPeak.tokens));
+      setText("whenSectionTitle", HAS_OFFICIAL_SOURCE ? "官方 Token 活动趋势" : "当前本地 Token 活动趋势");
+      setText("whenInsight", HAS_OFFICIAL_SOURCE ? "为 " + zhDate(officialPeak.date, true) + "的官方账户 Token；本范围官方累计 " + compactZh(reconstruction.officialTokens) + "。" : "为 " + zhDate(officialPeak.date, true) + "的已采集本地 Token；本范围本地累计 " + compactZh(reconstruction.officialTokens) + "。");
+      setText("timeline-title", HAS_OFFICIAL_SOURCE ? "每日与累计 Token" : "每日与累计本地 Token");
+      setText("timelineRange", selectedRange + (HAS_OFFICIAL_SOURCE ? " · 折线：官方累计 Token · 柱形：官方每日 Token" : " · 折线：本地累计 Token · 柱形：本地每日 Token"));
+      setText("timelineSourceTag", HAS_OFFICIAL_SOURCE ? "官方账户" : "CodeBurn 快照");
+      setText("timelineCounterLabel", HAS_OFFICIAL_SOURCE ? "官方账户累计" : "已采集本地累计");
+      setText("timelineCounter", compact(reconstruction.officialTokens, 2));
+      document.getElementById("timelineChart").setAttribute("aria-label", selectedRange + (HAS_OFFICIAL_SOURCE ? "的官方账户每日与累计 Token 图" : "的已采集本地每日与累计 Token 图"));
+      document.getElementById("timelineChart").dataset.grain = "daily";
+
+      setText("tokenValue", hasLocalDetails ? pct(facts.cacheTokenShare) : "0%");
+      setText("tokenInsight", hasLocalDetails
+        ? "来自本地可重建账本的缓存读取。缓存读取 " + compact(summary.tokenComponents.cacheRead, 2) + "，新输入 " + compact(summary.tokenComponents.input, 2) + "，输出 " + compact(summary.tokenComponents.output, 2) + (HAS_OFFICIAL_SOURCE ? "；官方与本地净差单独列示。" : "；以上均来自当前本地 CodeBurn 快照。")
+        : HAS_OFFICIAL_SOURCE
+          ? "所选日期有官方账户 Token，但已采集的本地账本没有对应调用明细，无法拆分输入、输出或缓存。"
+          : "所选日期在当前本地 CodeBurn 快照中没有调用明细，无法拆分输入、输出或缓存。");
+      setText("tokenSectionTitle", grainZh(grain) + "本地重建 Token 构成");
+      setText("token-title", grainZh(grain) + "可重建 Token 总量与构成");
+      setText("tokenScaleNote", hasLocalDetails ? "每根柱对应" + (grain === "daily" ? "一天" : grain === "weekly" ? "一周" : "一个月") + "，按缓存读取、新输入和输出分段" + (partialPeriods.length ? "；带 * 的时间段不完整" : "") + "。" : HAS_OFFICIAL_SOURCE ? "所选日期没有可重建的本地 Token 组件；官方账户总量仍显示在上方。" : "所选日期在当前本地 CodeBurn 快照中没有可重建的 Token 组件。");
+      setText("tokenGrainTag", hasLocalDetails ? grainZh(grain) : "无本地明细");
+      document.getElementById("tokenLedger").dataset.grain = grain;
+      document.getElementById("tokenLedger").setAttribute("aria-label", hasLocalDetails ? selectedRange + "的" + grainZh(grain) + " Token 构成图" : selectedRange + "没有已采集的本地 Token 构成明细");
+      setWidth("compositionCache", facts.cacheTokenShare);
+      setWidth("compositionWrite", facts.cacheWriteTokenShare);
+      setWidth("compositionInput", facts.inputTokenShare);
+      setWidth("compositionOutput", facts.outputTokenShare);
+      setText("compositionCacheLabel", "缓存读取 " + pct(facts.cacheTokenShare));
+      setText("compositionWriteLabel", "缓存写入 " + pct(facts.cacheWriteTokenShare, 2));
+      setText("compositionInputLabel", "新输入 " + pct(facts.inputTokenShare));
+      setText("compositionOutputLabel", "输出 " + pct(facts.outputTokenShare, 2));
+      setText("nonCacheValue", "新输入与输出合计 " + pct(nonCache));
+      setWidth("nonCacheInput", inputWithinNonCache);
+      setWidth("nonCacheOutput", outputWithinNonCache);
+      setText("nonCacheInputLabel", "新输入 " + pct(inputWithinNonCache));
+      setText("nonCacheOutputLabel", "输出 " + pct(outputWithinNonCache));
+      setText("dataScopeLabel", HAS_OFFICIAL_SOURCE ? "两层口径" : "数据口径");
+      setText("sessionNote", HAS_OFFICIAL_SOURCE
+        ? "官方账户总量为 " + compact(reconstruction.officialTokens, 2) + "；同日期本地重建 " + compact(reconstruction.reconstructedTokens, 2) + "。" + (hasLocalDetails ? "组件、项目和时段均以本地账本为准。" : "该日期没有已采集的本地调用明细，因此不展示项目、模型、会话或时段归属。")
+        : "本范围已采集本地 Token 为 " + compact(reconstruction.reconstructedTokens, 2) + "；组件、项目、模型、会话和时段均来自当前本地 CodeBurn 快照。");
+
+      setText("projectValue", hasLocalDetails ? pct(reconstruction.projectTokenCoverage) : "—");
+      setText("projectInsight", hasLocalDetails ? "为本地重建 Token 的项目可归属率；" + compact(reconstruction.historicalUnattributedProjectTokens, 2) + " 无法从现存旧日志恢复项目，统一列为“历史未归属”。" : HAS_OFFICIAL_SOURCE ? "所选日期没有已采集的本地调用明细，官方账户 Token 无法归属到项目。" : "所选日期在当前本地 CodeBurn 快照中没有可归属的项目明细。");
+      setText("projectRankSubtitle", hasLocalDetails ? "Codex 临时工作目录已并入所属项目 · 前 8 名" : "所选日期没有可归属到项目的本地明细。");
+      setText("projectRankTag", hasLocalDetails ? "前 8 名" : "无本地明细");
+      setText("project-week-title", grainZh(grain) + "项目估算成本");
+      setText("projectTrendSubtitle", hasLocalDetails ? (grain === "daily" ? "每天一根柱，分段表示各项目；柱高为当天估算成本合计。" : "每" + (grain === "weekly" ? "周" : "月") + "一根柱，分段表示各项目；柱高为当期估算成本合计。") : "所选日期没有可归属到项目的本地明细。");
+      setText("projectTrendTag", hasLocalDetails ? grainZh(grain) : "无本地明细");
+      document.getElementById("projectMatrix").dataset.grain = grain;
+      document.getElementById("projectMatrix").setAttribute("aria-label", selectedRange + "的" + grainZh(grain) + "项目估算成本堆叠图");
+      setText("modelValue", hasLocalDetails ? pct(facts.topModelShare) : "—");
+      setText("modelInsight", hasLocalDetails ? "来自 " + facts.topModel + "；" + topActivityPair + "两类任务合计占估算成本的 " + pct(facts.codingDelegationShare) + "。任务类型由 CodeBurn 自动归类。" : "所选日期没有已采集的本地调用明细，无法识别模型或任务类型。");
+      setText("activitySubtitle", hasLocalDetails ? "CodeBurn 自动归类 · 按估算成本显示前 6 项" : "所选日期没有可自动归类的本地任务明细。");
+      setText("activityTag", hasLocalDetails ? "前 6 名" : "无本地明细");
+      setText("model-title", grainZh(grain) + "模型估算成本");
+      setText("modelTrendSubtitle", hasLocalDetails ? (grain === "daily" ? "每天一根柱，分段表示各模型；柱高为当天估算成本合计。" : "每" + (grain === "weekly" ? "周" : "月") + "一根柱，分段表示各模型；柱高为当期估算成本合计。") : "所选日期没有可识别的本地模型明细。");
+      setText("modelTrendTag", hasLocalDetails ? grainZh(grain) : "无本地明细");
+      document.getElementById("modelStrip").dataset.grain = grain;
+      document.getElementById("modelStrip").setAttribute("aria-label", selectedRange + "的" + grainZh(grain) + "模型估算成本堆叠图");
+
+      setText("sessionValue", hasLocalDetails ? pct(facts.topFiveSessionShare) : "0 个");
+      setText("sessionInsight", hasLocalDetails ? "由估算成本最高的 5 个会话产生。单会话中位数 " + money(facts.sessionMedianCost) + "；95% 的会话不高于 " + money(facts.sessionP95Cost) + "；最高 " + money(topSession.cost) + "。" : HAS_OFFICIAL_SOURCE ? "所选日期没有已采集的本地会话明细；官方账户接口不提供会话拆分。" : "所选日期在当前本地 CodeBurn 快照中没有会话明细。");
+      const rankedSessions = summary.calendarDays <= 14;
+      const shownSessions = Math.min(summary.sessions, NARROW ? 8 : 12);
+      setText("session-title", rankedSessions ? "会话估算成本排名" : "会话首次调用日期与估算成本");
+      setText("sessionChartSubtitle", hasLocalDetails ? (rankedSessions ? "按估算成本从高到低排列；线长、圆点位置和金额标签表示成本。全部会话见下方明细。" : "横轴为范围内首次调用日期，纵轴为估算成本，点面积表示 Token") : "所选日期没有本地会话可供绘制。");
+      setText("sessionCountTag", hasLocalDetails ? (rankedSessions ? "显示前 " + shownSessions + " 个 · 共 " + summary.sessions + " 个会话" : summary.sessions + " 个会话 · 对数轴") : "0 个本地会话");
+      setText("topSessionValue", topSession ? money(topSession.cost) : "—");
+      setText("topSessionLabel", topSession ? "最高单会话估算成本 · " + projectLabel(topSession.project) + " · " + zhDate(topSession.date, true) : "所选日期没有本地会话明细");
+      setText("sessionMedianValue", money(facts.sessionMedianCost));
+      setText("top10SessionValue", pct(facts.topTenSessionShare));
+      document.getElementById("sessionScatter").dataset.view = rankedSessions ? "ranked" : "distribution";
+      document.getElementById("sessionScatter").dataset.pointsReadable = hasLocalDetails ? "true" : "empty";
+      document.getElementById("sessionScatter").setAttribute("aria-label", hasLocalDetails ? (rankedSessions ? "所选范围内估算成本最高的会话排名图" : summary.sessions + " 个会话按范围内首次调用时间和估算成本绘制的散点图") : "所选日期没有已采集的本地会话明细");
+
+      setText("rhythmValue", hasLocalDetails ? pct(facts.nightTokenShare) : "0%");
+      setText("rhythmInsight", hasLocalDetails ? "来自 00:00–05:59 的模型调用；周六、周日产生的 Token 占 " + pct(facts.weekendTokenShare) + "。时间表示模型调用发生时间，不等同于人工工作时长。" : "所选日期没有已采集的本地调用时间记录，无法形成时段分布。");
+      setText("nightValue", pct(facts.nightTokenShare));
+      setText("weekendValue", pct(facts.weekendTokenShare));
+      setText("heatPeakValue", hasLocalDetails ? heatPeakLabel : "—");
+      const heatScopeLabel = summary.calendarDays <= 14 ? "日期及时段" : "星期及时段";
+      setText("heatPeakLabel", hasLocalDetails ? (heatMetric === "tokens" ? "Token 最多的" + heatScopeLabel + " · " + compact(topHeat.tokens, 2) : "调用最频繁的" + heatScopeLabel + " · " + compact(topHeat.calls, 0) + " 次") : "所选日期没有本地时段明细");
+      const dateHourView = summary.calendarDays <= 14;
+      setText("rhythm-title", dateHourView ? "日期 × 小时调用分布" : "星期 × 小时调用分布");
+      setText("rhythmSubtitle", hasLocalDetails ? (dateHourView ? REPORT.meta.timezone + " · 行：日期 · 列：小时 · 右侧：当日估算成本" : REPORT.meta.timezone + " · 按星期汇总，圆越大，Token 或调用次数越多") : REPORT.meta.timezone + " · 所选日期没有本地调用时间记录");
+      document.getElementById("rhythmHeat").dataset.view = dateHourView ? "date-hour" : "weekday-hour";
+      document.getElementById("rhythmHeat").dataset.totalCost = summary.cost.toFixed(2);
+      document.getElementById("rhythmHeat").setAttribute("aria-label", dateHourView ? selectedRange + "按日期和小时统计的 Token 与调用次数图" : REPORT.meta.timezone + " 时区下按星期和小时统计的 Token 与调用次数图");
+
+      setText("actionValue", money(summary.cost));
+      setText("rangeSummaryTitle", compactRangeLabel(REPORT.meta.rangeStart, REPORT.meta.rangeEnd));
+      setText("actionInsight", hasLocalDetails ? "共 " + summary.calls.toLocaleString("en-US") + " 次模型调用 · " + compact(summary.tokens, 2) + " Token" : HAS_OFFICIAL_SOURCE ? "官方账户 Token 正常记录；本地调用明细为 0" : "当前本地 CodeBurn 快照中没有调用明细");
+      setText("actionProjectCopy", peak ? zhDate(peak.date, true) + " · " + peak.calls.toLocaleString("en-US") + " 次模型调用" : "所选日期没有本地调用记录");
+      setText("actionProjectMetric", peak ? money(peak.cost) : "—");
+      setText("actionSessionCopy", REPORT.projects.length ? projectLabel(REPORT.projects[0].name) + " · " + REPORT.projects[0].calls.toLocaleString("en-US") + " 次调用 · " + REPORT.projects[0].sessions + " 个会话" : HAS_OFFICIAL_SOURCE ? "官方账户接口不提供项目归属" : "当前本地 CodeBurn 快照没有项目明细");
+      setText("actionSessionMetric", REPORT.projects.length ? pct(REPORT.projects[0].share) : "—");
+      setText("actionActivityCopy", REPORT.models.length ? REPORT.models[0].model + " · " + REPORT.models[0].calls.toLocaleString("en-US") + " 次调用" : "所选日期没有本地模型明细");
+      setText("actionActivityMetric", REPORT.models.length ? pct(REPORT.models[0].share) : "—");
+      setText("actionActivityLabel", "模型估算成本占比");
+
+      setText("scopePrimaryTitle", HAS_OFFICIAL_SOURCE ? "官方账户" : "当前本地快照");
+      setText("scopePrimaryText", HAS_OFFICIAL_SOURCE
+        ? "累计与每日 Token 来自 Codex Profile 的账户活动接口；同一登录账户在其他设备上的使用预计包含在内，但接口不提供设备或项目拆分。"
+        : "累计与每日 Token 来自当前设备的 CodeBurn 快照，只覆盖仍可采集的本地记录。");
+      setText("scopeLocalTitle", (HAS_OFFICIAL_SOURCE ? "已采集本地明细 · " + compact(reconstruction.fullLocalLedgerTokens, 2) : "已采集本地 Token · " + compact(summary.tokens, 2)));
+      setText("scopeLocalText", HAS_OFFICIAL_SOURCE
+        ? "本地账本由已导入设备的 CC Switch 持久历史与截止点后的 CodeBurn 增量无重叠拼接；其中 " + compact(reconstruction.outsideOfficialDateRangeTokens, 2) + " 位于官方日报日期范围之外，不混入同日期比较。"
+        : "项目、模型、会话和时段均由当前本地 CodeBurn 明细重建，不代表同一账户在其他设备上的总量。");
+      setText("caveatPrimaryTitle", HAS_OFFICIAL_SOURCE ? "Token 活动" : "本地 Token");
+      setText("caveatPrimaryText", HAS_OFFICIAL_SOURCE
+        ? "官方 Profile 的累计 Token 是账户活动指标，不是订阅剩余额度或账单金额。"
+        : "累计与每日 Token 均来自当前本地 CodeBurn 快照，不是订阅剩余额度或账单金额。");
+      setText("caveatSourceTitle", HAS_OFFICIAL_SOURCE ? "来源差异" : "本地范围");
+      setText("caveatSourceText", HAS_OFFICIAL_SOURCE
+        ? "官方账户与本地账本的日期边界、设备范围和留存范围不同。两者净差可能同时包含未导入设备、已删除日志及采集时点差异，不能直接认定为某台电脑的用量，也不摊入项目、模型或 Token 组件。"
+        : "当前报告只覆盖已采集到的本地记录；其他设备和已删除日志不在统计范围内，因此不能代表同一账户的总量。");
+      setText("footerSource", "数据来源 · " + (HAS_OFFICIAL_SOURCE ? "Codex 官方账户活动 + 已采集设备的 CC Switch 历史账本与 CodeBurn 增量" : "当前本地 CodeBurn 快照") + " / " + document.getElementById("snapshotGeneratedLabel").textContent);
+
+      document.getElementById("dailyTable").innerHTML = HAS_OFFICIAL_SOURCE
+        ? tableHtml(
+            ["日期", { value: "官方账户 Token", numeric: true }, { value: "本地重建 Token", numeric: true }, { value: "估算成本", numeric: true }, { value: "调用", numeric: true }, { value: "会话", numeric: true }, { value: "缓存读取", numeric: true }],
+            REPORT.daily.map(function(row) { return [zhDate(row.date, true), { value: Number(row.officialTokens || 0).toLocaleString("en-US"), numeric: true }, { value: row.tokens.toLocaleString("en-US"), numeric: true }, { value: money(row.cost), numeric: true }, { value: row.calls.toLocaleString("en-US"), numeric: true }, { value: row.sessions, numeric: true }, { value: row.cacheRead.toLocaleString("en-US"), numeric: true }]; })
+          )
+        : tableHtml(
+            ["日期", { value: "已采集本地 Token", numeric: true }, { value: "估算成本", numeric: true }, { value: "调用", numeric: true }, { value: "会话", numeric: true }, { value: "缓存读取", numeric: true }],
+            REPORT.daily.map(function(row) { return [zhDate(row.date, true), { value: row.tokens.toLocaleString("en-US"), numeric: true }, { value: money(row.cost), numeric: true }, { value: row.calls.toLocaleString("en-US"), numeric: true }, { value: row.sessions, numeric: true }, { value: row.cacheRead.toLocaleString("en-US"), numeric: true }]; })
+          );
+      document.getElementById("projectTable").innerHTML = tableHtml(
+        [{ value: "排名", numeric: true }, "项目", { value: "估算成本", numeric: true }, { value: "占比", numeric: true }, { value: "累计占比", numeric: true }, { value: "调用", numeric: true }, { value: "会话", numeric: true }],
+        REPORT.projects.map(function(row) { return [{ value: row.rank, numeric: true }, projectLabel(row.name), { value: money(row.cost), numeric: true }, { value: pct(row.share), numeric: true }, { value: pct(row.cumulativeShare), numeric: true }, { value: row.calls.toLocaleString("en-US"), numeric: true }, { value: row.sessions, numeric: true }]; })
+      );
+      const modelTable = tableHtml(
+        ["模型", { value: "估算成本", numeric: true }, { value: "占比", numeric: true }, { value: "调用", numeric: true }, { value: "Token 总量", numeric: true }, "首次日期"],
+        REPORT.models.map(function(row) { return [row.model, { value: money(row.cost), numeric: true }, { value: pct(row.share, row.share < .001 ? 2 : 1), numeric: true }, { value: row.calls.toLocaleString("en-US"), numeric: true }, { value: row.tokens.toLocaleString("en-US"), numeric: true }, zhDate(row.firstDate, true)]; })
+      );
+      const activityTable = tableHtml(
+        ["任务类型", { value: "估算成本", numeric: true }, { value: "占比", numeric: true }, { value: "模型调用", numeric: true }],
+        REPORT.activities.map(function(row) { return [activityLabel(row.activity), { value: money(row.cost), numeric: true }, { value: pct(row.share), numeric: true }, { value: row.calls.toLocaleString("en-US"), numeric: true }]; })
+      );
+      document.getElementById("modelActivityTable").innerHTML = '<div style="display:grid;gap:22px"><div><h4 style="margin:0 0 8px">模型</h4>' + modelTable + '</div><div><h4 style="margin:0 0 8px">任务类型</h4>' + activityTable + "</div></div>";
+      document.getElementById("sessionTable").innerHTML = tableHtml(
+        [{ value: "排名", numeric: true }, "范围内首次调用日期", "项目", { value: "估算成本", numeric: true }, { value: "占本范围估算成本", numeric: true }, { value: "模型调用", numeric: true }, { value: "Token 总量", numeric: true }],
+        REPORT.sessions.map(function(row) { return [{ value: row.rank, numeric: true }, zhDate(row.date, true), projectLabel(row.project), { value: money(row.cost), numeric: true }, { value: pct(summary.cost ? row.cost / summary.cost : 0), numeric: true }, { value: row.calls.toLocaleString("en-US"), numeric: true }, { value: row.tokens.toLocaleString("en-US"), numeric: true }]; })
+      );
+      document.documentElement.dataset.filterFrom = REPORT.meta.rangeStart;
+      document.documentElement.dataset.filterTo = REPORT.meta.rangeEnd;
+    }
+    function tooltipBase() {
+      return {
+        backgroundColor: "rgba(25,25,23,.96)",
+        borderColor: "#191917",
+        borderWidth: 0,
+        padding: [10, 12],
+        textStyle: { color: "#f7f6f1", fontFamily: FONT, fontSize: chartFont("tooltip") },
+        extraCssText: "box-shadow:0 10px 30px rgba(0,0,0,.16);border-radius:4px;"
+      };
+    }
+    function tt(title, rows) {
+      return '<div class="echarts-tooltip"><div class="tt-date">' + esc(title) + '</div>' +
+        rows.map(function(row) {
+          return '<div class="tt-row"><span>' + esc(row[0]) + '</span><b>' + esc(row[1]) + '</b></div>';
+        }).join("") + "</div>";
+    }
+    function hasLocalChartData() {
+      return Boolean(REPORT.filterFacts && REPORT.filterFacts.length);
+    }
+    function emptyLocalChartOption(subject) {
+      const message = "所选日期没有已采集的本地" + subject + "明细";
+      return {
+        animation: false,
+        aria: { enabled: true, description: message + (HAS_OFFICIAL_SOURCE ? "；官方账户 Token 仍按所选日期显示。" : "；当前本地 CodeBurn 快照中没有可绘制记录。") },
+        textStyle: { fontFamily: FONT },
+        graphic: [
+          { type: "text", left: "center", top: "43%", silent: true, style: { text: "暂无本地明细", fill: COLORS.ink, fontFamily: FONT, fontSize: NARROW ? 18 : 22, fontWeight: 650, textAlign: "center" } },
+          { type: "text", left: "center", top: "53%", silent: true, style: { text: message + (HAS_OFFICIAL_SOURCE ? "\n官方账户 Token 不会被推算为本地归属" : "\n当前本地 CodeBurn 快照中没有可绘制记录"), fill: COLORS.muted, fontFamily: FONT, fontSize: NARROW ? 10 : 12, lineHeight: NARROW ? 17 : 20, textAlign: "center" } }
+        ],
+        series: []
+      };
+    }
+    function initEChart(id, optionFactory, force) {
+      const element = document.getElementById(id);
+      if (!element) return null;
+      if (charts.has(id)) {
+        charts.get(id).dispose();
+        charts.delete(id);
+      }
+      const chart = echarts.init(element, null, { renderer: "svg" });
+      chart.setOption(optionFactory(ANIMATE && force !== false), true);
+      charts.set(id, chart);
+      initialized.add(id);
+      return chart;
+    }
+    function register(id, initializer) {
+      pending.set(id, initializer);
+      const element = document.getElementById(id);
+      if (!element) return;
+      if (STATIC || REDUCED) {
+        initializer(false);
+        return;
+      }
+      chartObserver.observe(element);
+    }
+    const chartObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+        const id = entry.target.id;
+        if (!initialized.has(id) && pending.has(id)) pending.get(id)(true);
+        chartObserver.unobserve(entry.target);
+      });
+    }, { rootMargin: "100px 0px", threshold: .16 });
+
+    function timelineOption(animated) {
+      const dates = REPORT.daily.map(function(d) { return d.date; });
+      const peak = REPORT.facts.officialPeakDay || REPORT.daily.slice().sort(function(a, b) { return Number(b.officialTokens || b.tokens) - Number(a.officialTokens || a.tokens); })[0];
+      const peakTokens = Number(peak.tokens || peak.officialTokens || 0);
+      const maxDaily = Math.max.apply(null, REPORT.daily.map(function(d) { return Number(d.officialTokens || 0); }));
+      const primarySourceLabel = HAS_OFFICIAL_SOURCE ? "官方账户" : "已采集本地";
+      return {
+        animation: animated,
+        animationDuration: 1700,
+        animationEasing: "cubicOut",
+        aria: { enabled: true, decal: { show: false }, description: "所选范围" + primarySourceLabel + " Token 共 " + compact(REPORT.summary.officialTokens, 2) + "；单日最高为 " + zhDate(peak.date, true) + "，" + compact(peakTokens, 2) + " Token。上方为累计值，下方为每日值。" },
+        textStyle: { fontFamily: FONT, color: COLORS.ink },
+        axisPointer: { link: [{ xAxisIndex: [0, 1] }], label: { backgroundColor: COLORS.ink } },
+        tooltip: Object.assign(tooltipBase(), {
+          trigger: "axis",
+          axisPointer: { type: "line", lineStyle: { color: COLORS.ink, width: 1 } },
+          formatter: function(params) {
+            const first = params && params[0];
+            if (!first) return "";
+            const date = dates[first.dataIndex];
+            const row = REPORT.daily[first.dataIndex];
+            return tt(shortDate(date), [
+              [primarySourceLabel + "当日 Token", compact(row.officialTokens, 2)],
+              [primarySourceLabel + "累计 Token", compact(row.cumulativeOfficialTokens, 2)],
+              ...(HAS_OFFICIAL_SOURCE ? [["本地重建 Token", compact(row.tokens, 2)]] : []),
+              ["本地模型调用", compact(row.calls, 0)]
+            ]);
+          }
+        }),
+        grid: [
+          { left: NARROW ? 54 : 62, right: NARROW ? 18 : 88, top: 124, height: "47%" },
+          { left: NARROW ? 54 : 62, right: NARROW ? 18 : 88, top: "72%", height: "18%" }
+        ],
+        xAxis: [
+          {
+            type: "category", data: dates, boundaryGap: false,
+            axisLine: { lineStyle: { color: COLORS.line } },
+            axisTick: { show: false },
+            axisLabel: { show: false },
+            splitLine: { show: false }
+          },
+          {
+            type: "category", gridIndex: 1, data: dates, boundaryGap: true,
+            axisLine: { lineStyle: { color: COLORS.ink } },
+            axisTick: { show: false },
+            axisLabel: { show: true, color: COLORS.muted, fontFamily: MONO, fontSize: chartFont("axis"), interval: REPORT.summary.calendarDays <= 7 ? 0 : NARROW && REPORT.summary.calendarDays <= 14 ? 1 : 0, formatter: axisDate, margin: 12 }
+          }
+        ],
+        yAxis: [
+          {
+            type: "value", min: 0,
+            axisLine: { show: false }, axisTick: { show: false },
+            splitNumber: NARROW ? 5 : 7,
+            axisLabel: { color: COLORS.faint, fontFamily: MONO, fontSize: chartFont("axis"), formatter: function(v) { return compact(v, 1); } },
+            splitLine: { lineStyle: { color: COLORS.line, width: 1 } }
+          },
+          {
+            type: "value", gridIndex: 1, min: 0, max: Math.ceil(maxDaily / 100) * 100,
+            axisLine: { show: false }, axisTick: { show: false },
+            splitNumber: 2,
+            axisLabel: { show: !NARROW, color: COLORS.faint, fontFamily: MONO, fontSize: chartFont("axis"), formatter: function(v) { return compact(v, 1); } },
+            splitLine: { show: false }
+          }
+        ],
+        series: [
+          {
+            name: primarySourceLabel + "累计 Token", type: "line", xAxisIndex: 0, yAxisIndex: 0,
+            data: REPORT.daily.map(function(d) { return d.cumulativeOfficialTokens; }),
+            showSymbol: false, smooth: false, silent: false,
+            lineStyle: { color: COLORS.blue, width: 3 },
+            areaStyle: { color: "rgba(49,92,244,.07)" },
+            endLabel: { show: !NARROW, color: COLORS.blue, fontFamily: MONO, fontSize: 12, fontWeight: 700, formatter: compact(REPORT.summary.officialTokens, 2) },
+            labelLayout: { moveOverlap: "shiftY" },
+            emphasis: { disabled: true },
+            animationDuration: animated ? 1800 : 0
+          },
+          {
+            name: primarySourceLabel + "每日 Token", type: "bar", xAxisIndex: 1, yAxisIndex: 1,
+            data: REPORT.daily.map(function(d) {
+              return {
+                value: Number(d.officialTokens || 0),
+                itemStyle: Number(d.officialTokens || 0) === peakTokens
+                  ? { color: COLORS.blue, borderColor: COLORS.blue }
+                  : d.cost === 0
+                    ? { color: COLORS.line }
+                    : { color: COLORS.ink }
+              };
+            }),
+            barWidth: "34%", barMinHeight: 1,
+            itemStyle: { borderRadius: 0 },
+            label: { show: !NARROW && REPORT.summary.calendarDays <= 7, position: "top", color: COLORS.ink, fontFamily: MONO, fontSize: chartFont("value"), formatter: function(param) { return compact(param.value, 1); } },
+            animationDelay: function(index) { return animated ? index * 9 : 0; },
+            animationDuration: animated ? 550 : 0
+          },
+          {
+            name: "峰值", type: "scatter", xAxisIndex: 1, yAxisIndex: 1,
+            data: [[peak.date, peakTokens]],
+            symbolSize: NARROW ? 16 : 18,
+            itemStyle: { color: COLORS.card, borderColor: COLORS.blue, borderWidth: 2 },
+            label: {
+              show: true, position: "top", distance: 8, color: COLORS.ink,
+              fontFamily: MONO, fontSize: chartFont("annotation"), fontWeight: 700,
+              formatter: compact(peakTokens, 2) + "\n" + shortDate(peak.date)
+            },
+            z: 10
+          }
+        ]
+      };
+    }
+    function animateCounter(animated) {
+      const node = document.getElementById("timelineCounter");
+      if (!node) return;
+      const target = REPORT.summary.officialTokens;
+      if (!ANIMATE || !animated) { node.textContent = compact(target, 2); return; }
+      const start = performance.now();
+      const duration = 1750;
+      function frame(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        node.textContent = compact(target * eased, 2);
+        if (t < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+    function playTimeline(animated) {
+      initEChart("timelineChart", timelineOption, animated);
+      animateCounter(animated);
+    }
+
+    function tokenLedgerOption(animated) {
+      if (!hasLocalChartData()) return emptyLocalChartOption("Token 构成");
+      const grain = analysisGrain();
+      const rows = tokenPeriods(grain);
+      const labels = rows.map(function(row) { return row.label + (row.isPartial ? "*" : ""); });
+      const parts = [
+        { name: "缓存读取", key: "cacheRead", color: COLORS.ink },
+        { name: "新输入", key: "input", color: COLORS.blue },
+        { name: "输出", key: "output", color: COLORS.orange }
+      ];
+      if (rows.some(function(row) { return row.cacheWrite > 0; })) parts.push({ name: "缓存写入", key: "cacheWrite", color: COLORS.faint });
+      return {
+        animation: animated, animationDuration: 720,
+        aria: { enabled: true, description: grainZh(grain) + "堆叠柱显示缓存读取、新输入和输出 Token 的构成。" },
+        textStyle: { fontFamily: FONT },
+        color: parts.map(function(part) { return part.color; }),
+        legend: { top: 14, data: parts.map(function(part) { return part.name; }), itemWidth: 18, itemHeight: 3, textStyle: { color: COLORS.muted, fontSize: chartFont("legend"), fontFamily: FONT } },
+        tooltip: Object.assign(tooltipBase(), {
+          trigger: "axis", axisPointer: { type: "shadow" },
+          formatter: function(params) {
+            const first = params.find(function(param) { return param.seriesType === "bar"; });
+            if (!first) return "";
+            const row = rows[first.dataIndex];
+            return tt(row.label, [["Token 总量", compact(row.tokens, 2)], ["缓存读取", compact(row.cacheRead, 2)], ["新输入", compact(row.input, 2)], ["输出", compact(row.output, 2)], ["模型调用", compact(row.calls, 0)], ["估算成本", money(row.cost)]]);
+          }
+        }),
+        grid: { left: NARROW ? 52 : 72, right: NARROW ? 12 : 34, top: 72, bottom: 62 },
+        xAxis: {
+          type: "category", data: labels,
+          axisLine: { lineStyle: { color: COLORS.ink } }, axisTick: { show: false },
+          axisLabel: {
+            color: COLORS.muted, fontFamily: MONO, fontSize: chartFont("axis"),
+            interval: grain === "daily" && NARROW && rows.length > 7 ? 1 : 0,
+            hideOverlap: !(grain === "daily" && rows.length <= 7),
+            formatter: function(value) { return NARROW && grain === "daily" ? value.replace(/^0/, "").replace("/0", "/") : value; }
+          }
+        },
+        yAxis: {
+          type: "value", min: 0,
+          axisLine: { show: false }, axisTick: { show: false },
+          axisLabel: { color: COLORS.faint, fontFamily: MONO, fontSize: chartFont("axis"), formatter: function(value) { return compact(value, 1); } },
+          splitLine: { lineStyle: { color: COLORS.line } }
+        },
+        series: parts.map(function(part, index) {
+          return {
+            name: part.name, type: "bar", stack: "tokens", barMaxWidth: grain === "daily" ? 46 : 56,
+            data: rows.map(function(row) { return row[part.key]; }),
+            itemStyle: { color: part.color, opacity: part.key === "cacheRead" ? .86 : 1 },
+            emphasis: { focus: "series" },
+            animationDelay: function(dataIndex) { return animated ? dataIndex * 28 + index * 14 : 0; }
+          };
+        }).concat([{
+          name: "总量", type: "scatter", symbolSize: 1, silent: true,
+          data: rows.map(function(row, index) { return [labels[index], row.tokens]; }),
+          itemStyle: { color: "transparent" },
+          label: { show: !NARROW && rows.length <= 14, position: "top", color: COLORS.ink, fontFamily: MONO, fontSize: chartFont("value"), formatter: function(param) { return compact(param.value[1], 1); } },
+          z: 10
+        }])
+      };
+    }
+    function renderTokenLedger(play) { initEChart("tokenLedger", tokenLedgerOption, play); }
+
+    function projectBarsOption(animated) {
+      if (!hasLocalChartData()) return emptyLocalChartOption("项目");
+      const rows = REPORT.projects.slice(0, 8).reverse();
+      return {
+        animation: animated, animationDuration: 750, animationEasing: "cubicOut",
+        aria: { enabled: true, description: projectLabel(REPORT.facts.topProject) + " 和 " + projectLabel(REPORT.facts.secondProject || "其他项目") + " 是估算成本最高的两个项目。" },
+        textStyle: { fontFamily: FONT },
+        tooltip: Object.assign(tooltipBase(), {
+          trigger: "item",
+          formatter: function(p) {
+            const row = rows[p.dataIndex];
+            return tt(projectLabel(row.name), [["估算成本", money(row.cost)], ["占比", pct(row.share)], ["调用", compact(row.calls, 0)], ["会话", row.sessions]]);
+          }
+        }),
+        grid: { left: NARROW ? 88 : 124, right: NARROW ? 80 : 126, top: 32, bottom: 40 },
+        xAxis: {
+          type: "value", min: 0,
+          axisLine: { lineStyle: { color: COLORS.ink } }, axisTick: { show: false },
+          splitNumber: NARROW ? 3 : 6,
+          axisLabel: { color: COLORS.faint, fontFamily: MONO, fontSize: chartFont("axis"), hideOverlap: true, formatter: function(v) { return "$" + compact(v, 0); } },
+          splitLine: { lineStyle: { color: COLORS.line } }
+        },
+        yAxis: {
+          type: "category", data: rows.map(function(r) { return projectLabel(r.name); }),
+          axisLine: { show: false }, axisTick: { show: false },
+          axisLabel: { color: COLORS.ink, fontFamily: MONO, fontSize: chartFont("category"), margin: 16 }
+        },
+        series: [{
+          type: "bar",
+          data: rows.map(function(row) {
+            return { value: row.cost, itemStyle: { color: row.rank <= 2 ? COLORS.blue : row.rank <= 5 ? COLORS.ink : COLORS.lineDark } };
+          }),
+          barWidth: 12,
+          showBackground: true,
+          backgroundStyle: { color: "rgba(25,25,23,.04)" },
+          label: {
+            show: true, position: "right", distance: 8, color: COLORS.ink,
+            fontFamily: MONO, fontSize: chartFont("value"),
+            formatter: function(p) { const r = rows[p.dataIndex]; return money(r.cost, 0) + " · " + pct(r.share); }
+          },
+          animationDelay: function(index) { return animated ? index * 55 : 0; }
+        }]
+      };
+    }
+    function projectMatrixOption(animated) {
+      if (!hasLocalChartData()) return emptyLocalChartOption("项目");
+      const grain = analysisGrain();
+      const visibleCount = NARROW ? 2 : 3;
+      const names = REPORT.projects.slice(0, visibleCount).map(function(row) { return row.name; });
+      const bundle = dimensionPeriods("project", names, grain);
+      const seriesNames = names.concat(REPORT.projects.length > names.length ? ["Other"] : []);
+      const labels = bundle.periods.map(function(period) { return bucketLabel(period, grain); });
+      const palette = [COLORS.blue, COLORS.orange, COLORS.ink, "#77756e", COLORS.lineDark];
+      const totals = bundle.periods.map(function(period) {
+        return bundle.rows.filter(function(row) { return row.period === period; }).reduce(function(total, row) { return total + row.cost; }, 0);
+      });
+      return {
+        animation: animated, animationDuration: 680,
+        aria: { enabled: true, description: grainZh(grain) + "堆叠柱显示各项目实际发生的估算成本。" },
+        textStyle: { fontFamily: FONT },
+        tooltip: Object.assign(tooltipBase(), {
+          trigger: "axis", axisPointer: { type: "shadow" },
+          formatter: function(params) {
+            const index = params[0] ? params[0].dataIndex : 0;
+            const rows = params.filter(function(param) { return param.seriesType === "bar" && Number(param.value) > 0; }).sort(function(a, b) { return b.value - a.value; });
+            return tt(labels[index], [["当期合计", money(totals[index])]].concat(rows.map(function(param) { return [param.seriesName, money(param.value)]; })));
+          }
+        }),
+        legend: NARROW ? {
+          top: 14, left: "center", type: "plain", data: seriesNames.map(projectLabel), itemWidth: 10, itemHeight: 3, itemGap: 8,
+          textStyle: { color: COLORS.muted, fontSize: chartFont("legend"), fontFamily: FONT },
+          formatter: function(value) { const label = projectLabel(value); return label.length > 10 ? label.slice(0, 9) + "…" : label; }
+        } : {
+          top: 14, left: "center", type: "plain", data: seriesNames.map(projectLabel), itemWidth: 12, itemHeight: 3, itemGap: 8,
+          textStyle: { color: COLORS.muted, fontSize: chartFont("legend"), fontFamily: FONT }, formatter: projectLabel
+        },
+        grid: { left: NARROW ? 52 : 66, right: NARROW ? 12 : 26, top: 72, bottom: 62 },
+        xAxis: {
+          type: "category", data: labels,
+          axisLine: { lineStyle: { color: COLORS.ink } }, axisTick: { show: false },
+          axisLabel: {
+            color: COLORS.muted, fontFamily: MONO, fontSize: chartFont("axis"),
+            interval: grain === "daily" && NARROW && labels.length > 7 ? 1 : 0,
+            hideOverlap: !(grain === "daily" && labels.length <= 7),
+            formatter: function(value) { return NARROW && grain === "daily" ? value.replace(/^0/, "").replace("/0", "/") : value; }
+          }
+        },
+        yAxis: {
+          type: "value", min: 0,
+          axisLine: { show: false }, axisTick: { show: false },
+          axisLabel: { color: COLORS.faint, fontFamily: MONO, fontSize: chartFont("axis"), formatter: function(value) { return "$" + compact(value, 0); } },
+          splitLine: { lineStyle: { color: COLORS.line } }
+        },
+        series: seriesNames.map(function(name, seriesIndex) {
+          return {
+            name: projectLabel(name), type: "bar", stack: "project-cost", barMaxWidth: 48,
+            data: bundle.periods.map(function(period) { const row = bundle.rows.find(function(item) { return item.period === period && item.name === name; }); return row ? row.cost : 0; }),
+            itemStyle: { color: palette[seriesIndex] || COLORS.lineDark }, emphasis: { focus: "series" },
+            animationDelay: function(dataIndex) { return animated ? dataIndex * 28 + seriesIndex * 12 : 0; }
+          };
+        }).concat([{
+          name: "合计", type: "scatter", symbolSize: 1, silent: true,
+          data: totals.map(function(total, index) { return [labels[index], total]; }), itemStyle: { color: "transparent" },
+          label: { show: !NARROW && labels.length <= 14, position: "top", color: COLORS.ink, fontFamily: MONO, fontSize: chartFont("value"), formatter: function(param) { return money(param.value[1], 0); } }, z: 10
+        }])
+      };
+    }
+    function modelStripOption(animated) {
+      if (!hasLocalChartData()) return emptyLocalChartOption("模型");
+      const grain = analysisGrain();
+      const visibleCount = NARROW ? 3 : 5;
+      const names = REPORT.models.slice(0, visibleCount).map(function(row) { return row.model; });
+      const bundle = dimensionPeriods("model", names, grain);
+      const seriesNames = names.concat(REPORT.models.length > names.length ? ["Other"] : []);
+      const labels = bundle.periods.map(function(period) { return bucketLabel(period, grain); });
+      const modelColors = [COLORS.blue, COLORS.ink, COLORS.orange, "#6f706a", "#99978f", "#c4c2b9"];
+      const totals = bundle.periods.map(function(period) { return bundle.rows.filter(function(row) { return row.period === period; }).reduce(function(total, row) { return total + row.cost; }, 0); });
+      return {
+        animation: animated, animationDuration: 680,
+        aria: { enabled: true, description: grainZh(grain) + "堆叠柱显示各模型实际发生的估算成本。" },
+        textStyle: { fontFamily: FONT },
+        tooltip: Object.assign(tooltipBase(), {
+          trigger: "axis", axisPointer: { type: "shadow" },
+          formatter: function(params) {
+            const index = params[0] ? params[0].dataIndex : 0;
+            const period = bundle.periods[index];
+            const parts = params.filter(function(param) { return param.seriesType === "bar" && Number(param.value) > 0; }).sort(function(a, b) { return b.value - a.value; });
+            const details = parts.map(function(param) {
+              const rawName = param.seriesName === "其他" ? "Other" : param.seriesName;
+              const row = bundle.rows.find(function(item) { return item.period === period && item.name === rawName; });
+              return [param.seriesName, money(param.value) + " · " + compact(row ? row.calls : 0, 0) + " 次"];
+            });
+            return tt(labels[index], [["当期合计", money(totals[index])]].concat(details));
+          }
+        }),
+        legend: { top: 14, type: "scroll", data: seriesNames.map(function(value) { return value === "Other" ? "其他" : value; }), itemWidth: 16, itemHeight: 3, textStyle: { color: COLORS.muted, fontSize: chartFont("legend"), fontFamily: MONO }, formatter: function(value) { return value === "Other" ? "其他" : value; } },
+        grid: { left: NARROW ? 52 : 66, right: NARROW ? 12 : 26, top: 72, bottom: 62 },
+        xAxis: {
+          type: "category", data: labels,
+          axisLine: { lineStyle: { color: COLORS.ink } }, axisTick: { show: false },
+          axisLabel: {
+            color: COLORS.muted, fontFamily: MONO, fontSize: chartFont("axis"),
+            interval: grain === "daily" && NARROW && labels.length > 7 ? 1 : 0,
+            hideOverlap: !(grain === "daily" && labels.length <= 7),
+            formatter: function(value) { return NARROW && grain === "daily" ? value.replace(/^0/, "").replace("/0", "/") : value; }
+          }
+        },
+        yAxis: {
+          type: "value", min: 0,
+          axisLine: { show: false }, axisTick: { show: false },
+          axisLabel: { color: COLORS.faint, fontFamily: MONO, fontSize: chartFont("axis"), formatter: function(value) { return "$" + compact(value, 0); } },
+          splitLine: { lineStyle: { color: COLORS.line } }
+        },
+        series: seriesNames.map(function(name, seriesIndex) {
+          return {
+            name: name === "Other" ? "其他" : name, type: "bar", stack: "model-cost", barMaxWidth: 52,
+            data: bundle.periods.map(function(period) { const row = bundle.rows.find(function(item) { return item.period === period && item.name === name; }); return row ? row.cost : 0; }),
+            itemStyle: { color: modelColors[seriesIndex] || COLORS.lineDark }, emphasis: { focus: "series" },
+            animationDelay: function(dataIndex) { return animated ? dataIndex * 28 + seriesIndex * 12 : 0; }
+          };
+        }).concat([{
+          name: "合计", type: "scatter", symbolSize: 1, silent: true,
+          data: totals.map(function(total, index) { return [labels[index], total]; }), itemStyle: { color: "transparent" },
+          label: { show: !NARROW && labels.length <= 14, position: "top", color: COLORS.ink, fontFamily: MONO, fontSize: chartFont("value"), formatter: function(param) { return money(param.value[1], 0); } }, z: 10
+        }])
+      };
+    }
+    function activityBarsOption(animated) {
+      if (!hasLocalChartData()) return emptyLocalChartOption("任务类型");
+      const rows = REPORT.activities.slice(0, 6).reverse();
+      return {
+        animation: animated, animationDuration: 650,
+        aria: { enabled: true, description: REPORT.facts.topActivities.map(activityLabel).join(" 和 ") + " 是估算成本最高的任务类型。" },
+        textStyle: { fontFamily: FONT },
+        tooltip: Object.assign(tooltipBase(), {
+          formatter: function(p) {
+            const row = rows[p.dataIndex];
+            const title = activityLabel(row.activity) === row.activity ? row.activity : activityLabel(row.activity) + " · " + row.activity;
+            return tt(title, [["估算成本", money(row.cost)], ["占比", pct(row.share)], ["模型调用", compact(row.calls, 0)]]);
+          }
+        }),
+        grid: { left: NARROW ? 82 : 112, right: NARROW ? 72 : 112, top: 32, bottom: 40 },
+        xAxis: {
+          type: "value", min: 0,
+          axisLine: { lineStyle: { color: COLORS.ink } }, axisTick: { show: false },
+          splitNumber: NARROW ? 3 : 6,
+          axisLabel: { color: COLORS.faint, fontFamily: MONO, fontSize: chartFont("axis"), hideOverlap: true, formatter: function(v) { return "$" + compact(v, 0); } },
+          splitLine: { lineStyle: { color: COLORS.line } }
+        },
+        yAxis: {
+          type: "category", data: rows.map(function(r) { return r.activity; }),
+          axisLine: { show: false }, axisTick: { show: false },
+          axisLabel: { color: COLORS.ink, fontFamily: FONT, fontSize: chartFont("category"), margin: 14, formatter: activityLabel }
+        },
+        series: [
+          {
+            type: "bar", data: rows.map(function(r) { return r.cost; }), barWidth: 2,
+            itemStyle: { color: COLORS.ink },
+            animationDelay: function(index) { return animated ? index * 65 : 0; }
+          },
+          {
+            type: "scatter", data: rows.map(function(r) { return [r.cost, r.activity]; }),
+            symbolSize: NARROW ? 12 : 14,
+            itemStyle: { color: function(p) { return p.dataIndex >= rows.length - 2 ? COLORS.blue : COLORS.card; }, borderColor: COLORS.ink, borderWidth: 1.5 },
+            label: { show: true, position: "right", distance: 8, color: COLORS.ink, fontFamily: MONO, fontSize: chartFont("value"), formatter: function(p) { return money(p.value[0], 0); } }
+          }
+        ]
+      };
+    }
+    function sessionRankOption(animated) {
+      if (!hasLocalChartData()) return emptyLocalChartOption("会话");
+      const shown = REPORT.sessions.slice(0, NARROW ? 8 : 12);
+      const maxCost = Math.max(1, Math.max.apply(null, shown.map(function(row) { return row.cost; })));
+      const mobileAxisMax = Math.max(1, Math.ceil(maxCost / 100) * 100);
+      const idMap = new Map(shown.map(function(row) { return [row.id, row]; }));
+      const legend = document.getElementById("sessionLegend");
+      if (legend) legend.innerHTML = "";
+      return {
+        animation: animated, animationDuration: 680,
+        aria: { enabled: true, description: "横向排名显示所选范围内估算成本最高的会话，线长、圆点位置和金额标签均对应估算成本。" },
+        textStyle: { fontFamily: FONT },
+        tooltip: Object.assign(tooltipBase(), {
+          formatter: function(param) {
+            const value = param.value;
+            const id = Array.isArray(value) ? value[1] : shown[param.dataIndex].id;
+            const row = idMap.get(id) || shown[param.dataIndex];
+            return tt(projectLabel(row.project) + " · " + zhDate(row.date), [["估算成本", money(row.cost)], ["Token", compact(row.tokens, 2)], ["模型调用", compact(row.calls, 0)], ["缓存读取占比", pct(row.cacheShare)]]);
+          }
+        }),
+        grid: { left: NARROW ? 88 : 172, right: NARROW ? 72 : 132, top: 32, bottom: 58 },
+        xAxis: {
+          type: "value", min: 0, max: NARROW ? mobileAxisMax : undefined, splitNumber: NARROW ? 2 : 6, boundaryGap: [0, .12], name: "估算成本 · USD", nameLocation: "middle", nameGap: 36,
+          nameTextStyle: { color: COLORS.muted, fontSize: chartFont("axis"), fontFamily: FONT },
+          axisLine: { lineStyle: { color: COLORS.ink } }, axisTick: { show: false },
+          axisLabel: { color: COLORS.faint, fontFamily: MONO, fontSize: chartFont("axis"), hideOverlap: true, formatter: function(value) { return "$" + compact(value, 0); } },
+          splitLine: { lineStyle: { color: COLORS.line } }
+        },
+        yAxis: {
+          type: "category", inverse: true, data: shown.map(function(row) { return row.id; }),
+          axisLine: { show: false }, axisTick: { show: false },
+          axisLabel: { color: COLORS.ink, fontFamily: FONT, fontSize: chartFont("category"), lineHeight: 15, margin: 12, formatter: function(id) {
+            const row = idMap.get(id);
+            const project = projectLabel(row.project);
+            return NARROW ? project : project + "  ·  " + row.date.slice(5).replace("-", "/");
+          } }
+        },
+        series: [
+          {
+            type: "bar", barWidth: 2, data: shown.map(function(row) { return row.cost; }),
+            itemStyle: { color: COLORS.lineDark }, silent: true,
+            markLine: NARROW ? undefined : {
+              silent: true, symbol: "none", lineStyle: { color: COLORS.lineDark, type: "dashed", width: 1 },
+              label: { position: "insideStartTop", rotate: 0, color: COLORS.muted, fontFamily: MONO, fontSize: chartFont("annotation"), formatter: function(param) { return param.name; } },
+              data: [{ name: "中位数 " + money(REPORT.facts.sessionMedianCost, 0), xAxis: REPORT.facts.sessionMedianCost }, { name: "P95 " + money(REPORT.facts.sessionP95Cost, 0), xAxis: REPORT.facts.sessionP95Cost }]
+            }
+          },
+          {
+            type: "scatter", data: shown.map(function(row) { return [row.cost, row.id, row.tokens, row.rank]; }),
+            symbolSize: function(value) { return (NARROW ? 16 : 18) + Math.sqrt(value[0] / maxCost) * (NARROW ? 12 : 14); },
+            itemStyle: { color: function(param) { return param.value[3] <= 5 ? COLORS.blue : COLORS.card; }, borderColor: function(param) { return param.value[3] <= 5 ? COLORS.blue : COLORS.ink; }, borderWidth: 2 },
+            label: { show: true, position: "right", distance: NARROW ? 6 : 8, color: COLORS.ink, fontFamily: MONO, fontSize: chartFont("value"), lineHeight: 14, formatter: function(param) {
+              const row = idMap.get(param.value[1]);
+              return NARROW ? money(param.value[0], 0) + "\n" + row.date.slice(5).replace("-", "/") : money(param.value[0], 0);
+            } },
+            emphasis: { itemStyle: { borderColor: COLORS.orange, borderWidth: 3 } },
+            animationDelay: function(index) { return animated ? index * 38 : 0; }
+          }
+        ]
+      };
+    }
+    function sessionScatterOption(animated) {
+      if (!hasLocalChartData()) {
+        const legend = document.getElementById("sessionLegend");
+        if (legend) legend.innerHTML = "";
+        return emptyLocalChartOption("会话");
+      }
+      if (REPORT.summary.calendarDays <= 14) return sessionRankOption(animated);
+      const projects = REPORT.projects.slice(0, 4).map(function(p) { return p.name; });
+      const projectColors = [COLORS.blue, COLORS.orange, COLORS.ink, "#77756e"];
+      const otherColor = "#aaa89f";
+      const palette = Object.fromEntries(projects.map(function(project, index) { return [project, projectColors[index]]; }));
+      const legend = document.getElementById("sessionLegend");
+      if (legend) {
+        const entries = projects.map(function(project, index) { return [project, projectColors[index]]; });
+        if (REPORT.projects.length > projects.length) entries.push(["其他", otherColor]);
+        legend.innerHTML = entries.map(function(entry) {
+          return '<span><i style="background:' + entry[1] + '"></i>' + esc(projectLabel(entry[0])) + '</span>';
+        }).join("");
+      }
+      const shortRange = REPORT.daily.length <= 2;
+      const sessionTimes = REPORT.sessions.map(function(s) { return new Date(s.startedAt).getTime(); }).filter(Number.isFinite);
+      const firstSessionTime = sessionTimes.length ? Math.min.apply(null, sessionTimes) : Date.now();
+      const lastSessionTime = sessionTimes.length ? Math.max.apply(null, sessionTimes) : firstSessionTime;
+      const sessionSpan = Math.max(3600000, lastSessionTime - firstSessionTime);
+      const shortRangePadding = Math.max(3600000, sessionSpan * .08);
+      function sessionX(session) { return shortRange ? session.startedAt : session.date + "T12:00:00Z"; }
+      const maxTokens = Math.max(1, Math.max.apply(null, REPORT.sessions.map(function(s) { return s.tokens; })));
+      const positiveCosts = REPORT.sessions.map(function(s) { return s.cost; }).filter(function(value) { return value > 0; });
+      const minCost = positiveCosts.length ? Math.min.apply(null, positiveCosts) : .05;
+      const maxCost = positiveCosts.length ? Math.max.apply(null, positiveCosts) : 1;
+      const maxPower = 10 ** Math.floor(Math.log10(maxCost * 1.12));
+      const maxRatio = maxCost * 1.12 / maxPower;
+      const maxAxis = (maxRatio <= 1 ? 1 : maxRatio <= 2 ? 2 : maxRatio <= 5 ? 5 : 10) * maxPower;
+      const minAxis = Math.max(.001, Math.min(.05, minCost));
+      const scatter = REPORT.sessions.map(function(s) {
+        return {
+          value: [sessionX(s), s.cost, s.tokens, s.calls, s.project, s.shortId, s.rank, s.date],
+          itemStyle: { color: palette[s.project] || otherColor, opacity: s.rank <= 10 ? .9 : .55 }
+        };
+      });
+      const top = REPORT.sessions.slice(0, 5).map(function(s) {
+        return { value: [sessionX(s), s.cost, s.tokens, s.calls, s.project, s.shortId, s.rank, s.date] };
+      });
+      return {
+        animation: animated, animationDuration: 700,
+        aria: { enabled: true, description: "图中显示每个会话的估算成本、Token 总量和所属项目。" },
+        textStyle: { fontFamily: FONT },
+        tooltip: Object.assign(tooltipBase(), {
+          formatter: function(p) {
+            const v = p.value;
+            const startLabel = shortRange
+              ? new Intl.DateTimeFormat("zh-CN", { timeZone: REPORT.meta.timezone, month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(v[0]))
+              : shortDate(v[7]);
+            return tt(projectLabel(v[4]) + " · " + esc(v[5]), [["开始", startLabel], ["估算成本", money(v[1])], ["Token", compact(v[2], 2)], ["调用", compact(v[3], 0)]]);
+          }
+        }),
+        grid: { left: NARROW ? 58 : 76, right: NARROW ? 24 : 48, top: 48, bottom: 66 },
+        xAxis: {
+          type: "time",
+          min: shortRange ? firstSessionTime - shortRangePadding : new Date(REPORT.meta.rangeStart + "T00:00:00Z").getTime(),
+          max: shortRange ? lastSessionTime + shortRangePadding : new Date(REPORT.meta.rangeEnd + "T23:59:59Z").getTime(),
+          axisLine: { lineStyle: { color: COLORS.ink } }, axisTick: { show: false },
+          splitNumber: NARROW ? 4 : 9,
+          axisLabel: { color: COLORS.muted, fontFamily: MONO, fontSize: chartFont("axis"), hideOverlap: true, formatter: function(v) {
+            if (shortRange) return new Intl.DateTimeFormat("en-US", { timeZone: REPORT.meta.timezone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(v));
+            const date = new Date(v); return (date.getUTCMonth() + 1) + "/" + date.getUTCDate();
+          } },
+          splitLine: { lineStyle: { color: COLORS.line } }
+        },
+        yAxis: {
+          type: "log", logBase: 10, min: minAxis, max: maxAxis,
+          name: "估算成本 · USD · 对数轴", nameLocation: "end", nameGap: 18,
+          nameTextStyle: { color: COLORS.muted, fontFamily: FONT, fontSize: chartFont("category") },
+          axisLine: { show: false }, axisTick: { show: false },
+          axisLabel: { color: COLORS.muted, fontFamily: MONO, fontSize: chartFont("axis"), formatter: function(v) { return money(v, v < .1 ? 2 : v < 1 ? 1 : 0); } },
+          splitLine: { lineStyle: { color: COLORS.line } }
+        },
+        series: [
+          {
+            name: "会话", type: "scatter", data: scatter,
+            symbolSize: function(v) { return (NARROW ? 8 : 10) + Math.sqrt(v[2] / maxTokens) * (NARROW ? 16 : 30); },
+            emphasis: { itemStyle: { opacity: 1, borderColor: COLORS.ink, borderWidth: 1 } },
+            animationDelay: function(index) { return animated ? Math.min(index * 7, 650) : 0; },
+            markLine: {
+              silent: true, symbol: "none",
+              lineStyle: { color: COLORS.lineDark || "#b9b7ae", type: "dashed", width: 1 },
+              label: { color: COLORS.muted, fontFamily: MONO, fontSize: chartFont("annotation"), formatter: function(p) { return p.name + " " + money(p.value, 0); } },
+              data: [
+                { name: "单会话中位数", yAxis: REPORT.facts.sessionMedianCost, label: { position: "insideStartTop" } },
+                { name: "单会话估算成本 P95", yAxis: REPORT.facts.sessionP95Cost, label: { position: "insideEndTop" } }
+              ]
+            }
+          },
+          {
+            name: "估算成本最高的 5 个会话", type: "scatter", data: top, symbolSize: NARROW ? 20 : 24,
+            itemStyle: { color: COLORS.card, borderColor: COLORS.blue, borderWidth: 2 },
+            label: {
+              show: !NARROW, position: "top", distance: 8, color: COLORS.ink,
+              fontFamily: MONO, fontSize: chartFont("annotation"), lineHeight: 14,
+              formatter: function(p) { return projectLabel(p.value[4]) + "\n" + money(p.value[1], 0); }
+            },
+            labelLayout: { hideOverlap: true, moveOverlap: "shiftX" },
+            z: 12
+          }
+        ]
+      };
+    }
+    let heatMetric = "tokens";
+    function dateHourOption(animated) {
+      if (!hasLocalChartData()) return emptyLocalChartOption("调用时段");
+      const rawRows = dateHourRows();
+      const dates = REPORT.daily.map(function(row) { return row.date; });
+      const weekdays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+      const dailyCost = new Map(REPORT.daily.map(function(row) { return [row.date, row.cost]; }));
+      const grouped = new Map();
+      rawRows.forEach(function(row) {
+        const slot = NARROW ? Math.floor(row.hour / 3) : row.hour;
+        const key = row.date + "|" + slot;
+        const aggregate = grouped.get(key) || { date: row.date, slot: slot, calls: 0, tokens: 0, cost: 0 };
+        aggregate.calls += row.calls;
+        aggregate.tokens += row.tokens;
+        aggregate.cost += row.cost;
+        grouped.set(key, aggregate);
+      });
+      const rows = Array.from(grouped.values());
+      const slots = NARROW
+        ? ["00–02", "03–05", "06–08", "09–11", "12–14", "15–17", "18–20", "21–23"]
+        : Array.from({ length: 24 }, function(_, hour) { return hour; });
+      const values = rows.map(function(row) { return heatMetric === "tokens" ? row.tokens : row.calls; });
+      const max = Math.max(1, Math.max.apply(null, values));
+      const data = rows.map(function(row) {
+        const value = heatMetric === "tokens" ? row.tokens : row.calls;
+        return {
+          value: [slots[row.slot], row.date, value, row.tokens, row.calls, row.cost, row.slot],
+          itemStyle: { color: value === max ? COLORS.blue : COLORS.ink, opacity: value === max ? .62 : .32 }
+        };
+      });
+      return {
+        animation: animated, animationDuration: 650,
+        aria: { enabled: true, description: "每一行是所选范围内的真实日期，圆点显示各小时的 Token 或调用次数，右侧显示当天估算成本。" },
+        textStyle: { fontFamily: FONT },
+        tooltip: Object.assign(tooltipBase(), {
+          formatter: function(param) {
+            const value = param.value;
+            const slot = NARROW ? slots[value[6]] : String(value[6]).padStart(2, "0") + ":00–" + String(value[6]).padStart(2, "0") + ":59";
+            return tt(zhDate(value[1]) + " · " + slot, [["Token", compact(value[3], 2)], ["模型调用", compact(value[4], 0)], ["估算成本", money(value[5])]]);
+          }
+        }),
+        graphic: [{ type: "text", right: NARROW ? 8 : 24, top: 20, silent: true, style: { text: NARROW ? "当日成本" : "当日估算成本", fill: COLORS.muted, font: "600 " + chartFont("annotation") + "px " + FONT } }],
+        grid: [
+          { left: NARROW ? 52 : 98, right: NARROW ? 84 : 168, top: 58, bottom: 60 },
+          { right: NARROW ? 6 : 22, width: NARROW ? 68 : 126, top: 58, bottom: 60 }
+        ],
+        xAxis: [
+          {
+            type: "category", data: slots, gridIndex: 0,
+            axisLine: { lineStyle: { color: COLORS.ink } }, axisTick: { show: false },
+            axisLabel: { color: COLORS.muted, fontFamily: MONO, fontSize: chartFont("axis"), interval: NARROW ? 1 : 2, hideOverlap: true, formatter: function(value) { return NARROW ? value.slice(0, 2) + ":00" : String(value).padStart(2, "0") + ":00"; } }
+          },
+          { type: "value", min: 0, max: 1, gridIndex: 1, show: false }
+        ],
+        yAxis: [
+          {
+            type: "category", data: dates, inverse: true, gridIndex: 0,
+            axisLine: { show: false }, axisTick: { show: false },
+            axisLabel: { color: COLORS.ink, fontFamily: FONT, fontSize: chartFont("category"), margin: 12, formatter: function(value) { return value.slice(5).replace("-", "/") + (NARROW ? "" : " " + weekdays[new Date(value + "T00:00:00Z").getUTCDay()]); } },
+            splitLine: { show: true, lineStyle: { color: COLORS.line } }
+          },
+          {
+            type: "category", data: dates, inverse: true, gridIndex: 1, position: "left",
+            axisLine: { show: true, lineStyle: { color: COLORS.lineDark, width: 1 } }, axisTick: { show: false },
+            axisLabel: { show: true, inside: true, align: "left", padding: [0, 0, 0, NARROW ? 7 : 14], color: COLORS.ink, fontFamily: MONO, fontSize: chartFont("category"), formatter: function(value) { return money(dailyCost.get(value) || 0, 0); } },
+            splitLine: { show: false }
+          }
+        ],
+        series: [
+          {
+            type: "scatter", xAxisIndex: 0, yAxisIndex: 0, data: data,
+            symbolSize: function(value) { return (NARROW ? 8 : 8) + Math.sqrt(value[2] / max) * (NARROW ? 12 : 28); },
+            emphasis: { itemStyle: { opacity: 1, borderColor: COLORS.blue, borderWidth: 2 } },
+            animationDelay: function(index) { return animated ? index * 3 : 0; }
+          },
+          { type: "scatter", xAxisIndex: 1, yAxisIndex: 1, data: dates.map(function(date) { return [0, date]; }), symbolSize: 0, silent: true }
+        ]
+      };
+    }
+    function rhythmHeatOption(animated) {
+      if (!hasLocalChartData()) return emptyLocalChartOption("调用时段");
+      if (REPORT.summary.calendarDays <= 14) return dateHourOption(animated);
+      const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+      const labels = { Mon: "周一", Tue: "周二", Wed: "周三", Thu: "周四", Fri: "周五", Sat: "周六", Sun: "周日" };
+      const compactLayout = NARROW || document.getElementById("rhythmHeat").clientWidth < 700;
+      const values = REPORT.heatmap.map(function(row) { return heatMetric === "tokens" ? row.tokens : row.calls; });
+      const max = Math.max.apply(null, values);
+      const peakIndex = values.indexOf(max);
+      const data = REPORT.heatmap.map(function(row, index) {
+        const value = values[index];
+        return {
+          value: [row.hour, row.weekday, value, row.tokens, row.calls, row.approximateCost],
+          itemStyle: {
+            color: index === peakIndex ? COLORS.blue : COLORS.ink,
+            opacity: .22 + Math.sqrt(value / Math.max(1, max)) * .72
+          }
+        };
+      });
+      const peak = data[peakIndex];
+      return {
+        animation: animated, animationDuration: 650,
+        aria: { enabled: true, description: "圆点面积表示 " + REPORT.meta.timezone + " 时区下各星期和小时的 Token 总量或调用次数。" },
+        textStyle: { fontFamily: FONT },
+        tooltip: Object.assign(tooltipBase(), {
+          formatter: function(p) {
+            const v = p.value;
+            return tt(labels[v[1]] + " · " + String(v[0]).padStart(2, "0") + ":00–" + String(v[0]).padStart(2, "0") + ":59", [["Token", compact(v[3], 2)], ["调用", compact(v[4], 0)], ["估算成本", money(v[5])]]);
+          }
+        }),
+        grid: { left: compactLayout ? 52 : 82, right: compactLayout ? 16 : 42, top: 48, bottom: 64 },
+        xAxis: {
+          type: "category", data: Array.from({ length: 24 }, function(_, i) { return i; }),
+          axisLine: { lineStyle: { color: COLORS.ink } }, axisTick: { show: false },
+          axisLabel: { color: COLORS.muted, fontFamily: MONO, fontSize: chartFont("axis"), interval: compactLayout ? 5 : 2, formatter: function(v) { return String(v).padStart(2, "0") + ":00"; } },
+          splitLine: { show: false }
+        },
+        yAxis: {
+          type: "category", data: weekdays, inverse: true,
+          axisLine: { show: false }, axisTick: { show: false },
+          axisLabel: { color: COLORS.ink, fontSize: chartFont("category"), formatter: function(v) { return labels[v]; } },
+          splitLine: { show: true, lineStyle: { color: COLORS.line } }
+        },
+        series: [
+          {
+            type: "scatter", data: data,
+            symbolSize: function(v) { return (compactLayout ? 8 : 8) + Math.sqrt(v[2] / Math.max(1, max)) * (compactLayout ? 12 : 34); },
+            animationDelay: function(index) { return animated ? index * 3 : 0; },
+            emphasis: { itemStyle: { opacity: 1, borderColor: COLORS.ink, borderWidth: 1 } }
+          },
+          {
+            type: "scatter", data: peak ? [peak] : [],
+            symbolSize: function(v) { return (compactLayout ? 10 : 14) + Math.sqrt(v[2] / Math.max(1, max)) * (compactLayout ? 12 : 34); },
+            itemStyle: { color: "transparent", borderColor: COLORS.blue, borderWidth: 2 },
+            label: { show: true, position: "top", color: COLORS.blue, fontFamily: MONO, fontSize: chartFont("annotation"), formatter: heatMetric === "tokens" ? compact(max, 1) : compact(max, 0) },
+            silent: true, z: 10
+          }
+        ]
+      };
+    }
+
+    function refreshAllCharts() {
+      pending.forEach(function(initializer) { initializer(false); });
+      window.__CODEX_REPORT_READY = true;
+      document.documentElement.dataset.reportReady = "true";
+    }
+    function presetRange(key) {
+      const first = BASE_REPORT.meta.rangeStart;
+      const last = BASE_REPORT.meta.rangeEnd;
+      if (key === "all") return [first, last];
+      if (key === "7" || key === "30") return [clampDate(addDays(last, -(Number(key) - 1))), last];
+      if (key === "month") return [clampDate(startOfMonth(last)), last];
+      if (key === "previous-month") {
+        const previousEnd = addDays(startOfMonth(last), -1);
+        return [clampDate(startOfMonth(previousEnd)), clampDate(previousEnd)];
+      }
+      return null;
+    }
+    function matchingPreset(from, to) {
+      const keys = ["all", "7", "30", "month", "previous-month"];
+      return keys.find(function(key) { const range = presetRange(key); return range && range[0] === from && range[1] === to; }) || "";
+    }
+    function markPreset(from, to) {
+      const active = matchingPreset(from, to);
+      document.querySelectorAll("[data-range-preset]").forEach(function(button) {
+        button.setAttribute("aria-pressed", String(button.dataset.rangePreset === active));
+      });
+    }
+    function validateRangeInputs() {
+      const from = document.getElementById("rangeFrom").value;
+      const to = document.getElementById("rangeTo").value;
+      const apply = document.getElementById("rangeApply");
+      const error = document.getElementById("rangeError");
+      const current = document.getElementById("rangeCurrent");
+      let message = "";
+      let view = null;
+      if (!isDateString(from) || !isDateString(to)) message = "请选择完整的开始和结束日期。";
+      else if (from > to) message = "开始日期不能晚于结束日期。";
+      else if (from < BASE_REPORT.meta.rangeStart || to > BASE_REPORT.meta.rangeEnd) message = "日期需在数据范围 " + compactRangeLabel(BASE_REPORT.meta.rangeStart, BASE_REPORT.meta.rangeEnd) + " 内。";
+      else {
+        view = deriveView(from, to);
+        if (!view) message = "所选日期内没有模型调用。";
+      }
+      error.textContent = message;
+      apply.disabled = Boolean(message);
+      if (view) {
+        const officialActiveDays = (view.officialDaily || []).filter(function(row) { return Number(row.tokens || 0) > 0; }).length;
+        current.textContent = HAS_OFFICIAL_SOURCE
+          ? view.summary.calendarDays + " 天 · 官方 " + officialActiveDays + " 个活跃日 · 本地 " + view.summary.calls.toLocaleString("en-US") + " 次调用"
+          : view.summary.calendarDays + " 天 · 本地 " + officialActiveDays + " 个活跃日 · " + view.summary.calls.toLocaleString("en-US") + " 次调用";
+      } else current.textContent = "";
+      markPreset(from, to);
+      return view;
+    }
+    function openRangePanel() {
+      const layer = document.getElementById("rangeLayer");
+      const trigger = document.getElementById("rangeTrigger");
+      document.getElementById("rangeFrom").value = REPORT.meta.rangeStart;
+      document.getElementById("rangeTo").value = REPORT.meta.rangeEnd;
+      layer.hidden = false;
+      trigger.setAttribute("aria-expanded", "true");
+      document.body.style.overflow = "hidden";
+      validateRangeInputs();
+      requestAnimationFrame(function() { document.getElementById("rangeFrom").focus(); });
+    }
+    function closeRangePanel(restoreFocus) {
+      const layer = document.getElementById("rangeLayer");
+      if (layer.hidden) return;
+      layer.hidden = true;
+      document.getElementById("rangeTrigger").setAttribute("aria-expanded", "false");
+      document.body.style.overflow = "";
+      if (restoreFocus !== false) document.getElementById("rangeTrigger").focus();
+    }
+    function applyDateRange(view) {
+      REPORT = view;
+      renderDynamicCopy();
+      refreshAllCharts();
+      const fullRange = REPORT.meta.rangeStart === BASE_REPORT.meta.rangeStart && REPORT.meta.rangeEnd === BASE_REPORT.meta.rangeEnd;
+      const url = new URL(location.href);
+      if (fullRange) {
+        url.searchParams.delete("from");
+        url.searchParams.delete("to");
+      } else {
+        url.searchParams.set("from", REPORT.meta.rangeStart);
+        url.searchParams.set("to", REPORT.meta.rangeEnd);
+      }
+      history.replaceState(null, "", url);
+      closeRangePanel(false);
+      const officialActiveDays = (REPORT.officialDaily || []).filter(function(row) { return Number(row.tokens || 0) > 0; }).length;
+      document.getElementById("filterAnnouncement").textContent = "已显示" + zhDate(REPORT.meta.rangeStart) + "至" + zhDate(REPORT.meta.rangeEnd) + "的数据；" + (HAS_OFFICIAL_SOURCE ? "官方 " + officialActiveDays + " 个活跃日，本地 " : "本地 " + officialActiveDays + " 个活跃日，") + REPORT.summary.calls.toLocaleString("en-US") + " 次调用。";
+      document.getElementById("rangeTrigger").focus();
+    }
+
+    renderDynamicCopy();
+    register("timelineChart", function(animated) { playTimeline(animated); });
+    register("tokenLedger", function(animated) { renderTokenLedger(animated); });
+    register("projectBars", function(animated) { initEChart("projectBars", projectBarsOption, animated); });
+    register("projectMatrix", function(animated) { initEChart("projectMatrix", projectMatrixOption, animated); });
+    register("modelStrip", function(animated) { initEChart("modelStrip", modelStripOption, animated); });
+    register("activityBars", function(animated) { initEChart("activityBars", activityBarsOption, animated); });
+    register("sessionScatter", function(animated) { initEChart("sessionScatter", sessionScatterOption, animated); });
+    register("rhythmHeat", function(animated) { initEChart("rhythmHeat", rhythmHeatOption, animated); });
+
+    const rangeFrom = document.getElementById("rangeFrom");
+    const rangeTo = document.getElementById("rangeTo");
+    rangeFrom.min = rangeTo.min = BASE_REPORT.meta.rangeStart;
+    rangeFrom.max = rangeTo.max = BASE_REPORT.meta.rangeEnd;
+    document.getElementById("rangeTrigger").addEventListener("click", function() {
+      if (document.getElementById("rangeLayer").hidden) openRangePanel(); else closeRangePanel();
+    });
+    document.getElementById("rangeClose").addEventListener("click", function() { closeRangePanel(); });
+    document.getElementById("rangeScrim").addEventListener("click", function() { closeRangePanel(); });
+    document.querySelectorAll("[data-range-preset]").forEach(function(button) {
+      button.addEventListener("click", function() {
+        const range = presetRange(button.dataset.rangePreset);
+        if (!range) return;
+        rangeFrom.value = range[0];
+        rangeTo.value = range[1];
+        validateRangeInputs();
+      });
+    });
+    [rangeFrom, rangeTo].forEach(function(input) {
+      input.addEventListener("input", validateRangeInputs);
+      input.addEventListener("change", validateRangeInputs);
+    });
+    document.getElementById("rangeApply").addEventListener("click", function() {
+      const view = validateRangeInputs();
+      if (view) applyDateRange(view);
+    });
+    document.addEventListener("keydown", function(event) { if (event.key === "Escape") closeRangePanel(); });
+
+    const navLinks = Array.from(document.querySelectorAll(".section-nav a"));
+    const railLinks = Array.from(document.querySelectorAll(".chapter-rail a"));
+    const sectionNames = { overview: "总览 · 消耗分布", when: "01 · 日期", tokens: "02 · Token", projects: "03 · 项目", models: "04 · 模型与任务", sessions: "05 · 会话", rhythm: "06 · 时段", actions: "07 · 范围摘要" };
+    function activateNav(id) {
+      navLinks.forEach(function(link) { link.setAttribute("aria-current", link.getAttribute("href") === "#" + id ? "location" : "false"); });
+      railLinks.forEach(function(link) { link.setAttribute("aria-current", link.getAttribute("href") === "#" + id ? "location" : "false"); });
+      setText("toolbarContext", sectionNames[id] || "Codex 消耗报告");
+      const current = navLinks.find(function(link) { return link.getAttribute("href") === "#" + id; });
+      if (current && window.innerWidth <= 980) {
+        const nav = current.parentElement;
+        nav.scrollTo({ left: Math.max(0, current.offsetLeft - nav.clientWidth / 2 + current.clientWidth / 2), behavior: REDUCED ? "auto" : "smooth" });
+      }
+    }
+    navLinks.forEach(function(link) { link.addEventListener("click", function() { activateNav(link.getAttribute("href").slice(1)); }); });
+    railLinks.forEach(function(link) { link.addEventListener("click", function() { activateNav(link.getAttribute("href").slice(1)); }); });
+    const sectionObserver = new IntersectionObserver(function(entries) {
+      const visible = entries.filter(function(entry) { return entry.isIntersecting; }).sort(function(a, b) { return b.intersectionRatio - a.intersectionRatio; })[0];
+      if (visible) activateNav(visible.target.id);
+    }, { rootMargin: "-18% 0px -68%", threshold: [0, .1, .25, .5] });
+    ["overview", "when", "tokens", "projects", "models", "sessions", "rhythm", "actions"].forEach(function(id) { sectionObserver.observe(document.getElementById(id)); });
+    document.querySelectorAll("[data-heat-metric]").forEach(function(button) {
+      button.addEventListener("click", function() {
+        heatMetric = button.dataset.heatMetric;
+        document.querySelectorAll("[data-heat-metric]").forEach(function(item) { item.classList.toggle("active", item === button); });
+        renderDynamicCopy();
+        initEChart("rhythmHeat", rhythmHeatOption, true);
+      });
+    });
+    const revealObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) { entry.target.classList.add("visible"); revealObserver.unobserve(entry.target); }
+      });
+    }, { rootMargin: "40px 0px", threshold: .08 });
+    document.querySelectorAll(".reveal").forEach(function(element) {
+      if (STATIC || REDUCED) element.classList.add("visible"); else revealObserver.observe(element);
+    });
+    let resizeTimer;
+    addEventListener("resize", function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function() {
+        const nextNarrow = NARROW_QUERY.matches;
+        if (nextNarrow !== NARROW) {
+          NARROW = nextNarrow;
+          renderDynamicCopy();
+          refreshAllCharts();
+          return;
+        }
+        charts.forEach(function(chart) { chart.resize(); });
+      }, 120);
+    });
+    addEventListener("beforeprint", function() {
+      pending.forEach(function(initializer, id) { if (!initialized.has(id)) initializer(false); });
+      initEChart("rhythmHeat", rhythmHeatOption, false);
+      charts.forEach(function(chart) { chart.resize(); });
+      renderTokenLedger(false);
+    });
+    requestAnimationFrame(function() {
+      if (STATIC || REDUCED) {
+        pending.forEach(function(initializer, id) { if (!initialized.has(id)) initializer(false); });
+      }
+      window.__CODEX_REPORT_READY = true;
+      document.documentElement.dataset.reportReady = "true";
+    });
+  </script>
+</body>
+</html>
