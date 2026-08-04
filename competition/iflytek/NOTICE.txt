@@ -3,9 +3,8 @@ Copyright 2026 the submitter/repository contributors
 
 This package combines:
 
-* pre-existing background material under Apache License 2.0;
-* competition-period original adaptations identified separately in
-  competition-ip/competition-new-work.md; and
+* project-authored material, including competition-period adaptations, under
+  Apache License 2.0; and
 * third-party material under its original licenses.
 
 Apache ECharts
@@ -24,5 +23,6 @@ zrender 6.1.0, and tslib 2.3.0. Applicable terms and notices are preserved in:
 * assets/vendor/echarts/licenses/LICENSE-tslib.txt
 * assets/vendor/echarts/licenses/CopyrightNotice-tslib.txt
 
-See LICENSE.txt for the package-level rights boundary and
+See LICENSE.txt for the package-level license index,
+licenses/LICENSE-Apache-2.0.txt for the complete project license, and
 competition-ip/third-party-components.md for component provenance.

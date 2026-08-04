@@ -899,7 +899,7 @@ Skill：\`${skillName}\`
 
 赛事专项改造及本次上传前的公开基线：[94a72c6ddf8685a5b4541cb453260df0a8c39570](https://github.com/yongqixue99-hue/codex-consumption-report-skill/commit/94a72c6ddf8685a5b4541cb453260df0a8c39570)，提交时间 2026-08-04T10:43:16+08:00。该时间晚于赛事启动日，因此本清单不将其表述为“赛事开始前”基线。
 
-该公开基线在竞赛 portable 适配形成前已经按 Apache License 2.0 发布。Apache-2.0 已经授予的许可不因本次参赛而被本清单撤回。本清单中的 BG 分类只覆盖下表所列文件在该 commit 中的基线版本，不覆盖同一路径在该 commit 之后形成的竞赛适配增量。当前 ZIP 中的共享文件因此可能同时包含“BG 基线 + NEW 增量”；NEW 增量见 \`competition-ip/competition-new-work.md\`。
+该公开基线在竞赛 portable 适配形成前已经按 Apache License 2.0 发布。当前包中的竞赛期间自研适配也统一使用 Apache-2.0。本清单中的 BG 与 NEW 分类只用于说明时间、来源和原创性，不代表不同的项目许可。本清单中的 BG 范围只覆盖下表所列文件在该 commit 中的基线版本；当前 ZIP 中的共享文件可能同时包含“BG 基线 + NEW 增量”，NEW 增量见 \`competition-ip/competition-new-work.md\`。
 
 | 编号 | 专项改造前已有资产与精确边界 | 基线 Git blob 证据 | 当前 portable 包中的关系 | 权利人 | 许可状态 |
 | --- | --- | --- | --- | --- | --- |
@@ -908,7 +908,7 @@ Skill：\`${skillName}\`
 | BG-003 | 离线交互报告模板在公开基线 commit 中的版本 | \`assets/report.template.html\` = \`ca8677a11c77b96c6ee246529e6f9b32a9044e79\` | 当前同路径文件以该基线为基础，并含 NEW-004 的 post-baseline source-neutral、synthetic 与 portable 展示适配 | 提交人/仓库贡献者，以公开提交记录为准 | 基线版本为 Apache-2.0 |
 | BG-004 | 通用自动采集、生命周期重建、多设备合并和浏览器渲染能力 | 上述公开基线 commit 及公开仓库历史 | 明确不在 portable 竞赛 ZIP 内 | 提交人/仓库贡献者，以公开提交记录为准 | Apache-2.0；不属于本包竞赛新增 |
 
-Apache-2.0 全文保存在 \`licenses/LICENSE-Apache-2.0.txt\`。根目录 \`LICENSE.txt\` 是本次混合权利包的索引，不把 NEW 增量追溯性地描述成上述公开基线中的 Apache-2.0 资产。本清单不把第三方组件、未提交模块、商标或未来版本归入竞赛新增成果；当前包内文件级 SHA-256 以 \`competition-manifest.json\` 为准。
+Apache-2.0 全文保存在 \`licenses/LICENSE-Apache-2.0.txt\`。根目录 \`LICENSE.txt\` 明确说明包内全部项目自有内容，包括 BG 基线和 NEW 竞赛适配，统一使用 Apache-2.0；第三方组件继续适用各自许可。本清单不把第三方组件、未提交模块或商标归入项目自有内容；当前包内文件级 SHA-256 以 \`competition-manifest.json\` 为准。
 `;
 }
 
@@ -941,15 +941,17 @@ Skill：\`${skillName}\`
 
 权利人表述：提交人/仓库贡献者，最终以报名实名为准。
 
+许可状态：本清单中的 NEW-001 至 NEW-005 均为项目自有内容，统一按 Apache License 2.0 开源，允许在遵守该许可的前提下使用、修改、分发和创建派生作品。
+
 | 编号 | 竞赛新增成果 | 包内路径 | 日期 | 作者/权利人 | 相对公开基线的新增内容 | 本清单中的分类 |
 | --- | --- | --- | --- | --- | --- | --- |
 | NEW-001 | 显式输入、无账户与设备探测的 portable runner 和 normalizer | \`scripts/generate-competition-report.mjs\`、\`scripts/normalize-portable-usage.mjs\` | 2026-08-04 | 提交人/仓库贡献者，最终以报名实名为准 | 仅处理包内匿名演示或用户显式提供的脱敏 JSON/JSONL/CSV；直接串联安全报告阶段并返回聊天摘要 | 竞赛 portable 适配 |
 | NEW-002 | 赛事专用 Skill 指令与 AstronClaw 元数据 | \`SKILL.md\`、\`agents/openai.yaml\` | 2026-08-04 | 提交人/仓库贡献者，最终以报名实名为准 | 新增竞赛触发条件、显式输入边界、失败契约和聊天优先交付规则 | 竞赛 portable 适配 |
 | NEW-003 | 匿名合成 fixture、黄金结果与 portable 数据/评测参考 | \`examples/iflytek-demo-usage.json\`、\`examples/iflytek-demo-expected.json\`、\`references/portable-data-contract.md\`、\`references/evaluation-and-limitations.md\` | 2026-08-04 | 提交人/仓库贡献者，最终以报名实名为准 | 新增可复现实例、黄金指标、脱敏输入契约和已知限制说明 | 竞赛 portable 适配 |
 | NEW-004 | 公开基线共享报告文件的 post-baseline 竞赛适配增量 | \`scripts/derive-report.mjs\`、\`scripts/build-report.mjs\`、\`scripts/validate-report.mjs\`、\`assets/report.template.html\` | 2026-08-04 | 提交人/仓库贡献者，最终以报名实名为准 | 在 BG-001/BG-002/BG-003 基线上新增 portable 来源与质量事实、source-neutral 首屏、synthetic/portable 展示语义、portable 对账验证，以及 d3/zrender/tslib 独立 HTML 许可完整性；不把整份共享文件重新归类为 NEW | 竞赛 portable 适配增量 |
-| NEW-005 | 确定性竞赛打包、ZIP 验证、SHA-256、组合许可索引与权属清单生成 | 包内 \`LICENSE.txt\`、\`NOTICE.txt\`、\`competition-manifest.json\`、\`competition-ip/*.md\`；packager 源码只在源仓库执行 | 2026-08-04 | 提交人/仓库贡献者，最终以报名实名为准 | 新增官方扩展名白名单、100 MB/10 MB/500 文件限制、路径/密钥/隐私检查、经哈希锁定的第三方分发核验和 byte-for-byte 可复现 ZIP | 竞赛提交工程 |
+| NEW-005 | 确定性竞赛打包、ZIP 验证、SHA-256、许可索引与权属清单生成 | 包内 \`LICENSE.txt\`、\`NOTICE.txt\`、\`competition-manifest.json\`、\`competition-ip/*.md\`；packager 源码只在源仓库执行 | 2026-08-04 | 提交人/仓库贡献者，最终以报名实名为准 | 新增官方扩展名白名单、100 MB/10 MB/500 文件限制、路径/密钥/隐私检查、经哈希锁定的第三方分发核验和 byte-for-byte 可复现 ZIP | 竞赛提交工程 |
 
-根目录 \`LICENSE.txt\` 对本包实行组合权利说明：上述公开 BG 基线继续适用 Apache-2.0；第三方材料继续适用各自许可；本清单所列竞赛期原创增量不因与 BG 共用文件路径而被误述为公开基线中的 Apache-2.0 资产。本清单只列出 2026-08-04 实际形成并进入本次 portable 提交流程的新增内容。它不自动覆盖该公开基线、通用能力、第三方组件、商标、未提交模块、未提交数据、未来版本或未来独立开发成果。
+根目录 \`LICENSE.txt\` 对本包实行许可分层说明：全部项目自有内容，包括公开 BG 基线和本清单所列竞赛期原创增量，统一适用 Apache-2.0；第三方材料继续适用各自许可。本清单只用于证明 2026-08-04 实际形成并进入本次 portable 提交流程的新增内容，不限制 Apache-2.0 已经授予的二次开发权利，也不把第三方组件、商标、未提交模块或未提交数据归入项目自有成果。
 `;
 }
 

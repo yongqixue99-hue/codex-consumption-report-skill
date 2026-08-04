@@ -51,11 +51,17 @@ Codex Token 分析报告
 | --- | --- | --- |
 | `normalize-portable-usage.mjs` | 输入字段、时间戳、数值、重复记录和隐私白名单 | 自研核心 |
 | `generate-competition-report.mjs` | demo/上传模式、失败关闭、私有中间文件、原子发布和对话摘要 | 自研核心 |
-| `derive-report.mjs`、`build-report.mjs`、`validate-report.mjs` | 指标派生、HTML 构建和确定性对账；文件含公开基线及本次 portable 增量 | 自研核心，需按 diff 区分新旧边界 |
+| `derive-report.mjs`、`build-report.mjs`、`validate-report.mjs` | 指标派生、HTML 构建和确定性对账；文件含公开基线及本次 portable 增量 | 自研核心，diff 只用于证明原创时间和变更内容 |
 | `report.template.html` | 日期筛选、八类图表编排、来源和限制说明 | 自研报告设计，含公开基线及本次增量 |
 | ECharts / zrender / d3 / tslib | 浏览器图形渲染与随分发辅助代码 | 未修改第三方依赖，不负责数据校验、指标计算、隐私、摘要或打包 |
 
 佐证材料使用 Git baseline→候选包 diff、逐文件 SHA-256、有效代码行统计和功能演示，不把第三方 minified 文件混入自研代码行统计；最终按赛事方书面确认的口径重新计算。
+
+## 开源与第三方边界
+
+通用版与竞赛包中的全部项目自有内容，包括本次 portable 适配，统一按 Apache License 2.0 开源，允许在遵守该许可的前提下二次开发、分发和商用。`competition-ip/background-ip.md` 和 `competition-ip/competition-new-work.md` 只证明来源、时间和原创性，不再对竞赛增量保留专有许可。
+
+图表的数据处理、指标逻辑、配置、排版和视觉设计是项目自研内容；包内的 `echarts.min.js` 则是与官方 npm 6.1.0 分发逐字节一致的 Apache ECharts 运行时，并包含 d3.js portions、zrender 和 tslib。因此必须保留这些第三方的原许可和 NOTICE，不能将运行时一并声称为项目自研。
 
 ## 评审演示话术
 
@@ -112,9 +118,9 @@ node scripts/validate-competition-package.mjs \
 | 项目 | 当前值 |
 | --- | --- |
 | 文件名 | `codex-consumption-report-skill.zip` |
-| SHA-256 | `4e8fe4b4e00a086bb40e3028f11b6e2956a515e3bb35f89154fb9a4dc6964479` |
-| ZIP 大小 | 1,540,996 bytes |
-| 解包大小 | 1,537,188 bytes |
+| SHA-256 | `f4a9cb69d9a941b03e798d0401dbbfb1f7431b06ee94fc5c5687de3528a00a7e` |
+| ZIP 大小 | 1,541,605 bytes |
+| 解包大小 | 1,537,797 bytes |
 | 文件数 | 27 |
 
 哈希只对应当前候选包。任何进入白名单文件的修改都必须重新打包、重新验证，并以新生成的 `.sha256.txt` 为准。
@@ -129,7 +135,7 @@ node scripts/validate-competition-package.mjs \
 
 ## 尚需人工完成的三项发布门槛
 
-1. 把 [iflytek-ip-confirmation-email.md](iflytek-ip-confirmation-email.md) 连同逐文件清单和最终 ZIP 哈希发给赛事方并保存书面回复。需要确认公开基线、混合改造文件、竞赛新增内容和第三方组件的权利边界，以及 FAQ 所称“核心 Skill 自研内容不少于 50%”的计算口径。现有 Apache-2.0 权利不能靠改根许可证或删库追溯撤回；泛泛回复“允许参赛”不足以确认边界。
+1. 把 [iflytek-ip-confirmation-email.md](iflytek-ip-confirmation-email.md) 连同逐文件清单和最终 ZIP 哈希发给赛事方并保存书面回复。需要确认赛事接受“全部项目自有内容统一 Apache-2.0 + 第三方组件保持原许可”的提交方式，且不会要求参赛者作出与已公开许可矛盾的独占承诺；同时确认 FAQ 所称“核心 Skill 自研内容不少于 50%”的计算口径。项目开源许可的调整不能单方面修改赛事协议；泛泛回复“允许参赛”不足以确认这一点。
 2. 在真实 AstronClaw 中完成五条烟测：自动触发、指定 Skill、匿名 demo、上传 JSON/CSV、异常文件。网页若不能回传 HTML，至少确认聊天摘要完整可读。
 3. 从赛题页上传后检查审核状态、下载一次正式包复验，并为修改和复审至少预留 24–48 小时。
 

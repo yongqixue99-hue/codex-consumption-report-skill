@@ -34,6 +34,7 @@ function makeSkill(root) {
   write(root, 'competition/iflytek/SKILL.md', `---
 name: deterministic-test-skill
 description: Build a deterministic test package when the test requests packaging.
+license: Apache-2.0
 version: 1.0.0
 ---
 
@@ -180,7 +181,10 @@ test('builds byte-identical archives, excludes private/output files, and validat
   assert.match(archiveText, /NEW-004 的 post-baseline/u);
   assert.match(archiveText, /425d17511c74b9a2e1e0dd2d9d22e997fb1dd0ae/u);
   assert.match(archiveText, /核心分析链与提交工程为本项目自研/u);
-  assert.match(archiveText, /This package grants no\s+separate public license for those adaptations/u);
+  assert.match(archiveText, /All project-authored material in this package is licensed under the Apache\s+License, Version 2\.0/u);
+  assert.match(archiveText, /NEW-001 至 NEW-005 均为项目自有内容，统一按 Apache License 2\.0 开源/u);
+  assert.match(archiveText, /^license: Apache-2\.0$/mu);
+  assert.doesNotMatch(archiveText, /no\s+separate public license|All rights not expressly granted/iu);
 
   const validated = validateCompetitionArchive(first);
   assert.equal(validated.archiveSha256, result.archiveSha256);

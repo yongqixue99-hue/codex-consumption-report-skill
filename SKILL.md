@@ -1,6 +1,7 @@
 ---
 name: generate-codex-consumption-report
 description: Generate a polished, date-led, interactive Codex consumption report from official account usage, device-local CC Switch or CodeBurn sources, or an explicitly supplied sanitized portable JSON, JSONL, or CSV file. Use when the user asks where Codex Tokens or estimated cost went, requests lifecycle/monthly/custom-period or Mac-and-Windows analysis, audits coverage after deleted threads, wants project/model/session/cache diagnostics, needs an anonymous competition demo, or wants an offline HTML/PDF/PNG report. This skill is Codex-only; it must not present estimated cost as subscription billing, claim remaining quota, or assign an official-versus-local difference to a device or deleted thread.
+license: Apache-2.0
 ---
 
 # Generate Codex Consumption Report
@@ -176,6 +177,10 @@ Fix clipped labels, repeated date ticks, document-level overflow, incomplete SVG
 - On desktop, provide a narrow Codex-style chapter tick rail at the left edge with a clearly marked active chapter. On mobile, remove the rail and keep a compact, horizontally scrollable text navigation at the top.
 
 Read [references/data-contract.md](references/data-contract.md) when adapting a new CodeBurn schema, changing metrics, or reconciling a custom period. Read [references/multi-device.md](references/multi-device.md) for Mac/Windows collection, deleted-thread handling, event-level deduplication, or cross-OS project identity. Read [references/visual-contract.md](references/visual-contract.md) before changing the report template or chart behavior. Read [references/troubleshooting.md](references/troubleshooting.md) only when collection, rendering, or validation fails.
+
+## License boundary
+
+Project-authored content in this repository, including the iFLYTEK competition adaptations, is licensed under Apache License 2.0 and may be used, modified, redistributed, and incorporated into derivative projects subject to that license. The bundled official Apache ECharts runtime and its d3.js portions, zrender, and tslib components remain under their respective licenses. Preserve the project `LICENSE` and `NOTICE`, mark modified files as required by Apache-2.0, and retain every applicable file under `assets/vendor/echarts/` when redistributing those components.
 
 ## Deliver
 

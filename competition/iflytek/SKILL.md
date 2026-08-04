@@ -1,6 +1,7 @@
 ---
 name: generate-codex-consumption-report
 description: Analyze Codex Token usage from the bundled anonymous demo or an explicitly uploaded, sanitized JSON, JSONL, or CSV file, then return a readable in-chat summary and a self-contained interactive HTML report. Use when the user asks for Codex 用量分析、Token 消耗报告、日期趋势、项目或模型分布、缓存构成、异常峰值、数据质量检查、CSV/JSON 可视化，或要求演示一份 Codex 数据分析 Skill。This competition profile is offline and explicit-input-only; it never discovers an account or device automatically and never treats estimated API-equivalent cost as a subscription invoice or remaining quota.
+license: Apache-2.0
 ---
 
 # Codex Consumption Report · Competition Profile
@@ -67,3 +68,7 @@ The uploaded original file remains under the platform or caller's lifecycle cont
 - The interactive report is self-contained and makes no remote runtime request.
 
 Read [references/portable-data-contract.md](references/portable-data-contract.md) for the accepted schema and privacy rules. Read [references/evaluation-and-limitations.md](references/evaluation-and-limitations.md) when explaining evaluation behavior, platform statistics, or known runtime limits.
+
+## License boundary
+
+Project-authored content in this package, including the competition adaptations, is available under Apache License 2.0 and permits derivative development subject to that license. The bundled official Apache ECharts runtime and its d3.js portions, zrender, and tslib components remain under their respective licenses. Preserve `LICENSE.txt`, `NOTICE.txt`, `licenses/LICENSE-Apache-2.0.txt`, and the license files under `assets/vendor/echarts/` when redistributing the package or a derivative that contains those components.

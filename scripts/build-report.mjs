@@ -29,11 +29,11 @@ function firstExisting(...paths) {
   if (!found) throw new Error(`Required distribution notice is missing: ${paths.join(" or ")}`);
   return found;
 }
-const packagedBackgroundLicensePath = resolve(skillRoot, "licenses/LICENSE-Apache-2.0.txt");
+const packagedProjectLicensePath = resolve(skillRoot, "licenses/LICENSE-Apache-2.0.txt");
 const distributionNoticePaths = [
   ["Codex Consumption Report LICENSE", firstExisting(resolve(skillRoot, "LICENSE.txt"), resolve(skillRoot, "LICENSE"))],
-  ...(existsSync(packagedBackgroundLicensePath)
-    ? [["Pre-existing background Apache-2.0 LICENSE", packagedBackgroundLicensePath]]
+  ...(existsSync(packagedProjectLicensePath)
+    ? [["Project-authored content Apache-2.0 LICENSE", packagedProjectLicensePath]]
     : []),
   ["Codex Consumption Report NOTICE", firstExisting(resolve(skillRoot, "NOTICE.txt"), resolve(skillRoot, "NOTICE"))],
   ["Apache ECharts LICENSE", resolve(skillRoot, "assets/vendor/echarts/LICENSE.txt")],

@@ -92,4 +92,6 @@ node scripts/package-competition.mjs \
 
 ## 许可证
 
-赛事专项改造及本次上传前的公开基线 commit `94a72c6ddf8685a5b4541cb453260df0a8c39570` 使用 [Apache License 2.0](LICENSE)，已经授予的许可保持不变。讯飞竞赛包采用组合权利索引：BG 基线、post-baseline 竞赛增量和第三方组件分别说明，详见 `competition/iflytek/LICENSE.txt` 及包内 `competition-ip/` 清单；不能仅凭包中出现 Apache-2.0 全文就把竞赛增量误归为该公开基线中的 Apache 资产。内置 ECharts、d3、zrender 与 tslib 的许可见 [NOTICE](NOTICE) 和 `assets/vendor/echarts/`；生成的独立 HTML 会嵌入全部适用许可文本。
+本项目自有内容，包括通用 Skill、讯飞竞赛适配和后续自研改动，统一使用 [Apache License 2.0](LICENSE)。你可以在该许可条件下使用、复制、修改、分发、商用并创建二次开发版本。再发布时请保留适用的版权、`LICENSE` 和 `NOTICE` 说明，对修改过的文件做出显著说明，并继续保留第三方组件的许可文本。
+
+报告的数据处理、指标逻辑、图表配置、组合排版与视觉设计是本项目的自研内容；当前版本同时原样分发官方 Apache ECharts 6.1.0 浏览器运行时，其中还包含 d3.js portions、zrender 和 tslib。因此这些第三方声明不能删除，详见 [NOTICE](NOTICE) 和 `assets/vendor/echarts/`。讯飞包内的 `competition-ip/` 清单只用于说明原创性、来源和变更边界，不再为竞赛适配设置专有许可。生成的独立 HTML 会嵌入全部适用许可文本。
