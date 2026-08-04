@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Token 分析报告"
+  short_description: "用匿名演示或脱敏文件生成 Codex Token 分析与交互报告"
+  default_prompt: "使用 $generate-codex-consumption-report 分析 Codex Token 用量；没有文件时运行匿名合成演示，并先返回可核验的聊天摘要。"

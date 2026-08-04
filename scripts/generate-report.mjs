@@ -532,6 +532,20 @@ if (args.render) {
 }
 
 const data = JSON.parse(readFileSync(dataPath, "utf8"));
+const publicMetrics = {
+  sourceMode: data.meta.sourceMode || (lifecycleEnabled ? "official-and-local-lifecycle" : "codeburn-snapshot"),
+  syntheticData: data.meta.syntheticData === true,
+  rangeStart: data.meta.rangeStart,
+  rangeEnd: data.meta.rangeEnd,
+  tokens: data.summary.tokens,
+  officialTokens: data.summary.officialTokens ?? data.summary.tokens,
+  estimatedCostUsd: data.summary.cost,
+  calls: data.summary.calls,
+  sessions: data.summary.sessions,
+  logicalProjects: data.summary.logicalProjects,
+  cacheReadTokenShare: data.diagnostics?.cacheReadTokenShare ?? data.summary.cacheHitRate,
+  peakDay: data.diagnostics?.peakDay ?? null,
+};
 chmodSync(reportPath, 0o600);
 if (!lifecycleEnabled) {
   removeIfPresent(lifecyclePath);
@@ -560,6 +574,8 @@ const manifest = {
     ? crossDeviceDeduplication
     : null,
   projectAliasMapApplied: Boolean(multiDeviceMode && args["project-alias-map"]),
+  metrics: publicMetrics,
+  diagnostics: data.diagnostics ?? null,
   data: dataArtifact,
   report: { path: basename(reportPath), sha256: sha256(reportPath), selfContained: true, externalRuntimeDependencies: 0 },
   rendered: Boolean(args.render),
@@ -577,4 +593,6 @@ console.log(JSON.stringify({
   report: finalReportPath,
   manifest: finalManifestPath,
   retention,
+  metrics: publicMetrics,
+  diagnostics: data.diagnostics ?? null,
 }, null, 2));

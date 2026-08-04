@@ -1,0 +1,49 @@
+{
+  "schema": "codex.competition.expected-result.v1",
+  "fixture": "iflytek-demo-usage.json",
+  "source": {
+    "kind": "bundled-synthetic",
+    "synthetic": true
+  },
+  "summary": {
+    "rangeStart": "2026-07-01",
+    "rangeEnd": "2026-07-14",
+    "timezone": "Asia/Shanghai",
+    "tokens": 54618100,
+    "tokenComponents": {
+      "input": 5748000,
+      "output": 696100,
+      "cacheRead": 47820000,
+      "cacheWrite": 354000
+    },
+    "estimatedCostUsd": 91.44,
+    "calls": 435,
+    "sessions": 17,
+    "projects": 4,
+    "cacheReadTokenShare": 0.8755339347212737,
+    "peakDay": {
+      "date": "2026-07-08",
+      "tokens": 14563800,
+      "calls": 110
+    }
+  },
+  "facts": {
+    "peakToMedianActiveDayTokens": 4.6533,
+    "topProjectTokenShare": 0.65568374,
+    "topModelTokenShare": 0.65568374,
+    "cacheReadTokenShare": 0.87553393
+  },
+  "quality": {
+    "reconciliation": "pass",
+    "calendarContinuity": "pass",
+    "projectAttribution": "full",
+    "activityAttribution": "full",
+    "sourceDisclosure": "synthetic"
+  },
+  "privacy": {
+    "containsRealAccountData": false,
+    "containsPromptOrCode": false,
+    "containsHostPath": false,
+    "containsRawSessionIdentifier": false
+  }
+}

@@ -634,6 +634,18 @@
     }
     .hero-copy { position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: space-between; }
     .report-title .eyebrow { margin: 0; color: #a5a39b; }
+    .demo-data-badge {
+      display: inline-flex;
+      width: fit-content;
+      margin-top: 10px;
+      padding: 6px 9px;
+      border: 1px solid rgba(47, 91, 255, .34);
+      border-radius: 999px;
+      color: #244bd8;
+      background: rgba(47, 91, 255, .07);
+      font: 700 10px/1 var(--mono);
+      letter-spacing: .04em;
+    }
     .report-title h1 {
       max-width: none;
       margin-top: 28px;
@@ -1515,39 +1527,40 @@
     <header class="report-title reveal" id="overview">
       <div class="hero-copy">
         <p class="eyebrow">Codex 使用消耗报告</p>
+        <span class="demo-data-badge" id="demoDataBadge" hidden>匿名合成演示数据</span>
         <div><h1>消耗<br><span class="soft">分布</span></h1><p class="hero-deck">按日期、项目、模型和会话拆分 Token 与估算成本。</p></div>
       </div>
       <div class="title-side">
         <span class="hero-number" id="heroCost">{{TOTAL_TOKENS}}</span>
-        <span class="hero-number-label" id="heroNumberLabel">当前本地 CodeBurn 快照 Token</span>
+        <span class="hero-number-label" id="heroNumberLabel">Token 总量</span>
         <div class="hero-range"><span id="heroRange">{{RANGE_LABEL}}</span><span id="heroDays">{{ACTIVE_DAYS}} 个活跃日 / 共 {{CALENDAR_DAYS}} 天</span></div>
         <div class="title-meta">
           <div><span class="meta-value" id="snapshotGeneratedLabel">{{GENERATED_LOCAL}}</span><span class="meta-label">数据快照 · {{TIMEZONE}}</span></div>
-          <div><span class="meta-value" id="heroSourceValue">当前本地 CodeBurn 快照</span><span class="meta-label">仅统计 Codex · 不展示提示词或代码</span></div>
+          <div><span class="meta-value" id="heroSourceValue">数据来源加载中</span><span class="meta-label">仅统计 Codex · 不展示提示词或代码</span></div>
         </div>
       </div>
     </header>
 
-    <section class="metrics reveal" id="metricsOverview" aria-label="所选日期范围的已采集本地 Token 概览">
-      <div class="metric"><span class="metric-value" id="metricTokens">{{TOTAL_TOKENS}}</span><span class="metric-label" id="metricTokensLabel">已采集本地 Token 总量</span><span class="metric-note" id="metricTotalNote">所选日期范围</span></div>
-      <div class="metric"><span class="metric-value" id="metricAverage">{{OFFICIAL_DAILY_AVERAGE}}</span><span class="metric-label" id="metricAverageLabel">平均每天本地 Token</span><span class="metric-note" id="metricAverageNote">按所选 {{CALENDAR_DAYS}} 个自然日计算</span></div>
-      <div class="metric"><span class="metric-value" id="metricPeak">{{OFFICIAL_PEAK_TOKENS}}</span><span class="metric-label" id="metricPeakLabel">本地单日最高 Token</span><span class="metric-note" id="metricPeakNote">{{OFFICIAL_PEAK_DATE}}</span></div>
-      <div class="metric"><span class="metric-value" id="metricActiveDays">{{OFFICIAL_ACTIVE_DAYS}} / {{CALENDAR_DAYS}} 天</span><span class="metric-label" id="metricActiveDaysLabel">有本地 Token 记录</span><span class="metric-note" id="metricActiveDaysNote">活跃天数 / 所选天数</span></div>
-      <p class="metrics-source-note" id="metricsSourceNote">以上均为当前本地 CodeBurn 快照口径，随日期范围更新。</p>
+    <section class="metrics reveal" id="metricsOverview" aria-label="所选日期范围的 Token 概览">
+      <div class="metric"><span class="metric-value" id="metricTokens">{{TOTAL_TOKENS}}</span><span class="metric-label" id="metricTokensLabel">Token 总量</span><span class="metric-note" id="metricTotalNote">所选日期范围</span></div>
+      <div class="metric"><span class="metric-value" id="metricAverage">{{OFFICIAL_DAILY_AVERAGE}}</span><span class="metric-label" id="metricAverageLabel">平均每天 Token</span><span class="metric-note" id="metricAverageNote">按所选 {{CALENDAR_DAYS}} 个自然日计算</span></div>
+      <div class="metric"><span class="metric-value" id="metricPeak">{{OFFICIAL_PEAK_TOKENS}}</span><span class="metric-label" id="metricPeakLabel">单日最高 Token</span><span class="metric-note" id="metricPeakNote">{{OFFICIAL_PEAK_DATE}}</span></div>
+      <div class="metric"><span class="metric-value" id="metricActiveDays">{{OFFICIAL_ACTIVE_DAYS}} / {{CALENDAR_DAYS}} 天</span><span class="metric-label" id="metricActiveDaysLabel">有 Token 记录</span><span class="metric-note" id="metricActiveDaysNote">活跃天数 / 所选天数</span></div>
+      <p class="metrics-source-note" id="metricsSourceNote">以上指标随日期范围更新。</p>
     </section>
 
     <section class="story-section reveal" id="when">
       <div class="section-head">
-        <div><span class="section-no">01 / 日期</span><h2 id="whenSectionTitle">当前本地 Token 活动趋势</h2></div>
-        <p><strong id="whenValue">{{OFFICIAL_PEAK_TOKENS}}</strong><span id="whenInsight">当前本地 CodeBurn 快照的单日 Token 峰值。</span></p>
+        <div><span class="section-no">01 / 日期</span><h2 id="whenSectionTitle">Token 活动趋势</h2></div>
+        <p><strong id="whenValue">{{OFFICIAL_PEAK_TOKENS}}</strong><span id="whenInsight">所选范围内的单日 Token 峰值。</span></p>
       </div>
       <figure class="chart-shell" aria-labelledby="timeline-title">
         <figcaption class="chart-header">
-          <div><h3 id="timeline-title">每日与累计本地 Token</h3><p id="timelineRange">{{RANGE_LABEL}} · 折线：本地累计 Token · 柱形：本地每日 Token</p></div>
-          <span class="chart-tag" id="timelineSourceTag">CodeBurn 快照</span>
+          <div><h3 id="timeline-title">每日与累计 Token</h3><p id="timelineRange">{{RANGE_LABEL}} · 折线：累计 Token · 柱形：每日 Token</p></div>
+          <span class="chart-tag" id="timelineSourceTag">数据来源</span>
         </figcaption>
         <div class="chart-body">
-          <div class="timeline-counter" aria-hidden="true"><span class="label" id="timelineCounterLabel">已采集本地累计</span><span class="value mono" id="timelineCounter">0</span><span class="unit"> Token</span></div>
+          <div class="timeline-counter" aria-hidden="true"><span class="label" id="timelineCounterLabel">累计 Token</span><span class="value mono" id="timelineCounter">0</span><span class="unit"> Token</span></div>
           <div id="timelineChart" class="chart tall" role="img" aria-label="{{RANGE_LABEL}}的每日和累计估算成本图"></div>
         </div>
         <details class="details"><summary>查看当前范围每日数据 · 按实际调用日期</summary><div class="table-scroll" id="dailyTable">{{DAILY_TABLE}}</div></details>
@@ -1556,13 +1569,13 @@
 
     <section class="story-section reveal" id="tokens">
       <div class="section-head">
-        <div><span class="section-no">02 / Token</span><h2 id="tokenSectionTitle">本地重建 Token 构成</h2></div>
-        <p><strong id="tokenValue">{{CACHE_SHARE}}</strong><span id="tokenInsight">为当前本地 CodeBurn 快照中可拆分账本的缓存读取占比。</span></p>
+        <div><span class="section-no">02 / Token</span><h2 id="tokenSectionTitle">Token 构成</h2></div>
+        <p><strong id="tokenValue">{{CACHE_SHARE}}</strong><span id="tokenInsight">为可拆分 Token 中的缓存读取占比。</span></p>
       </div>
       <figure class="chart-shell" aria-labelledby="token-title">
         <figcaption class="chart-header">
           <div><h3 id="token-title">可重建 Token 总量及构成</h3><p id="tokenScaleNote">每条横线代表固定数量 Token，各时间段使用同一刻度{{MONTH_SCOPE_NOTE}}</p></div>
-          <span class="chart-tag" id="tokenGrainTag">本地账本</span>
+          <span class="chart-tag" id="tokenGrainTag">Token 账本</span>
         </figcaption>
         <div class="chart-body"><div id="tokenLedger" class="chart medium" role="img" aria-label="统计周期内 Token 总量和类型构成"></div></div>
         <div class="composition-ruler" aria-label="统计周期 Token 构成">
@@ -1574,7 +1587,7 @@
           <div><div class="composition-detail-track"><span class="input" id="nonCacheInput" style="width:{{INPUT_WITHIN_NON_CACHE_RAW}}%"></span><span class="output" id="nonCacheOutput" style="width:{{OUTPUT_WITHIN_NON_CACHE_RAW}}%"></span></div><div class="composition-detail-labels"><span id="nonCacheInputLabel">新输入 {{INPUT_WITHIN_NON_CACHE_SHARE}}</span><span id="nonCacheOutputLabel">输出 {{OUTPUT_WITHIN_NON_CACHE_SHARE}}</span></div></div>
         </div>
       </figure>
-      <div class="inline-note"><strong id="dataScopeLabel">数据口径</strong><span id="sessionNote">Token 组件、项目、模型、会话和时段均来自当前本地 CodeBurn 快照。</span></div>
+      <div class="inline-note"><strong id="dataScopeLabel">数据口径</strong><span id="sessionNote">Token 组件、项目、模型、会话和时段来自同一份可筛选事实表。</span></div>
     </section>
 
     <section class="story-section reveal" id="projects">
@@ -1598,7 +1611,7 @@
     <section class="story-section reveal" id="models">
       <div class="section-head">
         <div><span class="section-no">04 / 模型与任务</span><h2>模型与任务类型</h2></div>
-        <p><strong id="modelValue">{{TOP_MODEL_SHARE}}</strong><span id="modelInsight">是 {{TOP_MODEL}} 在模型估算成本中的占比；{{TOP_ACTIVITY_PAIR}}合计占任务类型估算成本的 {{TOP_ACTIVITY_SHARE}}。任务类型由 CodeBurn 自动推断。</span></p>
+        <p><strong id="modelValue">{{TOP_MODEL_SHARE}}</strong><span id="modelInsight">是 {{TOP_MODEL}} 在模型估算成本中的占比；任务类型来源随数据口径加载。</span></p>
       </div>
       <div class="two-up">
         <figure class="chart-shell" aria-labelledby="model-title">
@@ -1606,7 +1619,7 @@
           <div class="chart-body"><div id="modelStrip" class="chart medium" role="img" aria-label="各模型在统计周期内的使用日期和估算成本图"></div></div>
         </figure>
         <figure class="chart-shell" aria-labelledby="activity-title">
-          <figcaption class="chart-header"><div><h3 id="activity-title">按任务类型统计的估算成本</h3><p id="activitySubtitle">CodeBurn 自动归类 · 按估算成本显示前 6 项</p></div><span class="chart-tag" id="activityTag">前 6 名</span></figcaption>
+          <figcaption class="chart-header"><div><h3 id="activity-title">按任务类型统计的估算成本</h3><p id="activitySubtitle">任务标签来源随数据口径加载 · 按估算成本显示前 6 项</p></div><span class="chart-tag" id="activityTag">前 6 名</span></figcaption>
           <div class="chart-body"><div id="activityBars" class="chart medium" role="img" aria-label="编码、任务委派等任务类型的估算成本排名图"></div></div>
         </figure>
       </div>
@@ -1665,26 +1678,26 @@
     </section>
 
     <section class="scope reveal" aria-label="报告口径">
-      <div class="scope-item"><span class="scope-index">01</span><div><strong id="scopePrimaryTitle">当前本地快照</strong><span id="scopePrimaryText">累计与每日 Token 来自当前设备的 CodeBurn 快照，只覆盖仍可采集的本地记录。</span></div></div>
-      <div class="scope-item"><span class="scope-index">02</span><div><strong id="scopeLocalTitle">已采集本地 Token · {{FULL_LOCAL_LEDGER_TOKENS}}</strong><span id="scopeLocalText">项目、模型、会话和时段均由当前本地 CodeBurn 明细重建，不代表同一账户在其他设备上的总量。</span></div></div>
-      <div class="scope-item"><span class="scope-index">03</span><div><strong>归属限制</strong><span>已删除日志造成的项目或任务信息缺失标为“历史未归属”；尚未导入的电脑不会出现在项目、模型、会话和时段明细中。</span></div></div>
+      <div class="scope-item"><span class="scope-index">01</span><div><strong id="scopePrimaryTitle">主要数据口径</strong><span id="scopePrimaryText">累计与每日 Token 的来源将在报告加载后显示。</span></div></div>
+      <div class="scope-item"><span class="scope-index">02</span><div><strong id="scopeLocalTitle">可归属 Token · {{FULL_LOCAL_LEDGER_TOKENS}}</strong><span id="scopeLocalText">项目、模型、会话和时段的来源将在报告加载后显示。</span></div></div>
+      <div class="scope-item"><span class="scope-index">03</span><div><strong>归属限制</strong><span>报告只展示输入或采集数据能够支持的归属，不把缺失明细推测分配给项目、模型或设备。</span></div></div>
     </section>
 
     <section class="caveats reveal" aria-labelledby="caveats-title">
       <h2 id="caveats-title">统计口径与限制</h2>
       <ul class="caveat-list">
-        <li><strong id="caveatPrimaryTitle">本地 Token</strong><span id="caveatPrimaryText">累计与每日 Token 均来自当前本地 CodeBurn 快照，不是订阅剩余额度或账单金额。</span></li>
-        <li><strong id="caveatSourceTitle">本地范围</strong><span id="caveatSourceText">当前报告只覆盖已采集到的本地记录；其他设备和已删除日志不在统计范围内，因此不能代表同一账户的总量。</span></li>
+        <li><strong id="caveatPrimaryTitle">Token 口径</strong><span id="caveatPrimaryText">Token 活动不表示订阅剩余额度或账单金额。</span></li>
+        <li><strong id="caveatSourceTitle">数据范围</strong><span id="caveatSourceText">报告范围取决于当前数据源，来源说明将在加载后显示。</span></li>
         <li id="multiDeviceCaveat" hidden><strong>多设备合并</strong><span id="multiDeviceCaveatText"></span></li>
-        <li><strong>自动分类</strong><span>{{TOP_ACTIVITY_PAIR}}由 CodeBurn 自动归类，并非人工标注。本报告只展示模型使用时间与估算成本的关系，不据此判断模型更换导致成本变化。</span></li>
-        <li><strong>时间口径</strong><span>本页按模型调用日期统计；CodeBurn 原始日报按对话轮次日期统计，因此两者的单日数值可能不同。</span></li>
+        <li><strong id="classificationTitle">任务标签</strong><span id="classificationText">任务标签的来源随数据口径加载；报告不从分布结果推断因果。</span></li>
+        <li><strong>时间口径</strong><span id="timeBasisText">日期和小时按报告所选时区统计。</span></li>
         <li><strong>缺少交付数据</strong><span>数据中不含 commit、PR 或验收结果，无法统计单项交付成本。</span></li>
       </ul>
     </section>
   </main>
 
   <footer>
-    <span id="footerSource">数据来源 · 当前本地 CodeBurn 快照 / {{GENERATED_LOCAL}}</span>
+    <span id="footerSource">数据来源 · 加载中 / {{GENERATED_LOCAL}}</span>
     <span>图表 · Apache ECharts 6.1.0 + 自定义 SVG / 离线 HTML</span>
   </footer>
 
@@ -1693,6 +1706,14 @@
     "use strict";
     const BASE_REPORT = /*__REPORT_DATA__*/;
     const HAS_OFFICIAL_SOURCE = BASE_REPORT.meta && BASE_REPORT.meta.officialSourceAvailable === true;
+    const SOURCE_MODE = BASE_REPORT.meta && BASE_REPORT.meta.sourceMode ? BASE_REPORT.meta.sourceMode : "codeburn-snapshot";
+    const IS_SYNTHETIC = SOURCE_MODE === "synthetic-demo" || (BASE_REPORT.meta && BASE_REPORT.meta.syntheticData === true);
+    const IS_PORTABLE = SOURCE_MODE === "portable-input" || IS_SYNTHETIC;
+    const ACTIVITY_SOURCE_INPUT = BASE_REPORT.meta && BASE_REPORT.meta.activityClassification === "provided-by-input";
+    const LOCAL_SOURCE_LABEL = BASE_REPORT.meta && BASE_REPORT.meta.sourceLabel
+      ? BASE_REPORT.meta.sourceLabel
+      : IS_SYNTHETIC ? "匿名合成演示数据" : IS_PORTABLE ? "导入的脱敏 Codex 用量数据" : "当前本地 CodeBurn 快照";
+    if (IS_SYNTHETIC) document.getElementById("demoDataBadge").hidden = false;
     const LOCAL_LEDGER_SOURCE = BASE_REPORT.sources && BASE_REPORT.sources.ledger ? BASE_REPORT.sources.ledger : null;
     const IMPORTED_DEVICES = LOCAL_LEDGER_SOURCE && Array.isArray(LOCAL_LEDGER_SOURCE.devices) ? LOCAL_LEDGER_SOURCE.devices : [];
     const COMPACT_DEDUP = LOCAL_LEDGER_SOURCE ? LOCAL_LEDGER_SOURCE.deduplication : null;
@@ -2288,46 +2309,46 @@
       document.documentElement.dataset.officialSource = HAS_OFFICIAL_SOURCE ? "available" : "unavailable";
 
       setText("heroCost", compactZh(reconstruction.officialTokens));
-      setText("heroNumberLabel", HAS_OFFICIAL_SOURCE ? "Codex 官方账户 Token" : "当前本地 CodeBurn 快照 Token");
-      setText("heroSourceValue", HAS_OFFICIAL_SOURCE ? "官方账户 + 已采集本地账本" : "当前本地 CodeBurn 快照");
+      setText("heroNumberLabel", HAS_OFFICIAL_SOURCE ? "Codex 官方账户 Token" : IS_SYNTHETIC ? "匿名合成演示 Token" : IS_PORTABLE ? "导入数据 Token" : "当前本地 CodeBurn 快照 Token");
+      setText("heroSourceValue", HAS_OFFICIAL_SOURCE ? "官方账户 + 已采集本地账本" : LOCAL_SOURCE_LABEL);
       setText("heroRange", selectedRange);
       setText("heroDays", officialActiveDays + " 个活跃日 / 共 " + summary.calendarDays + " 天");
       setText("navRange", (fullRange ? "全周期 · " : "") + compactRangeLabel(REPORT.meta.rangeStart, REPORT.meta.rangeEnd));
       setText("metricTokens", compactZh(reconstruction.officialTokens));
-      setText("metricTokensLabel", HAS_OFFICIAL_SOURCE ? "Token 总量" : "已采集本地 Token 总量");
+      setText("metricTokensLabel", HAS_OFFICIAL_SOURCE ? "Token 总量" : IS_SYNTHETIC ? "演示 Token 总量" : IS_PORTABLE ? "导入 Token 总量" : "已采集本地 Token 总量");
       setText("metricTotalNote", selectedRange);
       setText("metricAverage", compactZh(officialDailyAverage));
-      setText("metricAverageLabel", HAS_OFFICIAL_SOURCE ? "平均每天 Token" : "平均每天本地 Token");
+      setText("metricAverageLabel", HAS_OFFICIAL_SOURCE || IS_PORTABLE ? "平均每天 Token" : "平均每天本地 Token");
       setText("metricAverageNote", "按所选 " + summary.calendarDays + " 个自然日计算");
       setText("metricPeak", compactZh(officialPeak.tokens));
-      setText("metricPeakLabel", HAS_OFFICIAL_SOURCE ? "单日最高 Token" : "本地单日最高 Token");
+      setText("metricPeakLabel", HAS_OFFICIAL_SOURCE || IS_PORTABLE ? "单日最高 Token" : "本地单日最高 Token");
       setText("metricPeakNote", zhDate(officialPeak.date, true));
       setText("metricActiveDays", officialActiveDays + " / " + summary.calendarDays + " 天");
-      setText("metricActiveDaysLabel", HAS_OFFICIAL_SOURCE ? "有 Token 记录" : "有本地 Token 记录");
+      setText("metricActiveDaysLabel", HAS_OFFICIAL_SOURCE || IS_PORTABLE ? "有 Token 记录" : "有本地 Token 记录");
       setText("metricActiveDaysNote", "活跃天数 / 所选天数");
-      setText("metricsSourceNote", HAS_OFFICIAL_SOURCE ? "以上均为 Codex 官方账户口径，随日期范围更新。" : "以上均为当前本地 CodeBurn 快照口径，随日期范围更新。");
-      document.getElementById("metricsOverview").setAttribute("aria-label", HAS_OFFICIAL_SOURCE ? "所选日期范围的官方 Token 概览" : "所选日期范围的已采集本地 Token 概览");
+      setText("metricsSourceNote", HAS_OFFICIAL_SOURCE ? "以上均为 Codex 官方账户口径，随日期范围更新。" : "以上均来自" + LOCAL_SOURCE_LABEL + "，随日期范围更新。");
+      document.getElementById("metricsOverview").setAttribute("aria-label", HAS_OFFICIAL_SOURCE ? "所选日期范围的官方 Token 概览" : IS_PORTABLE ? "所选日期范围的导入 Token 概览" : "所选日期范围的已采集本地 Token 概览");
 
       setText("whenValue", compactZh(officialPeak.tokens));
-      setText("whenSectionTitle", HAS_OFFICIAL_SOURCE ? "官方 Token 活动趋势" : "当前本地 Token 活动趋势");
-      setText("whenInsight", HAS_OFFICIAL_SOURCE ? "为 " + zhDate(officialPeak.date, true) + "的官方账户 Token；本范围官方累计 " + compactZh(reconstruction.officialTokens) + "。" : "为 " + zhDate(officialPeak.date, true) + "的已采集本地 Token；本范围本地累计 " + compactZh(reconstruction.officialTokens) + "。");
-      setText("timeline-title", HAS_OFFICIAL_SOURCE ? "每日与累计 Token" : "每日与累计本地 Token");
-      setText("timelineRange", selectedRange + (HAS_OFFICIAL_SOURCE ? " · 折线：官方累计 Token · 柱形：官方每日 Token" : " · 折线：本地累计 Token · 柱形：本地每日 Token"));
-      setText("timelineSourceTag", HAS_OFFICIAL_SOURCE ? "官方账户" : "CodeBurn 快照");
-      setText("timelineCounterLabel", HAS_OFFICIAL_SOURCE ? "官方账户累计" : "已采集本地累计");
+      setText("whenSectionTitle", HAS_OFFICIAL_SOURCE ? "官方 Token 活动趋势" : IS_SYNTHETIC ? "演示 Token 活动趋势" : IS_PORTABLE ? "导入 Token 活动趋势" : "当前本地 Token 活动趋势");
+      setText("whenInsight", HAS_OFFICIAL_SOURCE ? "为 " + zhDate(officialPeak.date, true) + "的官方账户 Token；本范围官方累计 " + compactZh(reconstruction.officialTokens) + "。" : IS_PORTABLE ? "为 " + zhDate(officialPeak.date, true) + "的 Token 峰值；本范围累计 " + compactZh(reconstruction.officialTokens) + "。" : "为 " + zhDate(officialPeak.date, true) + "的已采集本地 Token；本范围本地累计 " + compactZh(reconstruction.officialTokens) + "。");
+      setText("timeline-title", HAS_OFFICIAL_SOURCE || IS_PORTABLE ? "每日与累计 Token" : "每日与累计本地 Token");
+      setText("timelineRange", selectedRange + (HAS_OFFICIAL_SOURCE ? " · 折线：官方累计 Token · 柱形：官方每日 Token" : IS_PORTABLE ? " · 折线：累计 Token · 柱形：每日 Token" : " · 折线：本地累计 Token · 柱形：本地每日 Token"));
+      setText("timelineSourceTag", HAS_OFFICIAL_SOURCE ? "官方账户" : IS_SYNTHETIC ? "合成演示" : IS_PORTABLE ? "脱敏导入" : "CodeBurn 快照");
+      setText("timelineCounterLabel", HAS_OFFICIAL_SOURCE ? "官方账户累计" : IS_PORTABLE ? "导入数据累计" : "已采集本地累计");
       setText("timelineCounter", compact(reconstruction.officialTokens, 2));
-      document.getElementById("timelineChart").setAttribute("aria-label", selectedRange + (HAS_OFFICIAL_SOURCE ? "的官方账户每日与累计 Token 图" : "的已采集本地每日与累计 Token 图"));
+      document.getElementById("timelineChart").setAttribute("aria-label", selectedRange + (HAS_OFFICIAL_SOURCE ? "的官方账户每日与累计 Token 图" : IS_PORTABLE ? "的导入数据每日与累计 Token 图" : "的已采集本地每日与累计 Token 图"));
       document.getElementById("timelineChart").dataset.grain = "daily";
 
       setText("tokenValue", hasLocalDetails ? pct(facts.cacheTokenShare) : "0%");
       setText("tokenInsight", hasLocalDetails
-        ? "来自本地可重建账本的缓存读取。缓存读取 " + compact(summary.tokenComponents.cacheRead, 2) + "，新输入 " + compact(summary.tokenComponents.input, 2) + "，输出 " + compact(summary.tokenComponents.output, 2) + (HAS_OFFICIAL_SOURCE ? "；官方与本地净差单独列示。" : "；以上均来自当前本地 CodeBurn 快照。")
+        ? "来自本地可重建账本的缓存读取。缓存读取 " + compact(summary.tokenComponents.cacheRead, 2) + "，新输入 " + compact(summary.tokenComponents.input, 2) + "，输出 " + compact(summary.tokenComponents.output, 2) + (HAS_OFFICIAL_SOURCE ? "；官方与本地净差单独列示。" : "；以上均来自" + LOCAL_SOURCE_LABEL + "。")
         : HAS_OFFICIAL_SOURCE
           ? "所选日期有官方账户 Token，但已采集的本地账本没有对应调用明细，无法拆分输入、输出或缓存。"
-          : "所选日期在当前本地 CodeBurn 快照中没有调用明细，无法拆分输入、输出或缓存。");
-      setText("tokenSectionTitle", grainZh(grain) + "本地重建 Token 构成");
+          : "所选日期在" + LOCAL_SOURCE_LABEL + "中没有调用明细，无法拆分输入、输出或缓存。");
+      setText("tokenSectionTitle", grainZh(grain) + (IS_PORTABLE ? "Token 构成" : "本地重建 Token 构成"));
       setText("token-title", grainZh(grain) + "可重建 Token 总量与构成");
-      setText("tokenScaleNote", hasLocalDetails ? "每根柱对应" + (grain === "daily" ? "一天" : grain === "weekly" ? "一周" : "一个月") + "，按缓存读取、新输入和输出分段" + (partialPeriods.length ? "；带 * 的时间段不完整" : "") + "。" : HAS_OFFICIAL_SOURCE ? "所选日期没有可重建的本地 Token 组件；官方账户总量仍显示在上方。" : "所选日期在当前本地 CodeBurn 快照中没有可重建的 Token 组件。");
+      setText("tokenScaleNote", hasLocalDetails ? "每根柱对应" + (grain === "daily" ? "一天" : grain === "weekly" ? "一周" : "一个月") + "，按缓存读取、新输入和输出分段" + (partialPeriods.length ? "；带 * 的时间段不完整" : "") + "。" : HAS_OFFICIAL_SOURCE ? "所选日期没有可重建的本地 Token 组件；官方账户总量仍显示在上方。" : "所选日期在" + LOCAL_SOURCE_LABEL + "中没有可重建的 Token 组件。");
       setText("tokenGrainTag", hasLocalDetails ? grainZh(grain) : "无本地明细");
       document.getElementById("tokenLedger").dataset.grain = grain;
       document.getElementById("tokenLedger").setAttribute("aria-label", hasLocalDetails ? selectedRange + "的" + grainZh(grain) + " Token 构成图" : selectedRange + "没有已采集的本地 Token 构成明细");
@@ -2347,10 +2368,14 @@
       setText("dataScopeLabel", HAS_OFFICIAL_SOURCE ? "两层口径" : "数据口径");
       setText("sessionNote", HAS_OFFICIAL_SOURCE
         ? "官方账户总量为 " + compact(reconstruction.officialTokens, 2) + "；同日期本地重建 " + compact(reconstruction.reconstructedTokens, 2) + "。" + (hasLocalDetails ? "组件、项目和时段均以本地账本为准。" : "该日期没有已采集的本地调用明细，因此不展示项目、模型、会话或时段归属。")
-        : "本范围已采集本地 Token 为 " + compact(reconstruction.reconstructedTokens, 2) + "；组件、项目、模型、会话和时段均来自当前本地 CodeBurn 快照。");
+        : "本范围已采集本地 Token 为 " + compact(reconstruction.reconstructedTokens, 2) + "；组件、项目、模型、会话和时段均来自" + LOCAL_SOURCE_LABEL + "。");
 
       setText("projectValue", hasLocalDetails ? pct(reconstruction.projectTokenCoverage) : "—");
-      setText("projectInsight", hasLocalDetails ? "为本地重建 Token 的项目可归属率；" + compact(reconstruction.historicalUnattributedProjectTokens, 2) + " 无法从现存旧日志恢复项目，统一列为“历史未归属”。" : HAS_OFFICIAL_SOURCE ? "所选日期没有已采集的本地调用明细，官方账户 Token 无法归属到项目。" : "所选日期在当前本地 CodeBurn 快照中没有可归属的项目明细。");
+      setText("projectInsight", hasLocalDetails
+        ? IS_PORTABLE
+          ? "为输入数据的项目可归属率；未提供项目标签的记录不会被推测分配。"
+          : "为本地重建 Token 的项目可归属率；" + compact(reconstruction.historicalUnattributedProjectTokens, 2) + " 无法从现存旧日志恢复项目，统一列为“历史未归属”。"
+        : HAS_OFFICIAL_SOURCE ? "所选日期没有已采集的本地调用明细，官方账户 Token 无法归属到项目。" : "所选日期在" + LOCAL_SOURCE_LABEL + "中没有可归属的项目明细。");
       setText("projectRankSubtitle", hasLocalDetails ? "Codex 临时工作目录已并入所属项目 · 前 8 名" : "所选日期没有可归属到项目的本地明细。");
       setText("projectRankTag", hasLocalDetails ? "前 8 名" : "无本地明细");
       setText("project-week-title", grainZh(grain) + "项目估算成本");
@@ -2359,8 +2384,8 @@
       document.getElementById("projectMatrix").dataset.grain = grain;
       document.getElementById("projectMatrix").setAttribute("aria-label", selectedRange + "的" + grainZh(grain) + "项目估算成本堆叠图");
       setText("modelValue", hasLocalDetails ? pct(facts.topModelShare) : "—");
-      setText("modelInsight", hasLocalDetails ? "来自 " + facts.topModel + "；" + topActivityPair + "两类任务合计占估算成本的 " + pct(facts.codingDelegationShare) + "。任务类型由 CodeBurn 自动归类。" : "所选日期没有已采集的本地调用明细，无法识别模型或任务类型。");
-      setText("activitySubtitle", hasLocalDetails ? "CodeBurn 自动归类 · 按估算成本显示前 6 项" : "所选日期没有可自动归类的本地任务明细。");
+      setText("modelInsight", hasLocalDetails ? "来自 " + facts.topModel + "；" + topActivityPair + "两类任务合计占估算成本的 " + pct(facts.codingDelegationShare) + "。" + (ACTIVITY_SOURCE_INPUT ? "任务类型由输入文件提供。" : "任务类型由 CodeBurn 自动归类。") : "所选日期没有已采集的本地调用明细，无法识别模型或任务类型。");
+      setText("activitySubtitle", hasLocalDetails ? (ACTIVITY_SOURCE_INPUT ? "输入数据标签 · 按估算成本显示前 6 项" : "CodeBurn 自动归类 · 按估算成本显示前 6 项") : "所选日期没有可归类的本地任务明细。");
       setText("activityTag", hasLocalDetails ? "前 6 名" : "无本地明细");
       setText("model-title", grainZh(grain) + "模型估算成本");
       setText("modelTrendSubtitle", hasLocalDetails ? (grain === "daily" ? "每天一根柱，分段表示各模型；柱高为当天估算成本合计。" : "每" + (grain === "weekly" ? "周" : "月") + "一根柱，分段表示各模型；柱高为当期估算成本合计。") : "所选日期没有可识别的本地模型明细。");
@@ -2369,7 +2394,7 @@
       document.getElementById("modelStrip").setAttribute("aria-label", selectedRange + "的" + grainZh(grain) + "模型估算成本堆叠图");
 
       setText("sessionValue", hasLocalDetails ? pct(facts.topFiveSessionShare) : "0 个");
-      setText("sessionInsight", hasLocalDetails ? "由估算成本最高的 5 个会话产生。单会话中位数 " + money(facts.sessionMedianCost) + "；95% 的会话不高于 " + money(facts.sessionP95Cost) + "；最高 " + money(topSession.cost) + "。" : HAS_OFFICIAL_SOURCE ? "所选日期没有已采集的本地会话明细；官方账户接口不提供会话拆分。" : "所选日期在当前本地 CodeBurn 快照中没有会话明细。");
+      setText("sessionInsight", hasLocalDetails ? "由估算成本最高的 5 个会话产生。单会话中位数 " + money(facts.sessionMedianCost) + "；95% 的会话不高于 " + money(facts.sessionP95Cost) + "；最高 " + money(topSession.cost) + "。" : HAS_OFFICIAL_SOURCE ? "所选日期没有已采集的本地会话明细；官方账户接口不提供会话拆分。" : "所选日期在" + LOCAL_SOURCE_LABEL + "中没有会话明细。");
       const rankedSessions = summary.calendarDays <= 14;
       const shownSessions = Math.min(summary.sessions, NARROW ? 8 : 12);
       setText("session-title", rankedSessions ? "会话估算成本排名" : "会话首次调用日期与估算成本");
@@ -2399,32 +2424,45 @@
 
       setText("actionValue", money(summary.cost));
       setText("rangeSummaryTitle", compactRangeLabel(REPORT.meta.rangeStart, REPORT.meta.rangeEnd));
-      setText("actionInsight", hasLocalDetails ? "共 " + summary.calls.toLocaleString("en-US") + " 次模型调用 · " + compact(summary.tokens, 2) + " Token" : HAS_OFFICIAL_SOURCE ? "官方账户 Token 正常记录；本地调用明细为 0" : "当前本地 CodeBurn 快照中没有调用明细");
+      setText("actionInsight", hasLocalDetails ? "共 " + summary.calls.toLocaleString("en-US") + " 次模型调用 · " + compact(summary.tokens, 2) + " Token" : HAS_OFFICIAL_SOURCE ? "官方账户 Token 正常记录；本地调用明细为 0" : LOCAL_SOURCE_LABEL + "中没有调用明细");
       setText("actionProjectCopy", peak ? zhDate(peak.date, true) + " · " + peak.calls.toLocaleString("en-US") + " 次模型调用" : "所选日期没有本地调用记录");
       setText("actionProjectMetric", peak ? money(peak.cost) : "—");
-      setText("actionSessionCopy", REPORT.projects.length ? projectLabel(REPORT.projects[0].name) + " · " + REPORT.projects[0].calls.toLocaleString("en-US") + " 次调用 · " + REPORT.projects[0].sessions + " 个会话" : HAS_OFFICIAL_SOURCE ? "官方账户接口不提供项目归属" : "当前本地 CodeBurn 快照没有项目明细");
+      setText("actionSessionCopy", REPORT.projects.length ? projectLabel(REPORT.projects[0].name) + " · " + REPORT.projects[0].calls.toLocaleString("en-US") + " 次调用 · " + REPORT.projects[0].sessions + " 个会话" : HAS_OFFICIAL_SOURCE ? "官方账户接口不提供项目归属" : LOCAL_SOURCE_LABEL + "没有项目明细");
       setText("actionSessionMetric", REPORT.projects.length ? pct(REPORT.projects[0].share) : "—");
       setText("actionActivityCopy", REPORT.models.length ? REPORT.models[0].model + " · " + REPORT.models[0].calls.toLocaleString("en-US") + " 次调用" : "所选日期没有本地模型明细");
       setText("actionActivityMetric", REPORT.models.length ? pct(REPORT.models[0].share) : "—");
       setText("actionActivityLabel", "模型估算成本占比");
 
-      setText("scopePrimaryTitle", HAS_OFFICIAL_SOURCE ? "官方账户" : "当前本地快照");
+      setText("scopePrimaryTitle", HAS_OFFICIAL_SOURCE ? "官方账户" : IS_SYNTHETIC ? "匿名演示数据" : IS_PORTABLE ? "脱敏导入数据" : "当前本地快照");
       setText("scopePrimaryText", HAS_OFFICIAL_SOURCE
         ? "累计与每日 Token 来自 Codex Profile 的账户活动接口；同一登录账户在其他设备上的使用预计包含在内，但接口不提供设备或项目拆分。"
-        : "累计与每日 Token 来自当前设备的 CodeBurn 快照，只覆盖仍可采集的本地记录。");
+        : IS_SYNTHETIC
+          ? "累计与每日 Token 来自内置的匿名合成数据，仅用于功能演示，不代表任何真实账户或项目。"
+          : IS_PORTABLE
+            ? "累计与每日 Token 来自用户显式提供的脱敏文件，不会查询已登录账户或其他设备。"
+            : "累计与每日 Token 来自当前设备的 CodeBurn 快照，只覆盖仍可采集的本地记录。");
       setText("scopeLocalTitle", (HAS_OFFICIAL_SOURCE ? "已采集本地明细 · " + compact(reconstruction.fullLocalLedgerTokens, 2) : "已采集本地 Token · " + compact(summary.tokens, 2)));
       setText("scopeLocalText", HAS_OFFICIAL_SOURCE
         ? "本地账本由已导入设备的 CC Switch 持久历史与截止点后的 CodeBurn 增量无重叠拼接；其中 " + compact(reconstruction.outsideOfficialDateRangeTokens, 2) + " 位于官方日报日期范围之外，不混入同日期比较。"
-        : "项目、模型、会话和时段均由当前本地 CodeBurn 明细重建，不代表同一账户在其他设备上的总量。");
+        : "项目、模型、会话和时段均由" + LOCAL_SOURCE_LABEL + "重建，不代表同一账户在其他设备上的总量。");
       setText("caveatPrimaryTitle", HAS_OFFICIAL_SOURCE ? "Token 活动" : "本地 Token");
       setText("caveatPrimaryText", HAS_OFFICIAL_SOURCE
         ? "官方 Profile 的累计 Token 是账户活动指标，不是订阅剩余额度或账单金额。"
-        : "累计与每日 Token 均来自当前本地 CodeBurn 快照，不是订阅剩余额度或账单金额。");
-      setText("caveatSourceTitle", HAS_OFFICIAL_SOURCE ? "来源差异" : "本地范围");
+        : "累计与每日 Token 均来自" + LOCAL_SOURCE_LABEL + "；" + (IS_PORTABLE ? "估算成本由输入文件提供，" : "") + "不是订阅剩余额度或账单金额。");
+      setText("caveatSourceTitle", HAS_OFFICIAL_SOURCE ? "来源差异" : IS_PORTABLE ? "数据范围" : "本地范围");
       setText("caveatSourceText", HAS_OFFICIAL_SOURCE
         ? "官方账户与本地账本的日期边界、设备范围和留存范围不同。两者净差可能同时包含未导入设备、已删除日志及采集时点差异，不能直接认定为某台电脑的用量，也不摊入项目、模型或 Token 组件。"
-        : "当前报告只覆盖已采集到的本地记录；其他设备和已删除日志不在统计范围内，因此不能代表同一账户的总量。");
-      setText("footerSource", "数据来源 · " + (HAS_OFFICIAL_SOURCE ? "Codex 官方账户活动 + 已采集设备的 CC Switch 历史账本与 CodeBurn 增量" : "当前本地 CodeBurn 快照") + " / " + document.getElementById("snapshotGeneratedLabel").textContent);
+        : IS_SYNTHETIC
+          ? "这是匿名合成演示数据，只用于验证 Skill 的分析与报告能力。"
+          : "当前报告只覆盖显式导入或已采集到的本地记录；其他设备和已删除日志不在统计范围内，因此不能代表同一账户的总量。");
+      setText("classificationTitle", ACTIVITY_SOURCE_INPUT ? "任务标签" : "自动分类");
+      setText("classificationText", ACTIVITY_SOURCE_INPUT
+        ? "任务类型来自输入文件中的 activity 字段，并非 Skill 对工作内容的自动判断；本报告只展示模型使用时间与估算成本的关系。"
+        : topActivityPair + "由 CodeBurn 自动归类，并非人工标注。本报告只展示模型使用时间与估算成本的关系，不据此判断模型更换导致成本变化。");
+      setText("timeBasisText", IS_PORTABLE
+        ? "本页按输入记录的模型调用时间统计；日期和小时按报告所选时区换算。"
+        : "本页按模型调用日期统计；CodeBurn 原始日报按对话轮次日期统计，因此两者的单日数值可能不同。");
+      setText("footerSource", "数据来源 · " + (HAS_OFFICIAL_SOURCE ? "Codex 官方账户活动 + 已采集设备的 CC Switch 历史账本与 CodeBurn 增量" : LOCAL_SOURCE_LABEL) + " / " + document.getElementById("snapshotGeneratedLabel").textContent);
 
       document.getElementById("dailyTable").innerHTML = HAS_OFFICIAL_SOURCE
         ? tableHtml(
@@ -2478,11 +2516,11 @@
       const message = "所选日期没有已采集的本地" + subject + "明细";
       return {
         animation: false,
-        aria: { enabled: true, description: message + (HAS_OFFICIAL_SOURCE ? "；官方账户 Token 仍按所选日期显示。" : "；当前本地 CodeBurn 快照中没有可绘制记录。") },
+        aria: { enabled: true, description: message + (HAS_OFFICIAL_SOURCE ? "；官方账户 Token 仍按所选日期显示。" : "；" + LOCAL_SOURCE_LABEL + "中没有可绘制记录。") },
         textStyle: { fontFamily: FONT },
         graphic: [
           { type: "text", left: "center", top: "43%", silent: true, style: { text: "暂无本地明细", fill: COLORS.ink, fontFamily: FONT, fontSize: NARROW ? 18 : 22, fontWeight: 650, textAlign: "center" } },
-          { type: "text", left: "center", top: "53%", silent: true, style: { text: message + (HAS_OFFICIAL_SOURCE ? "\n官方账户 Token 不会被推算为本地归属" : "\n当前本地 CodeBurn 快照中没有可绘制记录"), fill: COLORS.muted, fontFamily: FONT, fontSize: NARROW ? 10 : 12, lineHeight: NARROW ? 17 : 20, textAlign: "center" } }
+          { type: "text", left: "center", top: "53%", silent: true, style: { text: message + (HAS_OFFICIAL_SOURCE ? "\n官方账户 Token 不会被推算为本地归属" : "\n" + LOCAL_SOURCE_LABEL + "中没有可绘制记录"), fill: COLORS.muted, fontFamily: FONT, fontSize: NARROW ? 10 : 12, lineHeight: NARROW ? 17 : 20, textAlign: "center" } }
         ],
         series: []
       };

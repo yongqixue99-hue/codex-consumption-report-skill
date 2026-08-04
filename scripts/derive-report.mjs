@@ -713,7 +713,38 @@ for (const record of rangeRecords) {
 const filterFacts = [...filterFactMap.values()].map((row) => ({ ...row, cost: round(row.cost, 6) }));
 
 const activeDayCosts = daily.filter((row) => row.calls > 0).map((row) => row.cost);
+const activeDayTokens = daily.filter((row) => row.calls > 0).map((row) => row.tokens);
 const topDays = [...daily].filter((row) => row.calls > 0).sort((a, b) => b.cost - a.cost);
+const peakTokenDay = [...daily].filter((row) => row.calls > 0).sort((a, b) => b.tokens - a.tokens)[0] ?? null;
+const peakToMedianActiveDayTokens = activeDayTokens.length
+  ? (peakTokenDay?.tokens ?? 0) / Math.max(1, quantile(activeDayTokens, 0.5))
+  : null;
+function topTokenShareForDate(date, dimension) {
+  if (!date) return null;
+  const totals = new Map();
+  let dateTokens = 0;
+  for (const fact of filterFacts) {
+    if (fact.date !== date) continue;
+    const tokens = fact.input + fact.output + fact.cacheRead + fact.cacheWrite;
+    dateTokens += tokens;
+    totals.set(fact[dimension], (totals.get(fact[dimension]) ?? 0) + tokens);
+  }
+  const top = [...totals.values()].sort((left, right) => right - left)[0] ?? 0;
+  return dateTokens ? top / dateTokens : null;
+}
+function topTokenFact(dimension) {
+  const totals = new Map();
+  for (const fact of filterFacts) {
+    const tokens = fact.input + fact.output + fact.cacheRead + fact.cacheWrite;
+    totals.set(fact[dimension], (totals.get(fact[dimension]) ?? 0) + tokens);
+  }
+  const [name, tokens] = [...totals.entries()].sort((left, right) => right[1] - left[1])[0] ?? [null, 0];
+  return { name, tokens, share: totalTokens ? tokens / totalTokens : 0 };
+}
+const peakDayTopProjectTokenShare = topTokenShareForDate(peakTokenDay?.date, "project");
+const peakDayTopModelTokenShare = topTokenShareForDate(peakTokenDay?.date, "model");
+const topProjectTokenFact = topTokenFact("project");
+const topModelTokenFact = topTokenFact("model");
 const topSessionCost = (count) => sessions.slice(0, count).reduce((sum, row) => sum + row.cost, 0);
 const dominantMonth = [...months].sort((a, b) => b.cost - a.cost)[0];
 const dominantMonthIndex = months.findIndex((row) => row.month === dominantMonth.month);
@@ -734,6 +765,14 @@ for (const row of daily) {
 }
 const officialTokens = lifecycleContext?.officialLifetimeTokens ?? totalTokens;
 const officialPeakDay = [...officialDaily].sort((a, b) => b.tokens - a.tokens)[0] ?? { date: rangeStart, tokens: 0 };
+const sourceMode = lifecycleContext
+  ? "official-and-local-lifecycle"
+  : source.competition?.portableInput === true
+    ? source.competition?.syntheticData === true ? "synthetic-demo" : "portable-input"
+    : "codeburn-snapshot";
+const sourceLabel = lifecycleContext
+  ? "Codex 官方账户 + 已采集本地账本"
+  : String(source.competition?.sourceLabel || "当前本地 CodeBurn 快照");
 const historicalUnattributedLabel = "历史未归属";
 const isHistoricalUnattributed = (value) => /^历史未归(?:属|类)(?:\s*·|$)/u.test(String(value || ""));
 const rawRecordTokens = (record) => (record.inputTokens ?? 0) + (record.outputTokens ?? 0)
@@ -775,9 +814,20 @@ const output = {
     rangeEnd,
     provider: "Codex",
     codeburnVersion: CODEBURN_VERSION,
-    costDefinition: "CodeBurn 按模型价格表估算的成本，不是 Codex 订阅实际账单。",
-    dailyDefinition: "每日指标沿用 CodeBurn 记录的对话轮次日期；时段图按实际调用时间戳聚合。",
-    filterDefinition: "交互式日期筛选统一按模型实际调用时间统计。",
+    sourceMode,
+    sourceLabel,
+    portableInput: source.competition?.portableInput === true,
+    syntheticData: source.competition?.syntheticData === true,
+    activityClassification: source.competition?.portableInput === true ? "provided-by-input" : "codeburn-inferred",
+    costDefinition: source.competition?.portableInput === true
+      ? "估算成本由输入文件提供，仅作为 API 等价估算，不是 Codex 订阅实际账单。"
+      : "CodeBurn 按模型价格表估算的成本，不是 Codex 订阅实际账单。",
+    dailyDefinition: source.competition?.portableInput === true
+      ? "每日指标按输入记录的显式时间戳与所选时区聚合。"
+      : "每日指标沿用 CodeBurn 记录的对话轮次日期；时段图按实际调用时间戳聚合。",
+    filterDefinition: source.competition?.portableInput === true
+      ? "交互式日期筛选统一使用输入记录的日历日期。"
+      : "交互式日期筛选统一按模型实际调用时间统计。",
     recordCostScale: round(recordCostScale, 8),
   },
   summary: {
@@ -834,6 +884,105 @@ const output = {
   sessions,
   heatmap,
   filterFacts,
+  diagnostics: {
+    sourceMode,
+    sourceRecordRows: rangeRecords.length,
+    weightedCalls: totalCalls,
+    activeCalendarDays: daily.filter((row) => row.calls > 0).length,
+    selectedCalendarDays: daily.length,
+    zeroCallDays: daily.filter((row) => row.calls === 0).length,
+    peakDay: peakTokenDay ? { date: peakTokenDay.date, tokens: peakTokenDay.tokens, calls: peakTokenDay.calls } : null,
+    peakToMedianActiveDayTokens,
+    cacheReadTokenShare: tokenComponents.cacheRead / totalTokens,
+    projectTokenCoverage: reconstruction.projectTokenCoverage,
+    activityTokenCoverage: reconstruction.activityTokenCoverage,
+    topProjectCostShare: projects[0]?.share ?? null,
+    topModelCostShare: models[0]?.share ?? null,
+    topProjectTokenShare: topProjectTokenFact.share,
+    topModelTokenShare: topModelTokenFact.share,
+    topFiveSessionCostShare: topSessionCost(5) / totalCost,
+    ruleset: source.competition?.portableInput === true ? "codex.portable.analysis.v1" : "codex.consumption.analysis.v1",
+    qualityFacts: [
+      {
+        code: "reconciliation",
+        outcome: "pass",
+        tokens: totalTokens,
+        componentTokens: tokenComponents.input + tokenComponents.output + tokenComponents.cacheRead + tokenComponents.cacheWrite,
+        calls: totalCalls,
+        evidence: "The date, model, project, activity, session, hour, call, and Token-component views derive from the same selected record set.",
+      },
+      {
+        code: "calendar-continuity",
+        outcome: "pass",
+        selectedCalendarDays: daily.length,
+        zeroCallDays: daily.filter((row) => row.calls === 0).length,
+        evidence: "The derived date axis contains one row for every selected calendar date.",
+      },
+      {
+        code: "project-token-attribution",
+        outcome: reconstruction.projectTokenCoverage >= 0.999999 ? "full" : "partial",
+        ratio: round(reconstruction.projectTokenCoverage, 8),
+        evidence: "Known project Tokens divided by locally reconstructed Tokens.",
+      },
+      {
+        code: "activity-token-attribution",
+        outcome: reconstruction.activityTokenCoverage >= 0.999999 ? "full" : "partial",
+        ratio: round(reconstruction.activityTokenCoverage, 8),
+        evidence: "Known activity Tokens divided by locally reconstructed Tokens.",
+      },
+      {
+        code: "source-disclosure",
+        outcome: sourceMode === "synthetic-demo" ? "synthetic" : sourceMode === "portable-input" ? "portable" : "collected",
+        evidence: sourceLabel,
+      },
+    ],
+    analysisFacts: [
+      {
+        code: "peak-day-token-ratio",
+        notable: peakToMedianActiveDayTokens !== null && peakToMedianActiveDayTokens >= 2,
+        date: peakTokenDay?.date ?? null,
+        value: peakToMedianActiveDayTokens === null ? null : round(peakToMedianActiveDayTokens, 4),
+        baseline: "median active-day Tokens",
+        interpretationLimit: "This is a statistical threshold, not a causal diagnosis.",
+      },
+      {
+        code: "top-project-token-share",
+        notable: topProjectTokenFact.share >= 0.6,
+        name: topProjectTokenFact.name,
+        tokens: topProjectTokenFact.tokens,
+        value: round(topProjectTokenFact.share, 8),
+        evidence: "Largest project Token subtotal divided by total Tokens.",
+        interpretationLimit: "This describes concentration and does not imply inefficient work.",
+      },
+      {
+        code: "top-model-token-share",
+        notable: topModelTokenFact.share >= 0.6,
+        name: topModelTokenFact.name,
+        tokens: topModelTokenFact.tokens,
+        value: round(topModelTokenFact.share, 8),
+        evidence: "Largest model Token subtotal divided by total Tokens.",
+      },
+      {
+        code: "peak-day-top-project-token-share",
+        date: peakTokenDay?.date ?? null,
+        value: peakDayTopProjectTokenShare === null ? null : round(peakDayTopProjectTokenShare, 8),
+        evidence: "Largest project Token subtotal divided by peak-day Tokens.",
+      },
+      {
+        code: "peak-day-top-model-token-share",
+        date: peakTokenDay?.date ?? null,
+        value: peakDayTopModelTokenShare === null ? null : round(peakDayTopModelTokenShare, 8),
+        evidence: "Largest model Token subtotal divided by peak-day Tokens.",
+      },
+      {
+        code: "cache-read-token-share",
+        notable: tokenComponents.cacheRead / totalTokens >= 0.8,
+        value: round(tokenComponents.cacheRead / totalTokens, 8),
+        evidence: "Cache-read Tokens divided by total Tokens; this is not cost share.",
+        interpretationLimit: "A high share is a composition fact, not evidence of a cache fault.",
+      },
+    ],
+  },
   facts: {
     dominantMonth: dominantMonth.month,
     dominantMonthCost: dominantMonth.cost,

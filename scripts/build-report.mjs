@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { chmodSync, closeSync, fsyncSync, openSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, closeSync, existsSync, fsyncSync, openSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import { resolve } from "node:path";
 
@@ -24,12 +24,36 @@ const templatePath = resolve(args.template || resolve(skillRoot, "assets/report.
 const dataPath = resolve(args.data);
 const echartsPath = resolve(args.echarts || resolve(skillRoot, "assets/vendor/echarts/echarts.min.js"));
 const outputPath = resolve(args.output);
+function firstExisting(...paths) {
+  const found = paths.find((path) => existsSync(path));
+  if (!found) throw new Error(`Required distribution notice is missing: ${paths.join(" or ")}`);
+  return found;
+}
+const packagedBackgroundLicensePath = resolve(skillRoot, "licenses/LICENSE-Apache-2.0.txt");
 const distributionNoticePaths = [
-  ["Codex Consumption Report LICENSE", resolve(skillRoot, "LICENSE")],
-  ["Codex Consumption Report NOTICE", resolve(skillRoot, "NOTICE")],
+  ["Codex Consumption Report LICENSE", firstExisting(resolve(skillRoot, "LICENSE.txt"), resolve(skillRoot, "LICENSE"))],
+  ...(existsSync(packagedBackgroundLicensePath)
+    ? [["Pre-existing background Apache-2.0 LICENSE", packagedBackgroundLicensePath]]
+    : []),
+  ["Codex Consumption Report NOTICE", firstExisting(resolve(skillRoot, "NOTICE.txt"), resolve(skillRoot, "NOTICE"))],
   ["Apache ECharts LICENSE", resolve(skillRoot, "assets/vendor/echarts/LICENSE.txt")],
   ["Apache ECharts NOTICE", resolve(skillRoot, "assets/vendor/echarts/NOTICE.txt")],
-  ["d3 BSD 3-Clause LICENSE", resolve(skillRoot, "assets/vendor/echarts/licenses/LICENSE-d3")],
+  ["d3 BSD 3-Clause LICENSE", firstExisting(
+    resolve(skillRoot, "assets/vendor/echarts/licenses/LICENSE-d3.txt"),
+    resolve(skillRoot, "assets/vendor/echarts/licenses/LICENSE-d3"),
+  )],
+  ["zrender 6.1.0 BSD 3-Clause LICENSE", firstExisting(
+    resolve(skillRoot, "assets/vendor/echarts/licenses/LICENSE-zrender.txt"),
+    resolve(skillRoot, "assets/vendor/echarts/licenses/LICENSE-zrender"),
+  )],
+  ["tslib 2.3.0 0BSD LICENSE", firstExisting(
+    resolve(skillRoot, "assets/vendor/echarts/licenses/LICENSE-tslib.txt"),
+    resolve(skillRoot, "assets/vendor/echarts/licenses/LICENSE-tslib"),
+  )],
+  ["tslib 2.3.0 Copyright Notice", firstExisting(
+    resolve(skillRoot, "assets/vendor/echarts/licenses/CopyrightNotice-tslib.txt"),
+    resolve(skillRoot, "assets/vendor/echarts/licenses/CopyrightNotice-tslib"),
+  )],
 ];
 const SESSION_PSEUDONYM_PATTERN = /^session-[0-9a-f]{12}$/;
 const UUID_PATTERN = /[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}/giu;
@@ -153,6 +177,7 @@ const officialRows = data.officialDaily?.length
   ? data.officialDaily
   : data.daily.map((row) => ({ date: row.date, tokens: row.tokens }));
 const hasOfficialSource = data.meta?.officialSourceAvailable === true;
+const portableInput = data.meta?.portableInput === true;
 const officialActiveDays = officialRows.filter((row) => Number(row.tokens || 0) > 0).length;
 const officialDailyAverage = reconstruction.officialTokens / Math.max(1, officialRows.length);
 const officialPeakDay = data.facts.officialPeakDay
@@ -209,7 +234,9 @@ const dailyTableHeaders = hasOfficialSource
       { value: "估算成本", numeric: true },
       { value: "调用", numeric: true },
       { value: "会话", numeric: true },
-      { value: "已采集本地 Token", numeric: true, title: "当前本地 CodeBurn 快照" },
+      portableInput
+        ? { value: "导入 Token", numeric: true, title: data.meta.sourceLabel }
+        : { value: "已采集本地 Token", numeric: true, title: "当前本地 CodeBurn 快照" },
       { value: "缓存读取", numeric: true },
     ];
 const dailyTable = table(

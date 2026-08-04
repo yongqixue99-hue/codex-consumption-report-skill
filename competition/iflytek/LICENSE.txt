@@ -1,0 +1,35 @@
+COMPETITION PACKAGE LICENSE AND RIGHTS NOTICE
+
+This file is the license index for the iFLYTEK competition package. It does
+not amend, replace, or interpret the competition rules or any agreement with
+the organizer.
+
+1. Pre-existing background material
+
+The portions of this package that existed in public commit
+94a72c6ddf8685a5b4541cb453260df0a8c39570 (2026-08-04T10:43:16+08:00)
+remain available under the Apache License, Version 2.0. A complete copy is in
+licenses/LICENSE-Apache-2.0.txt. The background inventory identifies the
+baseline Git objects. A current file at the same path may also contain a
+post-baseline competition adaptation; that delta is not reclassified as
+background material merely because it shares the file.
+
+2. Competition-period original adaptations
+
+The original adaptations listed in competition-ip/competition-new-work.md are
+Copyright 2026 the submitter/repository contributors, with the final legal
+identity determined by the competition registration. This package grants no
+separate public license for those adaptations. All rights not expressly
+granted by applicable law, the competition rules, or a separately executed
+written agreement are reserved. Submission, review, evaluation, publication,
+and prize-related use are governed by the applicable competition rules and
+any written agreement with the organizer.
+
+3. Third-party material
+
+Apache ECharts, d3.js portions embedded by ECharts, zrender, and tslib retain
+their respective licenses. See competition-ip/third-party-components.md and
+the license and notice files under assets/vendor/echarts/.
+
+No statement in this index revokes rights already granted under Apache-2.0 or
+changes any third-party license.

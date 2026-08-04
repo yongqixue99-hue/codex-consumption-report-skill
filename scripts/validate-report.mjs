@@ -25,12 +25,34 @@ const skillRoot = resolve(import.meta.dirname, "..");
 const sourcePath = resolve(args.source);
 const dataPath = resolve(args.data);
 const reportPath = resolve(args.report);
+function firstExisting(...paths) {
+  const found = paths.find((path) => existsSync(path));
+  if (!found) throw new Error(`Required distribution notice is missing: ${paths.join(" or ")}`);
+  return found;
+}
+const packagedBackgroundLicensePath = resolve(skillRoot, "licenses/LICENSE-Apache-2.0.txt");
 const distributionNoticePaths = [
-  resolve(skillRoot, "LICENSE"),
-  resolve(skillRoot, "NOTICE"),
+  firstExisting(resolve(skillRoot, "LICENSE.txt"), resolve(skillRoot, "LICENSE")),
+  ...(existsSync(packagedBackgroundLicensePath) ? [packagedBackgroundLicensePath] : []),
+  firstExisting(resolve(skillRoot, "NOTICE.txt"), resolve(skillRoot, "NOTICE")),
   resolve(skillRoot, "assets/vendor/echarts/LICENSE.txt"),
   resolve(skillRoot, "assets/vendor/echarts/NOTICE.txt"),
-  resolve(skillRoot, "assets/vendor/echarts/licenses/LICENSE-d3"),
+  firstExisting(
+    resolve(skillRoot, "assets/vendor/echarts/licenses/LICENSE-d3.txt"),
+    resolve(skillRoot, "assets/vendor/echarts/licenses/LICENSE-d3"),
+  ),
+  firstExisting(
+    resolve(skillRoot, "assets/vendor/echarts/licenses/LICENSE-zrender.txt"),
+    resolve(skillRoot, "assets/vendor/echarts/licenses/LICENSE-zrender"),
+  ),
+  firstExisting(
+    resolve(skillRoot, "assets/vendor/echarts/licenses/LICENSE-tslib.txt"),
+    resolve(skillRoot, "assets/vendor/echarts/licenses/LICENSE-tslib"),
+  ),
+  firstExisting(
+    resolve(skillRoot, "assets/vendor/echarts/licenses/CopyrightNotice-tslib.txt"),
+    resolve(skillRoot, "assets/vendor/echarts/licenses/CopyrightNotice-tslib"),
+  ),
 ];
 const SESSION_PSEUDONYM_PATTERN = /^session-[0-9a-f]{12}$/;
 const UUID_PATTERN = /[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}/iu;
@@ -132,6 +154,40 @@ check(data.meta.officialSourceAvailable === lifecycleMode, "Official-source avai
 check(Boolean(data.sources?.official) === data.meta.officialSourceAvailable, "Official-source availability flag diverged from embedded source metadata");
 check(report.includes(`"officialSourceAvailable":${data.meta.officialSourceAvailable}`), "HTML report omits the official-source availability flag");
 check(report.includes("const HAS_OFFICIAL_SOURCE = BASE_REPORT.meta && BASE_REPORT.meta.officialSourceAvailable === true"), "HTML report does not gate source claims on the official-source flag");
+check(typeof data.meta.sourceMode === "string" && data.meta.sourceMode.length > 0, "Report data omits sourceMode");
+check(typeof data.meta.sourceLabel === "string" && data.meta.sourceLabel.length > 0, "Report data omits sourceLabel");
+if (source.competition?.portableInput === true) {
+  check(data.meta.portableInput === true, "Portable source flag did not reach report data");
+  check(data.meta.sourceMode === (source.competition.syntheticData === true ? "synthetic-demo" : "portable-input"), "Portable source mode is incorrect");
+  check(data.meta.syntheticData === (source.competition.syntheticData === true), "Synthetic-data flag diverged from portable source");
+  check(report.includes(`"sourceMode":"${data.meta.sourceMode}"`), "HTML report omits portable source mode");
+  if (data.meta.syntheticData) {
+    check(report.includes('id="demoDataBadge"'), "Synthetic report omits the demo-data badge");
+    check(report.includes("匿名合成演示数据"), "Synthetic report does not disclose its source");
+  }
+  check(source.portableAudit?.calls === sourceSummary["API Calls"], "Portable audit calls diverged from source summary");
+  check(source.portableAudit?.tokens === sum(rangeRecords, (record) => tokenFields.reduce((total, field) => total + record[field], 0)), "Portable audit Tokens diverged from records");
+  check(data.meta.activityClassification === "provided-by-input", "Portable activity labels are not declared as input-provided");
+  check(/输入文件提供/u.test(data.meta.costDefinition), "Portable cost definition incorrectly claims a collected price source");
+  check(data.diagnostics?.ruleset === "codex.portable.analysis.v1", "Portable analysis rule set is missing");
+  const qualityFact = (code) => data.diagnostics?.qualityFacts?.find((fact) => fact.code === code);
+  const analysisFact = (code) => data.diagnostics?.analysisFacts?.find((fact) => fact.code === code);
+  const reconciliation = qualityFact("reconciliation");
+  check(reconciliation?.outcome === "pass", "Portable reconciliation fact did not pass");
+  check(reconciliation?.tokens === data.summary.tokens, "Portable reconciliation Token total diverged");
+  check(reconciliation?.componentTokens === Object.values(data.summary.tokenComponents).reduce((total, value) => total + value, 0), "Portable reconciliation component total diverged");
+  check(reconciliation?.calls === data.summary.calls, "Portable reconciliation call total diverged");
+  const tokenSubtotal = (fact) => fact.input + fact.output + fact.cacheRead + fact.cacheWrite;
+  const topShare = (dimension) => {
+    const totals = new Map();
+    for (const fact of data.filterFacts) totals.set(fact[dimension], (totals.get(fact[dimension]) ?? 0) + tokenSubtotal(fact));
+    const top = [...totals.values()].sort((left, right) => right - left)[0] ?? 0;
+    return data.summary.tokens ? top / data.summary.tokens : 0;
+  };
+  check(Math.abs(analysisFact("top-project-token-share")?.value - topShare("project")) < 1e-8, "Portable top-project Token share diverged");
+  check(Math.abs(analysisFact("top-model-token-share")?.value - topShare("model")) < 1e-8, "Portable top-model Token share diverged");
+  check(Math.abs(analysisFact("cache-read-token-share")?.value - data.summary.tokenComponents.cacheRead / data.summary.tokens) < 1e-8, "Portable cache-read Token share diverged");
+}
 check(data.meta.generatedAt === (lifecycleMode ? official.generatedAt : source.generated), "Snapshot timestamp diverged from source export");
 check(/^\d{4}-\d{2}-\d{2}$/.test(data.meta.rangeStart) && /^\d{4}-\d{2}-\d{2}$/.test(data.meta.rangeEnd), "Lifecycle range is invalid");
 check(data.meta.rangeStart <= data.meta.rangeEnd, "Lifecycle range is reversed");
@@ -146,9 +202,9 @@ if (!lifecycleMode) {
   check(data.officialDaily.every((row, index) => row.date === data.daily[index].date && row.tokens === data.daily[index].tokens), "Local-only primary daily series diverged from CodeBurn daily Tokens");
   check(data.summary.reconstruction.netGapTokens === 0, "Local-only report fabricates an official-to-local gap");
   check(!/(?:官方账户|Codex Profile|账户活动接口)/u.test(staticMarkup), "Local-only report contains a visible official-source claim before runtime initialization");
-  check(staticMarkup.includes('id="heroNumberLabel">当前本地 CodeBurn 快照 Token'), "Local-only hero is not labeled as a CodeBurn snapshot");
-  check(staticMarkup.includes('id="metricTokensLabel">已采集本地 Token 总量'), "Local-only KPI is not labeled as local Tokens");
-  check(staticMarkup.includes('id="footerSource">数据来源 · 当前本地 CodeBurn 快照'), "Local-only footer declares the wrong source");
+  check(staticMarkup.includes('id="heroNumberLabel">Token 总量'), "Pre-runtime hero does not use a source-neutral label");
+  check(staticMarkup.includes('id="metricTokensLabel">Token 总量'), "Pre-runtime KPI does not use a source-neutral label");
+  check(staticMarkup.includes('id="footerSource">数据来源 · 加载中'), "Pre-runtime footer does not use a source-neutral label");
 }
 
 for (let index = 1; index < data.daily.length; index += 1) {

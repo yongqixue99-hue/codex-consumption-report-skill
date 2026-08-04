@@ -1,6 +1,6 @@
 ---
 name: generate-codex-consumption-report
-description: Generate a polished, date-led, interactive Codex consumption report from the official account usage summary and one or more device-local CC Switch or CodeBurn sources. Use when the user asks where Codex tokens or estimated cost went, requests lifecycle/monthly/custom-period or Mac-and-Windows cross-device analysis, audits coverage after deleting threads, wants project/model/session/cache diagnostics, or wants an offline HTML/PDF/PNG report. This skill is for Codex-only analysis; it must not present estimated cost as subscription billing, claim a remaining quota, or infer that an official-versus-local difference belongs to a device or deleted thread.
+description: Generate a polished, date-led, interactive Codex consumption report from official account usage, device-local CC Switch or CodeBurn sources, or an explicitly supplied sanitized portable JSON, JSONL, or CSV file. Use when the user asks where Codex Tokens or estimated cost went, requests lifecycle/monthly/custom-period or Mac-and-Windows analysis, audits coverage after deleted threads, wants project/model/session/cache diagnostics, needs an anonymous competition demo, or wants an offline HTML/PDF/PNG report. This skill is Codex-only; it must not present estimated cost as subscription billing, claim remaining quota, or assign an official-versus-local difference to a device or deleted thread.
 ---
 
 # Generate Codex Consumption Report
@@ -18,6 +18,19 @@ Produce a self-contained interactive HTML report whose narrative starts with off
 7. Generate HTML first. Render PDF and PNG when browser dependencies are available or the user asks for those formats. Do not generate video.
 
 Do not block on an unspecified date range: use the full lifecycle. Do not block on an unspecified timezone: use the current environment timezone, falling back to `Asia/Shanghai` only when it cannot be determined.
+
+## Use portable competition mode
+
+When the environment has no signed-in Codex installation, when the user asks for an anonymous demonstration, or when they explicitly supply a sanitized portable JSON, JSONL, or CSV file, use the isolated competition runner instead of the lifecycle collector:
+
+```bash
+node "$SKILL_DIR/scripts/generate-competition-report.mjs" \
+  --demo \
+  --output-dir "/absolute/dedicated/output/directory" \
+  --timezone "Asia/Shanghai"
+```
+
+Replace `--demo` with `--input "/absolute/path/portable-usage.json"` for explicit data. Never fall back from an invalid upload to demo data or local collection. Treat portable `activity` labels and API-equivalent cost as input-provided fields, not CodeBurn inference or subscription billing. Return the runner's `replyMarkdown` before the HTML artifact. Read [references/competition-mode.md](references/competition-mode.md) before packaging or adapting this path for a competition platform.
 
 ## Generate the report
 
@@ -92,7 +105,7 @@ Choose one retention mode:
 - `--retention compressed` validates first, then stores those files as `.json.gz`; this is the normal delivery choice.
 - `--retention report-only` validates first, records content hashes in the manifest, then removes the JSON intermediates. Use it only when minimum disk usage matters more than later revalidation.
 
-On POSIX systems, the self-contained HTML, manifest, source files, and rendered artifacts are written as `0600` inside `0700` output directories. On Windows, place output in a current-user private NTFS directory because access follows inherited Windows ACLs rather than POSIX mode bits. The manifest contains relative artifact names rather than host paths. Report data and HTML contain stable `session-<12 hex>` pseudonyms, never raw source session IDs. Raw or compressed source ledgers can still contain local paths and identifiers and must remain local. The HTML embeds the Skill, ECharts, and d3 distribution notices so it remains license-complete when shared by itself.
+On POSIX systems, the self-contained HTML, manifest, source files, and rendered artifacts are written as `0600` inside `0700` output directories. On Windows, place output in a current-user private NTFS directory because access follows inherited Windows ACLs rather than POSIX mode bits. The manifest contains relative artifact names rather than host paths. Report data and HTML contain stable `session-<12 hex>` pseudonyms, never raw source session IDs. Raw or compressed source ledgers can still contain local paths and identifiers and must remain local. The HTML embeds the Skill, ECharts, d3, zrender, and tslib distribution notices so it remains license-complete when shared by itself.
 
 To rerun validation independently:
 

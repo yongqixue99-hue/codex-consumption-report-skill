@@ -1,0 +1,28 @@
+Codex Consumption Report — iFLYTEK competition portable package
+Copyright 2026 the submitter/repository contributors
+
+This package combines:
+
+* pre-existing background material under Apache License 2.0;
+* competition-period original adaptations identified separately in
+  competition-ip/competition-new-work.md; and
+* third-party material under its original licenses.
+
+Apache ECharts
+Copyright 2017-2026 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (https://www.apache.org/).
+
+The bundled Apache ECharts 6.1.0 browser distribution contains d3.js portions,
+zrender 6.1.0, and tslib 2.3.0. Applicable terms and notices are preserved in:
+
+* assets/vendor/echarts/LICENSE.txt
+* assets/vendor/echarts/NOTICE.txt
+* assets/vendor/echarts/licenses/LICENSE-d3.txt
+* assets/vendor/echarts/licenses/LICENSE-zrender.txt
+* assets/vendor/echarts/licenses/LICENSE-tslib.txt
+* assets/vendor/echarts/licenses/CopyrightNotice-tslib.txt
+
+See LICENSE.txt for the package-level rights boundary and
+competition-ip/third-party-components.md for component provenance.
