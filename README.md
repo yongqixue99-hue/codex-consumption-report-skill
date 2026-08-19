@@ -1,12 +1,15 @@
 # Codex Consumption Report Skill
 
-一个专门分析 Codex Token 消耗的 Codex Skill。它将官方账户 Token 活动与本机或多设备可恢复的调用明细分开呈现，生成可筛选的离线 HTML 报告，并可选导出 PDF 与 PNG。
+一个同时分析 Codex Token 消耗与核对 Credits 的 Codex Skill。它将官方账户 Token、本机或多设备可恢复的调用明细、网页 Credits 三种口径分开呈现，生成可筛选的离线报告、完整数字表和可分享图表。
 
 > An offline, date-led Codex usage report that keeps official account totals separate from device-local attribution.
 
 ## 能做什么
 
 - 按日期展示 Codex 官方账户 Token 总量、每日变化和峰值。
+- 核对 `daily-workspace-usage-counts` 中的 credits、Token 分项、threads 与 turns。
+- 解释 Fast 模式倍率，生成官方费率表、1 credit 换算表和 250 credits 的 Sol 等价表。
+- 结合页面剩余百分比，给出带取整区间与重置边界提示的周总额度近似值。
 - 从 CC Switch 历史账本与 CodeBurn 增量重建本地调用明细。
 - 分析输入、输出、缓存读取、项目、模型、任务类型、会话与调用时段。
 - 支持日期区间筛选、单日和最近 7 天等短周期视图。
@@ -16,12 +19,13 @@
 
 ## 数据口径
 
-报告明确区分两层数据：
+报告明确区分三层数据：
 
 1. **官方账户层**：来自已登录 Codex 账户的官方累计与每日 Token 活动。
 2. **本地解释层**：来自已导入设备的 CC Switch 与 CodeBurn，用于解释 Token 花在了哪些项目、模型、会话和时段。
+3. **Credits 核对层**：来自浏览器用量页中 `daily-workspace-usage-counts` 的纯 JSON 响应，用于核对已计入的 credits、Fast 与额度近似值。
 
-官方接口不提供设备或项目拆分，因此不能把“官方总量与本地重建值之差”直接归因给某台设备、已删除任务或某个项目。报告中的成本是按公开 API 价格进行的等价估算，不是 Codex 订阅账单，也不表示剩余额度。
+三层数据不会被强行混算。官方接口不提供设备或项目拆分，因此不能把“官方总量与本地重建值之差”直接归因给某台设备、已删除任务或某个项目。报告中的成本是按公开 API 价格进行的等价估算，不是 Codex 订阅账单；Credits 也不是美元。通过页面百分比反推的周额度只是近似值。
 
 ## 安装
 
@@ -36,6 +40,12 @@ git clone https://github.com/yongqixue99-hue/codex-consumption-report-skill.git 
 
 ```text
 使用 $generate-codex-consumption-report 分析我的 Codex Token 消耗，生成完整报告。
+```
+
+也可以直接说：
+
+```text
+使用 $generate-codex-consumption-report 核对我的 Codex credits，解释 Fast，并把每日数字做成表格和图。
 ```
 
 ## 命令行生成
@@ -58,6 +68,38 @@ node scripts/generate-report.mjs \
 ```
 
 完整运行规则、跨设备流程和验证方式见 [SKILL.md](SKILL.md)、[多设备说明](references/multi-device.md) 与 [数据契约](references/data-contract.md)。
+
+## Credits 核对
+
+先在 Codex 用量页打开浏览器开发者工具，只复制 `daily-workspace-usage-counts` 请求的 **Response JSON**。不要复制 Headers、Cookies、Authorization，也不要导出 HAR。然后运行：
+
+```bash
+node scripts/generate-credits-audit.mjs \
+  --input "/absolute/path/daily-workspace-usage-counts.json" \
+  --output-dir "/absolute/dedicated/credits-audit" \
+  --remaining-percent 41 \
+  --reset-at "2026-08-16T18:00:00+08:00" \
+  --timezone "Asia/Shanghai"
+```
+
+输出包括：
+
+- `codex-credits-audit.html`：完整可读报告；
+- `codex-credits-audit.md`：每日、模型、费率、额度与换算表；
+- `codex-credits-audit.svg`：摘要图；
+- `codex-credits-audit.json`：脱敏、可复验的数据；
+- `codex-credits-audit-manifest.json`：文件哈希。
+
+脚本会自动执行输出校验。仓库提供脱敏演示数据：
+
+```bash
+node scripts/generate-credits-audit.mjs \
+  --input examples/codex-credits-demo.json \
+  --output-dir /tmp/codex-credits-demo \
+  --remaining-percent 41
+```
+
+详细口径见 [Credits 审计说明](references/credits-audit.md)。
 
 ## 隐私与磁盘占用
 

@@ -1,12 +1,12 @@
 ---
 name: generate-codex-consumption-report
-description: Generate a polished, date-led, interactive Codex consumption report from official account usage, device-local CC Switch or CodeBurn sources, or an explicitly supplied sanitized portable JSON, JSONL, or CSV file. Use when the user asks where Codex Tokens or estimated cost went, requests lifecycle/monthly/custom-period or Mac-and-Windows analysis, audits coverage after deleted threads, wants project/model/session/cache diagnostics, needs an anonymous competition demo, or wants an offline HTML/PDF/PNG report. This skill is Codex-only; it must not present estimated cost as subscription billing, claim remaining quota, or assign an official-versus-local difference to a device or deleted thread.
+description: Generate a polished Codex Token consumption report or audit Codex credits from a sanitized daily-workspace-usage-counts response. Use when the user asks where Codex Tokens or estimated cost went, wants lifecycle/monthly/custom-period or Mac-and-Windows analysis, asks whether credits or weekly allowance look correct, investigates Fast mode, needs credits-to-Token conversion, requests numeric tables and charts, audits coverage after deleted threads, or wants offline HTML/PDF/PNG/SVG artifacts. This skill is Codex-only; it must not present estimated cost as subscription billing, claim an inferred quota as confirmed, allocate total credits from zero-valued model rows, or assign an official-versus-local difference to a device or deleted thread.
 license: Apache-2.0
 ---
 
 # Generate Codex Consumption Report
 
-Produce a self-contained interactive HTML report whose narrative starts with official account Token activity by date, then explains the Token detail reconstructed from the devices actually imported. Treat official account activity and device-local explanatory detail as separate layers. Keep every collection step read-only. The official collector may query the signed-in Codex usage endpoint through the bundled app server; its saved output must remain sanitized and contain no identity or credential fields.
+Produce a self-contained interactive HTML report whose narrative starts with official account Token activity by date, then explains the Token detail reconstructed from the devices actually imported. When credits are requested, add a separate validated credits audit with full tables and an SVG summary. Treat official account Token activity, device-local explanatory detail, and webpage credits as three distinct layers. Keep every collection step read-only. Saved inputs and outputs must remain sanitized and contain no identity or credential fields.
 
 ## Resolve the run
 
@@ -17,6 +17,7 @@ Produce a self-contained interactive HTML report whose narrative starts with off
 5. Require a sanitized user-defined alias such as `mac-main` or `win-main` for every imported device. A device that was not imported is outside local-detail coverage, not a zero-usage device. Read [references/multi-device.md](references/multi-device.md) before collecting or merging cross-device data.
 6. Default to the full lifecycle and the user's current timezone. Use a dedicated output directory. The generator marks directories it owns and refuses a non-empty unrelated directory unless `--replace-output` was deliberately supplied. Never place output over a broad workspace root.
 7. Generate HTML first. Render PDF and PNG when browser dependencies are available or the user asks for those formats. Do not generate video.
+8. When the user asks about credits or Fast mode, read [references/credits-audit.md](references/credits-audit.md). Generate the Token report and credits audit as sibling deliverables when both are requested; do not merge credits into the API-equivalent dollar estimate or force the two sources to reconcile.
 
 Do not block on an unspecified date range: use the full lifecycle. Do not block on an unspecified timezone: use the current environment timezone, falling back to `Asia/Shanghai` only when it cannot be determined.
 
@@ -32,6 +33,32 @@ node "$SKILL_DIR/scripts/generate-competition-report.mjs" \
 ```
 
 Replace `--demo` with `--input "/absolute/path/portable-usage.json"` for explicit data. Never fall back from an invalid upload to demo data or local collection. Treat portable `activity` labels and API-equivalent cost as input-provided fields, not CodeBurn inference or subscription billing. Return the runner's `replyMarkdown` before the HTML artifact. Read [references/competition-mode.md](references/competition-mode.md) before packaging or adapting this path for a competition platform.
+
+## Audit credits and Fast mode
+
+Use the credits audit for the JSON response body copied from the browser request named `daily-workspace-usage-counts`. Never ask for or accept Headers, Cookies, Authorization, a HAR file, email, account ID, or access tokens. The endpoint is an internal webpage interface rather than a documented public API, so fail on unfamiliar fields instead of guessing.
+
+Run:
+
+```bash
+node "$SKILL_DIR/scripts/generate-credits-audit.mjs" \
+  --input "/absolute/path/daily-workspace-usage-counts.json" \
+  --output-dir "/absolute/dedicated/credits-audit-directory" \
+  --remaining-percent 41 \
+  --reset-at "2026-08-16T18:00:00+08:00" \
+  --timezone "Asia/Shanghai"
+```
+
+Use `--from` and `--to` when only part of the response belongs to the current reset window. The generator validates every daily Token identity, rejects common sensitive keys, creates complete daily/model/rate/conversion tables, writes an SVG summary, and runs `validate-credits-audit.mjs` before reporting success. Do not hand over artifacts if that validation fails.
+
+Interpret `totals.credits` as the already charged amount. Do not multiply it by Fast again. Use `models` only to summarize model appearance and threads/turns when `models[].credits` is zero; never fabricate a credit allocation. Label a pool derived from `used credits / consumed percentage` as approximate, disclose integer-percentage rounding and mid-day reset uncertainty, and never compare it to an unofficial community number as though that number were a published entitlement.
+
+When the user wants Token consumption and credits in one workflow, generate both:
+
+1. `codex-consumption-report.html` for official Token history plus local explanatory detail;
+2. `codex-credits-audit.html`, `.md`, and `.svg` for charged credits, Fast interpretation, tables, and quota approximation.
+
+Lead with the two links and explain that they are companion layers rather than one interchangeable accounting system.
 
 ## Generate the report
 

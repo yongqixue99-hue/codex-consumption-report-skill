@@ -20,6 +20,15 @@ codex-consumption-data.json
 codex-consumption-data.json.gz
 codeburn-*.json
 .codex-consumption-*
+codex-credits-audit/
+codex-credits-audit.html
+codex-credits-audit.md
+codex-credits-audit.svg
+codex-credits-audit.png
+codex-credits-audit.json
+codex-credits-audit-manifest.json
+daily-workspace-usage-counts*.json
+.codex-credits-audit-*
 *.db
 *.sqlite
 *.sqlite3

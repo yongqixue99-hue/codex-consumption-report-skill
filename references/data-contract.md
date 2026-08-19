@@ -14,7 +14,7 @@
 
 ## Source modes and precedence
 
-The generator supports two explicit modes.
+The Token report generator supports two explicit modes. A credits audit is an optional companion layer with its own input and output contract; it is not a third Token-source mode.
 
 ### Lifecycle report
 
@@ -44,6 +44,19 @@ Use CodeBurn `export --format json`, not `report --format json`.
 Required source schema: `codeburn.export.v2`. Required fields are `generated`, `summary[0]`, `periods[0].daily`, `periods[0].models`, `periods[0].activity`, and `records`. `sessions` and `projects` may be used for audit when scoped correctly.
 
 CodeBurn 0.9.19 may leave `records`, `sessions`, or `projects` broader than a custom selected period. Never assume those arrays are scoped merely because `summary` is scoped. Also never call this mode a complete account lifecycle merely because collection began at `1970-01-01`: deleted or rotated session files are absent.
+
+### Credits audit companion
+
+Use a sanitized `daily-workspace-usage-counts` response only for credits, daily Token components, threads, turns, and model-presence tables. The response must contain `data[].date` and `data[].totals`; every daily row must satisfy:
+
+```text
+cached_text_input_tokens
++ uncached_text_input_tokens
++ text_output_tokens
+= text_total_tokens
+```
+
+Use `totals.credits` as the charged total. Do not replace it with the sum of `models[].credits`, which may be zero, and do not multiply it by Fast again. Keep the credits audit outside the API-equivalent dollar cost scaling and outside official-versus-local Token coverage calculations. Read [credits-audit.md](credits-audit.md) for collection, rate snapshots, quota inference, tables, and privacy constraints.
 
 ## Account and device layers
 
@@ -200,3 +213,6 @@ Local-only validation must assert CodeBurn summary/daily/fact call, session, Tok
 - CodeBurn task labels are heuristic.
 - Temporal overlap between a model and a high-volume period is not causal evidence.
 - Execution-hour concentration includes background agent work and is not a timesheet.
+- Credits are not dollars, and a credits-to-Token conversion depends on model plus uncached-input, cached-input, and output mix.
+- A weekly pool derived from consumed credits and a displayed remaining percentage is an estimate, not a confirmed entitlement. Integer percentage rounding, reset boundaries, omitted dates, and collection lag all matter.
+- Fast increases the charged credit rate for supported models. Treat webpage `totals.credits` as already charged and never apply the multiplier twice.

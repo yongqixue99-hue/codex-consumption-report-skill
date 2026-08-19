@@ -34,3 +34,8 @@ jobs:
           test -s assets/vendor/echarts/LICENSE.txt
           test -s assets/vendor/echarts/NOTICE.txt
           test -s assets/vendor/echarts/licenses/LICENSE-d3
+          test -s references/credits-audit.md
+          test -s examples/codex-credits-demo.json
+      - name: Test Credits audit
+        shell: bash
+        run: node scripts/test-credits-audit.mjs

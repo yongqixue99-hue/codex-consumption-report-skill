@@ -1,0 +1,119 @@
+{
+  "data": [
+    {
+      "date": "2026-08-10",
+      "clients": [
+        {
+          "client_id": "CODEX_DESKTOP_APP",
+          "users": 1,
+          "threads": 12,
+          "turns": 15,
+          "credits": 2500
+        }
+      ],
+      "models": [
+        {
+          "model": "gpt-5.6-luna",
+          "credits": 0,
+          "users": 1,
+          "threads": 10,
+          "turns": 10
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "credits": 0,
+          "users": 1,
+          "threads": 2,
+          "turns": 5
+        }
+      ],
+      "totals": {
+        "users": 1,
+        "threads": 12,
+        "turns": 15,
+        "credits": 2500,
+        "cached_text_input_tokens": 80000000,
+        "uncached_text_input_tokens": 8000000,
+        "text_output_tokens": 1000000,
+        "text_total_tokens": 89000000
+      }
+    },
+    {
+      "date": "2026-08-11",
+      "clients": [
+        {
+          "client_id": "CODEX_DESKTOP_APP",
+          "users": 1,
+          "threads": 14,
+          "turns": 24,
+          "credits": 2000
+        }
+      ],
+      "models": [
+        {
+          "model": "gpt-5.6-luna",
+          "credits": 0,
+          "users": 1,
+          "threads": 11,
+          "turns": 11
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "credits": 0,
+          "users": 1,
+          "threads": 3,
+          "turns": 13
+        }
+      ],
+      "totals": {
+        "users": 1,
+        "threads": 14,
+        "turns": 24,
+        "credits": 2000,
+        "cached_text_input_tokens": 100000000,
+        "uncached_text_input_tokens": 5000000,
+        "text_output_tokens": 500000,
+        "text_total_tokens": 105500000
+      }
+    },
+    {
+      "date": "2026-08-12",
+      "clients": [
+        {
+          "client_id": "CODEX_DESKTOP_APP",
+          "users": 1,
+          "threads": 9,
+          "turns": 18,
+          "credits": 1900
+        }
+      ],
+      "models": [
+        {
+          "model": "gpt-5.6-terra",
+          "credits": 0,
+          "users": 1,
+          "threads": 7,
+          "turns": 7
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "credits": 0,
+          "users": 1,
+          "threads": 2,
+          "turns": 11
+        }
+      ],
+      "totals": {
+        "users": 1,
+        "threads": 9,
+        "turns": 18,
+        "credits": 1900,
+        "cached_text_input_tokens": 60000000,
+        "uncached_text_input_tokens": 10000000,
+        "text_output_tokens": 1200000,
+        "text_total_tokens": 71200000
+      }
+    }
+  ],
+  "group_by": "day"
+}
