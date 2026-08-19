@@ -14,7 +14,7 @@
 
 ## Source modes and precedence
 
-The Token report generator supports two explicit modes. A credits audit is an optional companion layer with its own input and output contract; it is not a third Token-source mode.
+The Token report generator supports two explicit modes. A credits audit and an official activity analytics audit are optional companion layers with their own input and output contracts; neither is an additional Token-source mode.
 
 ### Lifecycle report
 
@@ -57,6 +57,12 @@ cached_text_input_tokens
 ```
 
 Use `totals.credits` as the charged total. Do not replace it with the sum of `models[].credits`, which may be zero, and do not multiply it by Fast again. Keep the credits audit outside the API-equivalent dollar cost scaling and outside official-versus-local Token coverage calculations. Read [credits-audit.md](credits-audit.md) for collection, rate snapshots, quota inference, tables, and privacy constraints.
+
+### Official activity analytics companion
+
+Use sanitized response bodies from `daily-workspace-usage-counts`, `daily-skill-usage-metrics`, and `daily-plugin-usage-metrics` to report turns, daily thread values, model/client activity, Skill invocations, and Plugin calls. Require the same `group_by` and exact selected date buckets across every supplied response. Missing optional Skill or Plugin input must remain unavailable rather than becoming zero.
+
+Keep these activity metrics outside credits, Token conversion, API-equivalent dollar cost, and official-versus-local coverage calculations. A sum of daily thread values is not a deduplicated task count. Skill invocations can be explicit or implicit, and Plugin calls are a separate measure. Read [official-analytics.md](official-analytics.md) for the response schemas, browser-copy procedure, output tables, validation, and privacy constraints.
 
 ## Account and device layers
 
@@ -216,3 +222,4 @@ Local-only validation must assert CodeBurn summary/daily/fact call, session, Tok
 - Credits are not dollars, and a credits-to-Token conversion depends on model plus uncached-input, cached-input, and output mix.
 - A weekly pool derived from consumed credits and a displayed remaining percentage is an estimate, not a confirmed entitlement. Integer percentage rounding, reset boundaries, omitted dates, and collection lag all matter.
 - Fast increases the charged credit rate for supported models. Treat webpage `totals.credits` as already charged and never apply the multiplier twice.
+- Turns, Skill invocations, and Plugin calls are activity counts, not credits or Token quantities. Do not derive a conversion rate from their correlation with a date's credits.

@@ -1,0 +1,65 @@
+{
+  "data": [
+    {
+      "date": "2026-08-10",
+      "skill_usage_overviews": [
+        {
+          "skill_name": "agent-reach",
+          "display_name": "Agent Reach",
+          "invocation_counts": 6
+        },
+        {
+          "skill_name": "imagegen",
+          "display_name": "Imagegen",
+          "invocation_counts": 2
+        },
+        {
+          "skill_name": "Other",
+          "display_name": "Other",
+          "invocation_counts": 1
+        }
+      ]
+    },
+    {
+      "date": "2026-08-11",
+      "skill_usage_overviews": [
+        {
+          "skill_name": "agent-reach",
+          "display_name": "Agent Reach",
+          "invocation_counts": 5
+        },
+        {
+          "skill_name": "video-use",
+          "display_name": "Video Use",
+          "invocation_counts": 4
+        },
+        {
+          "skill_name": "Other",
+          "display_name": "Other",
+          "invocation_counts": 1
+        }
+      ]
+    },
+    {
+      "date": "2026-08-12",
+      "skill_usage_overviews": [
+        {
+          "skill_name": "agent-reach",
+          "display_name": "Agent Reach",
+          "invocation_counts": 4
+        },
+        {
+          "skill_name": "research",
+          "display_name": "Research",
+          "invocation_counts": 3
+        },
+        {
+          "skill_name": "frontend-design",
+          "display_name": "Frontend Design",
+          "invocation_counts": 2
+        }
+      ]
+    }
+  ],
+  "group_by": "day"
+}

@@ -1,12 +1,12 @@
 ---
 name: generate-codex-consumption-report
-description: Generate a polished Codex Token consumption report or audit Codex credits from a sanitized daily-workspace-usage-counts response. Use when the user asks where Codex Tokens or estimated cost went, wants lifecycle/monthly/custom-period or Mac-and-Windows analysis, asks whether credits or weekly allowance look correct, investigates Fast mode, needs credits-to-Token conversion, requests numeric tables and charts, audits coverage after deleted threads, or wants offline HTML/PDF/PNG/SVG artifacts. This skill is Codex-only; it must not present estimated cost as subscription billing, claim an inferred quota as confirmed, allocate total credits from zero-valued model rows, or assign an official-versus-local difference to a device or deleted thread.
+description: Generate a polished Codex Token consumption report, audit Codex credits, or summarize the official Analytics page's turns, models, clients, Skill invocations, and Plugin calls from sanitized response JSON. Use when the user asks where Codex Tokens or estimated cost went, wants lifecycle/monthly/custom-period or Mac-and-Windows analysis, asks whether credits or weekly allowance look correct, investigates Fast mode, needs credits-to-Token conversion, requests official activity tables and charts, audits coverage after deleted threads, or wants offline HTML/PDF/PNG/SVG artifacts. This skill is Codex-only; it must not present estimated cost as subscription billing, claim an inferred quota as confirmed, convert activity counts into credits, allocate total credits from zero-valued model rows, or assign an official-versus-local difference to a device or deleted thread.
 license: Apache-2.0
 ---
 
 # Generate Codex Consumption Report
 
-Produce a self-contained interactive HTML report whose narrative starts with official account Token activity by date, then explains the Token detail reconstructed from the devices actually imported. When credits are requested, add a separate validated credits audit with full tables and an SVG summary. Treat official account Token activity, device-local explanatory detail, and webpage credits as three distinct layers. Keep every collection step read-only. Saved inputs and outputs must remain sanitized and contain no identity or credential fields.
+Produce a self-contained interactive HTML report whose narrative starts with official account Token activity by date, then explains the Token detail reconstructed from the devices actually imported. When credits are requested, add a separate validated credits audit with full tables and an SVG summary. When the user asks about the Analytics page's turns, models, clients, Skills, or Plugins, add the official activity companion. Treat official account Token activity, official activity analytics, device-local explanatory detail, and webpage credits as four distinct layers. Keep every collection step read-only. Saved inputs and outputs must remain sanitized and contain no identity or credential fields.
 
 ## Resolve the run
 
@@ -18,6 +18,7 @@ Produce a self-contained interactive HTML report whose narrative starts with off
 6. Default to the full lifecycle and the user's current timezone. Use a dedicated output directory. The generator marks directories it owns and refuses a non-empty unrelated directory unless `--replace-output` was deliberately supplied. Never place output over a broad workspace root.
 7. Generate HTML first. Render PDF and PNG when browser dependencies are available or the user asks for those formats. Do not generate video.
 8. When the user asks about credits or Fast mode, read [references/credits-audit.md](references/credits-audit.md). Generate the Token report and credits audit as sibling deliverables when both are requested; do not merge credits into the API-equivalent dollar estimate or force the two sources to reconcile.
+9. When the user asks about the official Analytics page, turns, model/client activity, Skill invocations, or Plugin calls, read [references/official-analytics.md](references/official-analytics.md). Use only copied Response JSON, keep activity counts separate from credits and Tokens, and do not request administrator API credentials.
 
 Do not block on an unspecified date range: use the full lifecycle. Do not block on an unspecified timezone: use the current environment timezone, falling back to `Asia/Shanghai` only when it cannot be determined.
 
@@ -59,6 +60,23 @@ When the user wants Token consumption and credits in one workflow, generate both
 2. `codex-credits-audit.html`, `.md`, and `.svg` for charged credits, Fast interpretation, tables, and quota approximation.
 
 Lead with the two links and explain that they are companion layers rather than one interchangeable accounting system.
+
+## Audit official activity analytics
+
+Use this companion for the three response bodies copied from the official Codex Analytics page. `daily-workspace-usage-counts` is required; `daily-skill-usage-metrics` and `daily-plugin-usage-metrics` are optional. Never ask for or accept Headers, Cookies, Authorization, browser storage, a HAR file, email, account ID, user ID, or access tokens.
+
+Run:
+
+```bash
+node "$SKILL_DIR/scripts/generate-official-analytics.mjs" \
+  --usage-input "/absolute/path/daily-workspace-usage-counts.json" \
+  --skills-input "/absolute/path/daily-skill-usage-metrics.json" \
+  --plugins-input "/absolute/path/daily-plugin-usage-metrics.json" \
+  --output-dir "/absolute/dedicated/official-analytics-directory" \
+  --timezone "Asia/Shanghai"
+```
+
+The generator requires matching date buckets and `group_by` values, validates all aggregates, and produces `.html`, `.md`, `.svg`, normalized `.json`, and a hash manifest. Missing optional responses remain “not provided,” never zero. Treat the three request names as internal dashboard interfaces whose schema may change, not as a stable public API. Do not convert turns, daily thread sums, Skill invocations, or Plugin calls into credits or Tokens.
 
 ## Generate the report
 
@@ -203,7 +221,7 @@ Fix clipped labels, repeated date ticks, document-level overflow, incomplete SVG
 - End the visual narrative with a selected-range facts summary, not recommendations. Show only calculated totals, peaks, shares, and distribution facts that can be traced to the active fact subset. Do not tell the reader what to review, limit, optimize, change, or do next, and do not generate action lists from usage data.
 - On desktop, provide a narrow Codex-style chapter tick rail at the left edge with a clearly marked active chapter. On mobile, remove the rail and keep a compact, horizontally scrollable text navigation at the top.
 
-Read [references/data-contract.md](references/data-contract.md) when adapting a new CodeBurn schema, changing metrics, or reconciling a custom period. Read [references/multi-device.md](references/multi-device.md) for Mac/Windows collection, deleted-thread handling, event-level deduplication, or cross-OS project identity. Read [references/visual-contract.md](references/visual-contract.md) before changing the report template or chart behavior. Read [references/troubleshooting.md](references/troubleshooting.md) only when collection, rendering, or validation fails.
+Read [references/data-contract.md](references/data-contract.md) when adapting a new CodeBurn schema, changing metrics, or reconciling a custom period. Read [references/official-analytics.md](references/official-analytics.md) for Analytics Response collection, Skills/Plugins tables, field meanings, public-API eligibility, or privacy boundaries. Read [references/multi-device.md](references/multi-device.md) for Mac/Windows collection, deleted-thread handling, event-level deduplication, or cross-OS project identity. Read [references/visual-contract.md](references/visual-contract.md) before changing the report template or chart behavior. Read [references/troubleshooting.md](references/troubleshooting.md) only when collection, rendering, or validation fails.
 
 ## License boundary
 

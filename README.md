@@ -1,6 +1,6 @@
 # Codex Consumption Report Skill
 
-一个同时分析 Codex Token 消耗与核对 Credits 的 Codex Skill。它将官方账户 Token、本机或多设备可恢复的调用明细、网页 Credits 三种口径分开呈现，生成可筛选的离线报告、完整数字表和可分享图表。
+一个同时分析 Codex Token 消耗、核对 Credits、整理官网 Analytics 活动数据的 Codex Skill。它将官方账户 Token、官网活动统计、本机或多设备可恢复的调用明细、网页 Credits 四种口径分开呈现，生成可筛选的离线报告、完整数字表和可分享图表。
 
 > An offline, date-led Codex usage report that keeps official account totals separate from device-local attribution.
 
@@ -8,6 +8,7 @@
 
 - 按日期展示 Codex 官方账户 Token 总量、每日变化和峰值。
 - 核对 `daily-workspace-usage-counts` 中的 credits、Token 分项、threads 与 turns。
+- 汇总官网 Analytics 页的模型、客户端、turns、Skill 激活和 Plugin 调用情况。
 - 解释 Fast 模式倍率，生成官方费率表、1 credit 换算表和 250 credits 的 Sol 等价表。
 - 结合页面剩余百分比，给出带取整区间与重置边界提示的周总额度近似值。
 - 从 CC Switch 历史账本与 CodeBurn 增量重建本地调用明细。
@@ -19,13 +20,14 @@
 
 ## 数据口径
 
-报告明确区分三层数据：
+报告明确区分四层数据：
 
 1. **官方账户层**：来自已登录 Codex 账户的官方累计与每日 Token 活动。
-2. **本地解释层**：来自已导入设备的 CC Switch 与 CodeBurn，用于解释 Token 花在了哪些项目、模型、会话和时段。
-3. **Credits 核对层**：来自浏览器用量页中 `daily-workspace-usage-counts` 的纯 JSON 响应，用于核对已计入的 credits、Fast 与额度近似值。
+2. **官方活动层**：来自官网 Analytics 页的脱敏 JSON 响应，用于整理 turns、模型/客户端、Skill 激活和 Plugin 调用表。
+3. **本地解释层**：来自已导入设备的 CC Switch 与 CodeBurn，用于解释 Token 花在了哪些项目、模型、会话和时段。
+4. **Credits 核对层**：来自浏览器用量页中 `daily-workspace-usage-counts` 的纯 JSON 响应，用于核对已计入的 credits、Fast 与额度近似值。
 
-三层数据不会被强行混算。官方接口不提供设备或项目拆分，因此不能把“官方总量与本地重建值之差”直接归因给某台设备、已删除任务或某个项目。报告中的成本是按公开 API 价格进行的等价估算，不是 Codex 订阅账单；Credits 也不是美元。通过页面百分比反推的周额度只是近似值。
+四层数据不会被强行混算。turns、Skill 激活和 Plugin 调用不能换算为 credits 或 Token。官方接口不提供设备或项目拆分，因此不能把“官方总量与本地重建值之差”直接归因给某台设备、已删除任务或某个项目。报告中的成本是按公开 API 价格进行的等价估算，不是 Codex 订阅账单；Credits 也不是美元。通过页面百分比反推的周额度只是近似值。
 
 ## 安装
 
@@ -100,6 +102,37 @@ node scripts/generate-credits-audit.mjs \
 ```
 
 详细口径见 [Credits 审计说明](references/credits-audit.md)。
+
+## 官网 Analytics 活动统计
+
+在同一个 Analytics 页面中，只复制以下请求的 **Response JSON**：
+
+- `daily-workspace-usage-counts`（必需）；
+- `daily-skill-usage-metrics`（可选）；
+- `daily-plugin-usage-metrics`（可选）。
+
+不要复制 Headers、Cookies、Authorization、浏览器存储或 HAR。三个响应必须来自同一日期范围和同一分组，然后运行：
+
+```bash
+node scripts/generate-official-analytics.mjs \
+  --usage-input "/absolute/path/daily-workspace-usage-counts.json" \
+  --skills-input "/absolute/path/daily-skill-usage-metrics.json" \
+  --plugins-input "/absolute/path/daily-plugin-usage-metrics.json" \
+  --output-dir "/absolute/dedicated/official-analytics" \
+  --timezone "Asia/Shanghai"
+```
+
+输出包括完整离线 HTML、Markdown 数字表、SVG 图、规范化 JSON 与哈希清单。脚本会验证日期对齐、每日合计、模型/客户端份额、Skill/Plugin 汇总以及凭证风险。脱敏示例可以直接运行：
+
+```bash
+node scripts/generate-official-analytics.mjs \
+  --usage-input examples/codex-credits-demo.json \
+  --skills-input examples/codex-skills-demo.json \
+  --plugins-input examples/codex-plugins-demo.json \
+  --output-dir /tmp/codex-official-analytics-demo
+```
+
+详细步骤、字段含义与官方 Analytics API 的适用条件见 [官网活动统计说明](references/official-analytics.md)。
 
 ## 隐私与磁盘占用
 

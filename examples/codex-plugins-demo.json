@@ -1,0 +1,37 @@
+{
+  "data": [
+    {
+      "date": "2026-08-10",
+      "plugin_usage_overviews": [
+        {
+          "plugin_id": "plugin-figma-demo",
+          "plugin_name": "figma",
+          "display_name": "Figma",
+          "invocation_counts": 2
+        },
+        {
+          "plugin_id": "plugin-github-demo",
+          "plugin_name": "github",
+          "display_name": "GitHub",
+          "invocation_counts": 1
+        }
+      ]
+    },
+    {
+      "date": "2026-08-11",
+      "plugin_usage_overviews": [
+        {
+          "plugin_id": "plugin-github-demo",
+          "plugin_name": "github",
+          "display_name": "GitHub",
+          "invocation_counts": 3
+        }
+      ]
+    },
+    {
+      "date": "2026-08-12",
+      "plugin_usage_overviews": []
+    }
+  ],
+  "group_by": "day"
+}

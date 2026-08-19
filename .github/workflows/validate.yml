@@ -35,7 +35,13 @@ jobs:
           test -s assets/vendor/echarts/NOTICE.txt
           test -s assets/vendor/echarts/licenses/LICENSE-d3
           test -s references/credits-audit.md
+          test -s references/official-analytics.md
           test -s examples/codex-credits-demo.json
+          test -s examples/codex-skills-demo.json
+          test -s examples/codex-plugins-demo.json
       - name: Test Credits audit
         shell: bash
         run: node scripts/test-credits-audit.mjs
+      - name: Test official Analytics activity audit
+        shell: bash
+        run: node scripts/test-official-analytics.mjs
