@@ -46,12 +46,22 @@ try {
   ]);
 
   const audit = JSON.parse(readFileSync(resolve(output, "codex-credits-audit.json"), "utf8"));
+  const markdown = readFileSync(resolve(output, "codex-credits-audit.md"), "utf8");
+  const html = readFileSync(resolve(output, "codex-credits-audit.html"), "utf8");
+  const svg = readFileSync(resolve(output, "codex-credits-audit.svg"), "utf8");
   check(audit.summary.credits === 6400, "demo credit total changed");
   check(audit.summary.textTotalTokens === 265700000, "demo Token total changed");
   check(audit.summary.solStandardReferenceCredits === 7900, "Sol reference calculation changed");
   check(Math.abs(audit.summary.quotaInference.pointEstimateCredits - 6400 / 0.59) < 1e-8, "quota point estimate changed");
   check(audit.models.every((row) => row.reportedCredits === 0), "demo model credits should remain zero");
   check(audit.summary.credits > sum(audit.models, (row) => row.reportedCredits), "totals.credits must remain separate from model credits");
+  check(markdown.includes("| Token 总量 | 2.7亿 |"), "summary Token compact display changed");
+  check(markdown.includes("| 缓存输入 Token | 2.4亿 |"), "cached Token compact display changed");
+  check(markdown.includes("| 非缓存输入 Token | 2,300.0万 |"), "uncached Token compact display changed");
+  check(markdown.includes("| 2026-08-10 | 2,500.0 | 8,000.0万 | 800.0万 | 100.0万 | 8,900.0万 |"), "daily compact display changed");
+  check(html.includes('.num{text-align:center}'), "numeric-column alignment changed");
+  check(html.includes('<th class="num">活跃日期</th>'), "model numeric header alignment changed");
+  check(svg.includes("2.7亿"), "SVG compact display changed");
 
   const sensitiveInput = resolve(temporaryDirectory, "sensitive.json");
   const sensitive = JSON.parse(readFileSync(example, "utf8"));

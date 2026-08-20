@@ -424,6 +424,21 @@ function formatNumber(value, maximumFractionDigits = 0) {
   return new Intl.NumberFormat("zh-CN", { maximumFractionDigits }).format(value);
 }
 
+function formatOneDecimal(value) {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "—";
+  return new Intl.NumberFormat("zh-CN", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
+function formatTokenQuantity(value) {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "—";
+  if (Math.abs(value) >= 100_000_000) return `${formatOneDecimal(value / 100_000_000)}亿`;
+  if (Math.abs(value) >= 10_000) return `${formatOneDecimal(value / 10_000)}万`;
+  return formatOneDecimal(value);
+}
+
 function formatPercent(value, digits = 1) {
   if (!Number.isFinite(value)) return "—";
   return `${(value * 100).toFixed(digits)}%`;
@@ -446,9 +461,9 @@ function renderMarkdown(audit) {
     ? [
         ["页面剩余", `${formatNumber(audit.source.remainingPercent, 1)}%`],
         ["已消耗比例", `${formatNumber(quota.consumedPercent, 1)}%`],
-        ["周总额度点估计", formatNumber(quota.pointEstimateCredits, 0)],
-        ["整数百分比取整区间", quota.roundingRangeCredits ? `${formatNumber(quota.roundingRangeCredits.min, 0)}–${formatNumber(quota.roundingRangeCredits.max, 0)}` : "无法计算"],
-        ["估计剩余 credits", formatNumber(quota.estimatedRemainingCredits, 0)],
+        ["周总额度点估计", formatOneDecimal(quota.pointEstimateCredits)],
+        ["整数百分比取整区间", quota.roundingRangeCredits ? `${formatOneDecimal(quota.roundingRangeCredits.min)}–${formatOneDecimal(quota.roundingRangeCredits.max)}` : "无法计算"],
+        ["估计剩余 credits", formatOneDecimal(quota.estimatedRemainingCredits)],
       ]
     : [["页面剩余比例", "未提供，因此不反推周总额度"]];
   const rateRows = audit.rates.standardCreditsPerMillionTokens.map((row) => [
@@ -467,18 +482,20 @@ function renderMarkdown(audit) {
     "",
     "## 汇总",
     "",
+    "显示规则：Token 大数使用“万/亿”并统一保留 1 位小数；精确原始值保留在 JSON 审计文件中。",
+    "",
     markdownTable(["指标", "数值"], [
-      ["credits", formatNumber(audit.summary.credits, 6)],
-      ["Token 总量", formatNumber(audit.summary.textTotalTokens)],
-      ["缓存输入 Token", formatNumber(audit.summary.cachedTextInputTokens)],
-      ["非缓存输入 Token", formatNumber(audit.summary.uncachedTextInputTokens)],
-      ["输出 Token", formatNumber(audit.summary.textOutputTokens)],
-      ["缓存 Token 占比", formatPercent(audit.summary.cachedTokenShare, 2)],
+      ["credits", formatOneDecimal(audit.summary.credits)],
+      ["Token 总量", formatTokenQuantity(audit.summary.textTotalTokens)],
+      ["缓存输入 Token", formatTokenQuantity(audit.summary.cachedTextInputTokens)],
+      ["非缓存输入 Token", formatTokenQuantity(audit.summary.uncachedTextInputTokens)],
+      ["输出 Token", formatTokenQuantity(audit.summary.textOutputTokens)],
+      ["缓存 Token 占比", formatPercent(audit.summary.cachedTokenShare, 1)],
       ["每日 threads 相加（非去重）", formatNumber(audit.summary.threadsDailySum)],
       ["turns", formatNumber(audit.summary.turns)],
-      ["平均 turns / 每日 thread", formatNumber(audit.summary.averageTurnsPerThreadDailySum, 2)],
-      ["假设全部按 Sol Standard 的文本 credits", formatNumber(audit.summary.solStandardReferenceCredits, 6)],
-      ["实际 / Sol Standard 参照", formatNumber(audit.summary.chargedToSolStandardReferenceRatio, 4)],
+      ["平均 turns / 每日 thread", formatOneDecimal(audit.summary.averageTurnsPerThreadDailySum)],
+      ["假设全部按 Sol Standard 的文本 credits", formatOneDecimal(audit.summary.solStandardReferenceCredits)],
+      ["实际 / Sol Standard 参照", formatOneDecimal(audit.summary.chargedToSolStandardReferenceRatio)],
     ]),
     "",
     "## 每日数字",
@@ -487,14 +504,14 @@ function renderMarkdown(audit) {
       ["日期", "credits", "缓存输入", "非缓存输入", "输出", "Token 总量", "threads", "turns", "turns/thread"],
       audit.daily.map((row) => [
         row.date,
-        formatNumber(row.credits, 6),
-        formatNumber(row.cachedTextInputTokens),
-        formatNumber(row.uncachedTextInputTokens),
-        formatNumber(row.textOutputTokens),
-        formatNumber(row.textTotalTokens),
+        formatOneDecimal(row.credits),
+        formatTokenQuantity(row.cachedTextInputTokens),
+        formatTokenQuantity(row.uncachedTextInputTokens),
+        formatTokenQuantity(row.textOutputTokens),
+        formatTokenQuantity(row.textTotalTokens),
         formatNumber(row.threads),
         formatNumber(row.turns),
-        formatNumber(row.averageTurnsPerThread, 2),
+        formatOneDecimal(row.averageTurnsPerThread),
       ]),
     ),
     "",
@@ -509,8 +526,8 @@ function renderMarkdown(audit) {
         formatNumber(row.activeDates),
         formatNumber(row.threadsDailySum),
         formatNumber(row.turns),
-        formatNumber(row.averageTurnsPerThreadDailySum, 2),
-        formatNumber(row.reportedCredits, 6),
+        formatOneDecimal(row.averageTurnsPerThreadDailySum),
+        formatOneDecimal(row.reportedCredits),
       ]),
     ),
     "",
@@ -533,9 +550,9 @@ function renderMarkdown(audit) {
       ["模式", "非缓存输入", "缓存输入", "输出"],
       audit.rates.referral250SolEquivalents.map((row) => [
         row.mode,
-        formatNumber(row.uncachedInputTokens),
-        formatNumber(row.cachedInputTokens),
-        formatNumber(row.outputTokens),
+        formatTokenQuantity(row.uncachedInputTokens),
+        formatTokenQuantity(row.cachedInputTokens),
+        formatTokenQuantity(row.outputTokens),
       ]),
     ),
     "",
@@ -575,10 +592,10 @@ function renderSvg(audit) {
   const barWidth = Math.max(1, barStep * 0.72);
   const quota = audit.summary.quotaInference;
   const cards = [
-    ["所选 credits", formatNumber(audit.summary.credits, 2)],
-    ["Token 总量", formatNumber(audit.summary.textTotalTokens)],
+    ["所选 credits", formatOneDecimal(audit.summary.credits)],
+    ["Token 总量", formatTokenQuantity(audit.summary.textTotalTokens)],
     ["缓存占比", formatPercent(audit.summary.cachedTokenShare, 1)],
-    ["周总额度近似", quota?.pointEstimateCredits ? formatNumber(quota.pointEstimateCredits, 0) : "未提供剩余比例"],
+    ["周总额度近似", quota?.pointEstimateCredits ? formatOneDecimal(quota.pointEstimateCredits) : "未提供剩余比例"],
   ];
   const cardMarkup = cards.map(([label, value], index) => {
     const x = 96 + index * 360;
@@ -594,7 +611,7 @@ function renderSvg(audit) {
       ? `<text x="${x + barWidth / 2}" y="${chartY + chartHeight + 28}" class="axis" text-anchor="middle">${xmlEscape(row.date.slice(5))}</text>`
       : "";
     return `<rect x="${x}" y="${chartY + chartHeight - barHeight}" width="${barWidth}" height="${barHeight}" rx="4" fill="#1463ff">`
-      + `<title>${xmlEscape(row.date)} · ${xmlEscape(formatNumber(row.credits, 6))} credits</title></rect>${label}`;
+      + `<title>${xmlEscape(row.date)} · ${xmlEscape(formatOneDecimal(row.credits))} credits</title></rect>${label}`;
   }).join("\n");
   const tableY = 680;
   const columns = [96, 285, 485, 720, 955, 1190, 1370, 1500];
@@ -604,11 +621,11 @@ function renderSvg(audit) {
     const y = tableY + 48 + index * 45;
     const values = [
       row.date,
-      formatNumber(row.credits, 3),
-      formatNumber(row.cachedTextInputTokens),
-      formatNumber(row.uncachedTextInputTokens),
-      formatNumber(row.textOutputTokens),
-      formatNumber(row.textTotalTokens),
+      formatOneDecimal(row.credits),
+      formatTokenQuantity(row.cachedTextInputTokens),
+      formatTokenQuantity(row.uncachedTextInputTokens),
+      formatTokenQuantity(row.textOutputTokens),
+      formatTokenQuantity(row.textTotalTokens),
       formatNumber(row.threads),
       formatNumber(row.turns),
     ];
@@ -617,7 +634,7 @@ function renderSvg(audit) {
   }).join("\n");
   const noteY = tableY + 88 + visibleRows.length * 45;
   const rangeText = quota?.roundingRangeCredits
-    ? `按 ${formatNumber(audit.source.remainingPercent, 1)}% 剩余反推：约 ${formatNumber(quota.pointEstimateCredits, 0)} credits；只考虑整数百分比取整时约 ${formatNumber(quota.roundingRangeCredits.min, 0)}–${formatNumber(quota.roundingRangeCredits.max, 0)}。`
+    ? `按 ${formatNumber(audit.source.remainingPercent, 1)}% 剩余反推：约 ${formatOneDecimal(quota.pointEstimateCredits)} credits；只考虑整数百分比取整时约 ${formatOneDecimal(quota.roundingRangeCredits.min)}–${formatOneDecimal(quota.roundingRangeCredits.max)}。`
     : "未提供页面剩余百分比，因此不反推周总 credits。";
   const truncated = audit.daily.length > visibleRows.length
     ? `<text x="96" y="${noteY - 26}" class="muted">图内仅列最近 ${visibleRows.length} 天；完整每日表见 HTML / Markdown。</text>`
@@ -656,7 +673,7 @@ function renderSvg(audit) {
   <text x="124" y="${noteY + 43}" class="note">额度反推</text>
   <text x="124" y="${noteY + 82}" class="subtitle">${xmlEscape(rangeText)}</text>
   <text x="124" y="${noteY + 119}" class="muted">Fast 会提高 credits 消耗速率；totals.credits 按已计入的消耗处理，不应再次乘以 2.5。</text>
-  <text x="96" y="${height - 46}" class="muted">Credits 不是美元。内部网页接口可能变化；完整校验、模型表与换算表见 HTML / Markdown。</text>
+  <text x="96" y="${height - 46}" class="muted">Token 大数按万/亿显示并保留 1 位小数；精确值见 JSON。Credits 不是美元。</text>
 </svg>`;
 }
 
@@ -670,31 +687,31 @@ function htmlEscape(value) {
 }
 
 function htmlTable(headers, rows) {
-  return `<div class="table-scroll"><table><thead><tr>${headers.map((header) => `<th>${htmlEscape(header)}</th>`).join("")}</tr></thead>`
+  return `<div class="table-scroll"><table><thead><tr>${headers.map((header, index) => `<th${index ? ' class="num"' : ""}>${htmlEscape(header)}</th>`).join("")}</tr></thead>`
     + `<tbody>${rows.map((row) => `<tr>${row.map((cell, index) => `<td${index ? ' class="num"' : ""}>${htmlEscape(cell)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 
 function renderHtml(audit, svg) {
   const summaryRows = [
-    ["credits", formatNumber(audit.summary.credits, 6)],
-    ["Token 总量", formatNumber(audit.summary.textTotalTokens)],
-    ["缓存输入 Token", formatNumber(audit.summary.cachedTextInputTokens)],
-    ["非缓存输入 Token", formatNumber(audit.summary.uncachedTextInputTokens)],
-    ["输出 Token", formatNumber(audit.summary.textOutputTokens)],
-    ["缓存 Token 占比", formatPercent(audit.summary.cachedTokenShare, 2)],
+    ["credits", formatOneDecimal(audit.summary.credits)],
+    ["Token 总量", formatTokenQuantity(audit.summary.textTotalTokens)],
+    ["缓存输入 Token", formatTokenQuantity(audit.summary.cachedTextInputTokens)],
+    ["非缓存输入 Token", formatTokenQuantity(audit.summary.uncachedTextInputTokens)],
+    ["输出 Token", formatTokenQuantity(audit.summary.textOutputTokens)],
+    ["缓存 Token 占比", formatPercent(audit.summary.cachedTokenShare, 1)],
     ["threads 日累计（非去重）", formatNumber(audit.summary.threadsDailySum)],
     ["turns", formatNumber(audit.summary.turns)],
-    ["平均 turns / 每日 thread", formatNumber(audit.summary.averageTurnsPerThreadDailySum, 2)],
-    ["Sol Standard 文本 credits 参照", formatNumber(audit.summary.solStandardReferenceCredits, 6)],
-    ["实际 / Sol Standard 参照", formatNumber(audit.summary.chargedToSolStandardReferenceRatio, 4)],
+    ["平均 turns / 每日 thread", formatOneDecimal(audit.summary.averageTurnsPerThreadDailySum)],
+    ["Sol Standard 文本 credits 参照", formatOneDecimal(audit.summary.solStandardReferenceCredits)],
+    ["实际 / Sol Standard 参照", formatOneDecimal(audit.summary.chargedToSolStandardReferenceRatio)],
   ];
   const modelRows = audit.models.map((row) => [
     row.model,
     formatNumber(row.activeDates),
     formatNumber(row.threadsDailySum),
     formatNumber(row.turns),
-    formatNumber(row.averageTurnsPerThreadDailySum, 2),
-    formatNumber(row.reportedCredits, 6),
+    formatOneDecimal(row.averageTurnsPerThreadDailySum),
+    formatOneDecimal(row.reportedCredits),
   ]);
   const rateRows = audit.rates.standardCreditsPerMillionTokens.map((row) => [
     row.model,
@@ -707,7 +724,7 @@ function renderHtml(audit, svg) {
   ]);
   const quota = audit.summary.quotaInference;
   const quotaText = quota?.pointEstimateCredits
-    ? `点估计 ${formatNumber(quota.pointEstimateCredits, 0)} credits${quota.roundingRangeCredits ? `；整数百分比取整区间约 ${formatNumber(quota.roundingRangeCredits.min, 0)}–${formatNumber(quota.roundingRangeCredits.max, 0)}` : ""}。`
+    ? `点估计 ${formatOneDecimal(quota.pointEstimateCredits)} credits${quota.roundingRangeCredits ? `；整数百分比取整区间约 ${formatOneDecimal(quota.roundingRangeCredits.min)}–${formatOneDecimal(quota.roundingRangeCredits.max)}` : ""}。`
     : "未提供可用的剩余百分比，因此不反推周总额度。";
   return `<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -718,21 +735,21 @@ function renderHtml(audit, svg) {
   main{max-width:1440px;margin:auto;padding:32px 28px 80px}.visual{width:100%;overflow:auto;border:1px solid var(--line);background:white;border-radius:14px}.visual svg{display:block;width:100%;height:auto}
   section{margin-top:42px}h1{font-size:42px;margin:0 0 8px}h2{font-size:28px;margin:0 0 12px}p{max-width:980px;color:var(--muted)}
   .callout{padding:18px 22px;border:1px solid #f2b276;background:#fff7ed;border-radius:12px;color:var(--ink)}
-  .table-scroll{overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}table{border-collapse:collapse;width:100%;min-width:940px;font-variant-numeric:tabular-nums}th,td{padding:12px 14px;border-bottom:1px solid #ece7df;text-align:left;white-space:nowrap}th{background:#fbfaf7;font-size:14px}.num{text-align:right}
+  .table-scroll{overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}table{border-collapse:collapse;width:100%;min-width:940px;font-variant-numeric:tabular-nums}th,td{padding:12px 14px;border-bottom:1px solid #ece7df;text-align:left;white-space:nowrap}th{background:#fbfaf7;font-size:14px}.num{text-align:center}
   ul{color:var(--muted)}code{background:#ebe7df;padding:2px 5px;border-radius:4px}@media(max-width:620px){main{padding:20px 14px 60px}h1{font-size:32px}}
 </style></head><body><main>
   <h1>Codex Credits 核对报告</h1>
   <p>${htmlEscape(audit.source.rangeStart)} 至 ${htmlEscape(audit.source.rangeEnd)}。Credits 是用量折算单位，不是美元。</p>
   <div class="visual">${svg.replace(/^<\?xml[^>]*>\s*/u, "")}</div>
-  <section><h2>汇总数字</h2>${htmlTable(["指标", "数值"], summaryRows)}</section>
+  <section><h2>汇总数字</h2><p class="display-note">Token 大数使用“万/亿”并统一保留 1 位小数；完整精确值保留在 JSON 审计文件中。</p>${htmlTable(["指标", "数值"], summaryRows)}</section>
   <section><h2>每日数字</h2>${htmlTable(
     ["日期", "credits", "缓存输入", "非缓存输入", "输出", "Token 总量", "threads", "turns", "turns/thread"],
-    audit.daily.map((row) => [row.date, formatNumber(row.credits, 6), formatNumber(row.cachedTextInputTokens), formatNumber(row.uncachedTextInputTokens), formatNumber(row.textOutputTokens), formatNumber(row.textTotalTokens), formatNumber(row.threads), formatNumber(row.turns), formatNumber(row.averageTurnsPerThread, 2)]),
+    audit.daily.map((row) => [row.date, formatOneDecimal(row.credits), formatTokenQuantity(row.cachedTextInputTokens), formatTokenQuantity(row.uncachedTextInputTokens), formatTokenQuantity(row.textOutputTokens), formatTokenQuantity(row.textTotalTokens), formatNumber(row.threads), formatNumber(row.turns), formatOneDecimal(row.averageTurnsPerThread)]),
   )}</section>
   <section><h2>模型数字</h2><p>模型明细覆盖 ${htmlEscape(audit.summary.modelDetailCoverageDays)}/${htmlEscape(audit.daily.length)} 天，用于说明模型出现情况和 threads/turns 分布；不把 <code>models[].credits</code> 当成总额度。</p>${htmlTable(["模型", "活跃日期", "threads 日累计", "turns", "平均 turns/thread", "models[].credits"], modelRows)}</section>
   <section><h2>周额度近似</h2><div class="callout">${htmlEscape(quotaText)} Fast 或工具调用可能已经体现在 <code>totals.credits</code> 中，不要重复乘倍率。</div></section>
   <section><h2>官方费率与 1 credit 换算</h2>${htmlTable(["模型", "1M 非缓存输入", "1M 缓存输入", "1M 输出", "1 credit≈非缓存输入", "1 credit≈缓存输入", "1 credit≈输出"], rateRows)}</section>
-  <section><h2>250 credits 的 Sol 等价量</h2>${htmlTable(["模式", "非缓存输入", "缓存输入", "输出"], audit.rates.referral250SolEquivalents.map((row) => [row.mode, formatNumber(row.uncachedInputTokens), formatNumber(row.cachedInputTokens), formatNumber(row.outputTokens)]))}<p>实际任务混合三类 Token，因此没有唯一 Token 数。</p></section>
+  <section><h2>250 credits 的 Sol 等价量</h2>${htmlTable(["模式", "非缓存输入", "缓存输入", "输出"], audit.rates.referral250SolEquivalents.map((row) => [row.mode, formatTokenQuantity(row.uncachedInputTokens), formatTokenQuantity(row.cachedInputTokens), formatTokenQuantity(row.outputTokens)]))}<p>实际任务混合三类 Token，因此没有唯一 Token 数。</p></section>
   <section><h2>校验与限制</h2><ul>${audit.validation.warnings.map((warning) => `<li>${htmlEscape(warning)}</li>`).join("")}</ul><p>费率快照核对于 ${htmlEscape(audit.rates.verifiedAt)}；公开文档链接保留在 JSON/Markdown 中。不要上传 Headers、Cookies、Authorization 或 HAR。</p></section>
 </main></body></html>`;
 }

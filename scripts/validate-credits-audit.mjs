@@ -40,6 +40,19 @@ function sum(rows, selector) {
   return rows.reduce((total, row) => total + selector(row), 0);
 }
 
+function formatOneDecimal(value) {
+  return new Intl.NumberFormat("zh-CN", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
+function formatTokenQuantity(value) {
+  if (Math.abs(value) >= 100_000_000) return `${formatOneDecimal(value / 100_000_000)}亿`;
+  if (Math.abs(value) >= 10_000) return `${formatOneDecimal(value / 10_000)}万`;
+  return formatOneDecimal(value);
+}
+
 function hasCredentialLikeText(text) {
   return /(?:authorization\s*[:=]|proxy-authorization\s*[:=]|set-cookie\s*[:=]|bearer\s+[a-z0-9._~-]{12,}|(?:access|refresh|session)[-_]?token\s*[:=])/iu.test(text);
 }
@@ -110,12 +123,40 @@ function validate() {
     check(svg.includes(date), `SVG omits date ${date}`);
     check(html.includes(date), `HTML omits date ${date}`);
   }
+  const summaryTokenDisplays = [
+    formatTokenQuantity(audit.summary.textTotalTokens),
+    formatTokenQuantity(audit.summary.cachedTextInputTokens),
+    formatTokenQuantity(audit.summary.uncachedTextInputTokens),
+    formatTokenQuantity(audit.summary.textOutputTokens),
+  ];
+  for (const display of summaryTokenDisplays) {
+    check(markdown.includes(display), `Markdown omits compact Token display ${display}`);
+    check(html.includes(display), `HTML omits compact Token display ${display}`);
+  }
+  check(svg.includes(formatTokenQuantity(audit.summary.textTotalTokens)), "SVG omits compact Token total");
+  for (const row of audit.daily) {
+    for (const value of [row.cachedTextInputTokens, row.uncachedTextInputTokens, row.textOutputTokens, row.textTotalTokens]) {
+      const display = formatTokenQuantity(value);
+      check(markdown.includes(display), `Markdown omits daily compact Token display ${display}`);
+      check(html.includes(display), `HTML omits daily compact Token display ${display}`);
+    }
+  }
+  const visibleSvgRows = audit.daily.length <= 12 ? audit.daily : audit.daily.slice(-12);
+  for (const row of visibleSvgRows) {
+    for (const value of [row.cachedTextInputTokens, row.uncachedTextInputTokens, row.textOutputTokens, row.textTotalTokens]) {
+      const display = formatTokenQuantity(value);
+      check(svg.includes(display), `SVG omits visible compact Token display ${display}`);
+    }
+  }
   check(markdown.includes("| 日期 | credits | 缓存输入 | 非缓存输入 |"), "Markdown daily table is missing");
+  check(markdown.includes("Token 大数使用“万/亿”并统一保留 1 位小数"), "Markdown compact-display note is missing");
   check(markdown.includes("250 credits 折算为 Sol Token"), "Markdown referral conversion table is missing");
   check(svg.startsWith("<?xml") && svg.includes("<svg"), "SVG is invalid");
   check(!/<script\b/iu.test(svg), "SVG unexpectedly contains script");
   check(/<!doctype html>/iu.test(html), "HTML doctype is missing");
   check(!/(?:src|href)=["']https?:\/\//iu.test(html), "HTML has a remote runtime dependency");
+  check(html.includes('.num{text-align:center}'), "HTML numeric columns are not centered");
+  check(html.includes('<th class="num">活跃日期</th>'), "HTML model numeric headers are not centered");
   for (const text of [auditText, markdown, svg, html]) {
     check(!hasCredentialLikeText(text), "an output contains credential-like text");
   }

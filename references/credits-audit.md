@@ -142,3 +142,7 @@ The generator writes:
 - `codex-credits-audit-manifest.json`: hashes and artifact metadata.
 
 The HTML and Markdown must include the full daily table, model table, official rate table, 250-credit Sol table, quota estimate, and caveats. The SVG may summarize long ranges, but it must point to the complete tables. Keep all artifacts private unless the user explicitly chooses to publish them.
+
+For reader-facing HTML, Markdown, and SVG, format measured credits and calculated decimal values with one decimal place. Format Token quantities with Chinese compact units: use `亿` at 100,000,000 or above, `万` at 10,000 or above, and retain one decimal place. Apply the same rule to the summary, every daily Token column, and the 250-credit Token conversion table. Keep threads and turns as integers, preserve official rate-card precision where rounding would change the published rate, and retain every exact raw value in `codex-credits-audit.json`.
+
+In HTML tables, keep the descriptive first column left-aligned and center every numeric header and numeric cell, including all columns in the model table after the model name.

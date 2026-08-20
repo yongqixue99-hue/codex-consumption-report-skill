@@ -29,6 +29,14 @@
 
 四层数据不会被强行混算。turns、Skill 激活和 Plugin 调用不能换算为 credits 或 Token。官方接口不提供设备或项目拆分，因此不能把“官方总量与本地重建值之差”直接归因给某台设备、已删除任务或某个项目。报告中的成本是按公开 API 价格进行的等价估算，不是 Codex 订阅账单；Credits 也不是美元。通过页面百分比反推的周额度只是近似值。
 
+交付规则如下：
+
+- 只要求 Token 消耗分析：生成主 Token 报告；
+- 只要求 Credits 核对：只生成 Credits HTML、Markdown、SVG 与审计 JSON；
+- 要求“整体、完整、综合报告”：只要已经提供脱敏的 `daily-workspace-usage-counts` Response JSON，就默认同时生成主 Token 报告与独立的 Credits 核对报告；若缺少该 JSON，会明确标注 Credits 未包含。
+
+Credits 核对报告是主报告的并列文件，不嵌进同一个 HTML，以免把 Token、credits 和估算成本混成一个口径。
+
 ## 安装
 
 需要 Node.js 20.11 或更高版本；生命周期账本建议使用 Node.js 22.5 或更高版本。自动采集 CodeBurn 还需要 npm/npx。PDF 与 PNG 渲染为可选功能，需要 Playwright 和 Chrome、Chromium 或 Edge。
@@ -91,6 +99,8 @@ node scripts/generate-credits-audit.mjs \
 - `codex-credits-audit.svg`：摘要图；
 - `codex-credits-audit.json`：脱敏、可复验的数据；
 - `codex-credits-audit-manifest.json`：文件哈希。
+
+读者看到的 Credits 与计算小数统一保留 1 位；Token 总量、缓存输入、非缓存输入、输出以及每日 Token 列统一使用“万/亿 + 1 位小数”。底层 JSON 仍保留未经缩写的精确数值。HTML 表格的数字表头和数字单元格统一居中，模型名称继续左对齐。
 
 脚本会自动执行输出校验。仓库提供脱敏演示数据：
 

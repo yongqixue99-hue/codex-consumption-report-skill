@@ -6,7 +6,7 @@ license: Apache-2.0
 
 # Generate Codex Consumption Report
 
-Produce a self-contained interactive HTML report whose narrative starts with official account Token activity by date, then explains the Token detail reconstructed from the devices actually imported. When credits are requested, add a separate validated credits audit with full tables and an SVG summary. When the user asks about the Analytics page's turns, models, clients, Skills, or Plugins, add the official activity companion. Treat official account Token activity, official activity analytics, device-local explanatory detail, and webpage credits as four distinct layers. Keep every collection step read-only. Saved inputs and outputs must remain sanitized and contain no identity or credential fields.
+Produce a self-contained interactive HTML report whose narrative starts with official account Token activity by date, then explains the Token detail reconstructed from the devices actually imported. When credits are requested, add a separate validated credits audit with full tables and an SVG summary. Treat requests for an “overall,” “complete,” or “comprehensive” Codex usage report as a report bundle: include the credits audit whenever a sanitized `daily-workspace-usage-counts` response is available in scope. When the user asks about the Analytics page's turns, models, clients, Skills, or Plugins, add the official activity companion. Treat official account Token activity, official activity analytics, device-local explanatory detail, and webpage credits as four distinct layers. Keep every collection step read-only. Saved inputs and outputs must remain sanitized and contain no identity or credential fields.
 
 ## Resolve the run
 
@@ -17,7 +17,7 @@ Produce a self-contained interactive HTML report whose narrative starts with off
 5. Require a sanitized user-defined alias such as `mac-main` or `win-main` for every imported device. A device that was not imported is outside local-detail coverage, not a zero-usage device. Read [references/multi-device.md](references/multi-device.md) before collecting or merging cross-device data.
 6. Default to the full lifecycle and the user's current timezone. Use a dedicated output directory. The generator marks directories it owns and refuses a non-empty unrelated directory unless `--replace-output` was deliberately supplied. Never place output over a broad workspace root.
 7. Generate HTML first. Render PDF and PNG when browser dependencies are available or the user asks for those formats. Do not generate video.
-8. When the user asks about credits or Fast mode, read [references/credits-audit.md](references/credits-audit.md). Generate the Token report and credits audit as sibling deliverables when both are requested; do not merge credits into the API-equivalent dollar estimate or force the two sources to reconcile.
+8. When the user asks about credits or Fast mode, read [references/credits-audit.md](references/credits-audit.md). Generate the Token report and credits audit as sibling deliverables when both are requested. For an overall/complete/comprehensive report, include both by default when the sanitized Credits response is already supplied or available in the task scope. If it is unavailable, finish the Token report and explicitly say that Credits was not included and that only the `daily-workspace-usage-counts` Response JSON is needed; do not silently omit it or ask for credentials. Do not merge credits into the API-equivalent dollar estimate or force the two sources to reconcile.
 9. When the user asks about the official Analytics page, turns, model/client activity, Skill invocations, or Plugin calls, read [references/official-analytics.md](references/official-analytics.md). Use only copied Response JSON, keep activity counts separate from credits and Tokens, and do not request administrator API credentials.
 
 Do not block on an unspecified date range: use the full lifecycle. Do not block on an unspecified timezone: use the current environment timezone, falling back to `Asia/Shanghai` only when it cannot be determined.
@@ -60,6 +60,8 @@ When the user wants Token consumption and credits in one workflow, generate both
 2. `codex-credits-audit.html`, `.md`, and `.svg` for charged credits, Fast interpretation, tables, and quota approximation.
 
 Lead with the two links and explain that they are companion layers rather than one interchangeable accounting system.
+
+If the user asks only for Token consumption, generate only the Token report. If they ask only for a Credits audit, generate only the Credits artifacts. “Overall,” “complete,” and “comprehensive” mean the companion bundle when the required sanitized inputs are available; the Credits report remains a separate sibling HTML rather than being embedded into the Token report.
 
 ## Audit official activity analytics
 
