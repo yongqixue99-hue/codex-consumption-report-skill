@@ -33,7 +33,7 @@ const RATE_CARD = [
   { model: "GPT-5.4", input: 62.5, cachedInput: 6.25, output: 375 },
 ];
 
-const SENSITIVE_KEY_PATTERN = /^(?:authorization|proxy-authorization|cookie|cookies|set-cookie|access[-_]?token|refresh[-_]?token|id[-_]?token|session[-_]?token|api[-_]?key|apikey|password|secret|email|account[-_]?id)$/i;
+const SENSITIVE_KEY_PATTERN = /^(?:authorization|proxy-authorization|cookie|cookies|set-cookie|access[-_]?token|refresh[-_]?token|id[-_]?token|session[-_]?token|api[-_]?key|apikey|password|secret|email|account[-_]?id|user[-_]?id|workspace[-_]?id|organization[-_]?id|org[-_]?id)$/i;
 const VALUE_OPTIONS = new Set([
   "input",
   "output-dir",

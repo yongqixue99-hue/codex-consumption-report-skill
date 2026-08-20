@@ -7,7 +7,7 @@
 ## 能做什么
 
 - 按日期展示 Codex 官方账户 Token 总量、每日变化和峰值。
-- 核对 `daily-workspace-usage-counts` 中的 credits、Token 分项、threads 与 turns。
+- 从已登录的官方 Analytics 页面自动获取脱敏响应，核对 `daily-workspace-usage-counts` 中的 credits、Token 分项、threads 与 turns。
 - 汇总官网 Analytics 页的模型、客户端、turns、Skill 激活和 Plugin 调用情况。
 - 解释 Fast 模式倍率，生成官方费率表、1 credit 换算表和 250 credits 的 Sol 等价表。
 - 结合页面剩余百分比，给出带取整区间与重置边界提示的周总额度近似值。
@@ -23,9 +23,9 @@
 报告明确区分四层数据：
 
 1. **官方账户层**：来自已登录 Codex 账户的官方累计与每日 Token 活动。
-2. **官方活动层**：来自官网 Analytics 页的脱敏 JSON 响应，用于整理 turns、模型/客户端、Skill 激活和 Plugin 调用表。
+2. **官方活动层**：自动采集或手动导入官网 Analytics 页的脱敏 JSON 响应，用于整理 turns、模型/客户端、Skill 激活和 Plugin 调用表。
 3. **本地解释层**：来自已导入设备的 CC Switch 与 CodeBurn，用于解释 Token 花在了哪些项目、模型、会话和时段。
-4. **Credits 核对层**：来自浏览器用量页中 `daily-workspace-usage-counts` 的纯 JSON 响应，用于核对已计入的 credits、Fast 与额度近似值。
+4. **Credits 核对层**：来自浏览器用量页中自动采集或手动导入的 `daily-workspace-usage-counts` 纯 JSON 响应，用于核对已计入的 credits、Fast 与额度近似值。
 
 四层数据不会被强行混算。turns、Skill 激活和 Plugin 调用不能换算为 credits 或 Token。官方接口不提供设备或项目拆分，因此不能把“官方总量与本地重建值之差”直接归因给某台设备、已删除任务或某个项目。报告中的成本是按公开 API 价格进行的等价估算，不是 Codex 订阅账单；Credits 也不是美元。通过页面百分比反推的周额度只是近似值。
 
@@ -33,13 +33,13 @@
 
 - 只要求 Token 消耗分析：生成主 Token 报告；
 - 只要求 Credits 核对：只生成 Credits HTML、Markdown、SVG 与审计 JSON；
-- 要求“整体、完整、综合报告”：只要已经提供脱敏的 `daily-workspace-usage-counts` Response JSON，就默认同时生成主 Token 报告与独立的 Credits 核对报告；若缺少该 JSON，会明确标注 Credits 未包含。
+- 要求“整体、完整、综合报告”：默认同时生成主 Token 报告与独立的 Credits 核对报告；未提供 JSON 时优先从已登录浏览器自动采集。只有浏览器控制不可用或尚未登录时，才会提示用户处理。
 
 Credits 核对报告是主报告的并列文件，不嵌进同一个 HTML，以免把 Token、credits 和估算成本混成一个口径。
 
 ## 安装
 
-需要 Node.js 20.11 或更高版本；生命周期账本建议使用 Node.js 22.5 或更高版本。自动采集 CodeBurn 还需要 npm/npx。PDF 与 PNG 渲染为可选功能，需要 Playwright 和 Chrome、Chromium 或 Edge。
+需要 Node.js 20.11 或更高版本；生命周期账本建议使用 Node.js 22.5 或更高版本。自动采集 CodeBurn 还需要 npm/npx。Analytics 一句话自动取数需要 Codex 的浏览器控制能力，以及一个已经登录 `chatgpt.com` 的浏览器会话；它不会读取或保存 Cookie、令牌和请求头。PDF 与 PNG 渲染为可选功能，需要 Playwright 和 Chrome、Chromium 或 Edge。
 
 ```bash
 git clone https://github.com/yongqixue99-hue/codex-consumption-report-skill.git \
@@ -57,6 +57,14 @@ git clone https://github.com/yongqixue99-hue/codex-consumption-report-skill.git 
 ```text
 使用 $generate-codex-consumption-report 核对我的 Codex credits，解释 Fast，并把每日数字做成表格和图。
 ```
+
+最短可以只说：
+
+```text
+查看 Credits 报告
+```
+
+当前任务已有有效报告时会直接打开；没有报告，或者你说“刷新 Credits 报告”时，会自动打开已登录的官方 Analytics 页面取数、校验并生成。正常情况下不需要用户提供 Response JSON。
 
 ## 命令行生成
 
@@ -81,7 +89,9 @@ node scripts/generate-report.mjs \
 
 ## Credits 核对
 
-先在 Codex 用量页打开浏览器开发者工具，只复制 `daily-workspace-usage-counts` 请求的 **Response JSON**。不要复制 Headers、Cookies、Authorization，也不要导出 HAR。然后运行：
+在 Codex 中直接说“查看 Credits 报告”即可。Skill 会优先复用已登录的 Analytics 页面，只读取页面已经发出的 `daily-workspace-usage-counts` JSON 正文，并自动提取可见的剩余百分比和重置时间。它不会读取浏览器 Cookie、存储、Authorization、请求头或 HAR。
+
+如果运行环境没有浏览器控制能力，才使用手动回退：在 Codex 用量页打开开发者工具，只复制 `daily-workspace-usage-counts` 请求的 **Response JSON**。不要复制 Headers、Cookies、Authorization，也不要导出 HAR。然后运行：
 
 ```bash
 node scripts/generate-credits-audit.mjs \
@@ -115,13 +125,13 @@ node scripts/generate-credits-audit.mjs \
 
 ## 官网 Analytics 活动统计
 
-在同一个 Analytics 页面中，只复制以下请求的 **Response JSON**：
+需要官网活动表时，Skill 会在同一个已登录的 Analytics 页面自动收集以下响应正文：
 
 - `daily-workspace-usage-counts`（必需）；
 - `daily-skill-usage-metrics`（可选）；
 - `daily-plugin-usage-metrics`（可选）。
 
-不要复制 Headers、Cookies、Authorization、浏览器存储或 HAR。三个响应必须来自同一日期范围和同一分组，然后运行：
+三个响应必须来自同一日期范围和同一分组。缺少可选的 Skill 或 Plugin 响应时会显示“未提供”，不会写成零。自动采集不可用时，仍可手动复制这三个 **Response JSON**；不要复制 Headers、Cookies、Authorization、浏览器存储或 HAR。然后运行：
 
 ```bash
 node scripts/generate-official-analytics.mjs \

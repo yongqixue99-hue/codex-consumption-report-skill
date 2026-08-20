@@ -20,7 +20,11 @@ OpenAI documents a separate [Analytics API](https://learn.chatgpt.com/docs/enter
 
 For this Skill, use the page's already loaded, sanitized Response JSON instead. It requires no API key and makes the privacy boundary visible to the user.
 
-## Copy only the three response bodies
+## Collect automatically when possible
+
+When the user supplies no JSON, read [browser-auto-collection.md](browser-auto-collection.md) and use the signed-in Analytics page to collect the response bodies. `daily-workspace-usage-counts` is required; the Skill and Plugin responses remain optional. Do not ask the user to open Developer Tools or paste JSON unless supported browser control is unavailable.
+
+## Manual response-body fallback
 
 1. Sign in and open `https://chatgpt.com/codex/cloud/settings/analytics`.
 2. Select the intended date range and grouping on the page first.

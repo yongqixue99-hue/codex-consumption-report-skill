@@ -16,7 +16,19 @@ The audit can:
 
 It cannot prove a universal plan allowance, attribute total credits to one model when `models[].credits` is zero, split a calendar day at a mid-day reset, or prove which model handled one individual reply.
 
-## Collect only the response body
+## Collect automatically when possible
+
+When the user supplies no JSON, read [browser-auto-collection.md](browser-auto-collection.md) and use the signed-in Analytics page to collect only the `daily-workspace-usage-counts` response body. Also read the remaining percentage and reset time that are visibly rendered on the page when available. Do not ask the user to open Developer Tools or paste JSON unless supported browser control is unavailable.
+
+The intended one-line interaction is:
+
+```text
+查看 Credits 报告
+```
+
+If a valid report already exists in the current task, this opens it. If no report exists, or the user asks for the latest data, it automatically collects and generates one.
+
+## Manual response-body fallback
 
 1. Open `https://chatgpt.com/codex/cloud/settings/analytics#usage` while signed in.
 2. Record the visible remaining percentage and reset time separately.
@@ -28,7 +40,7 @@ It cannot prove a universal plan allowance, attribute total credits to one model
 
 Never export or upload a HAR. Never copy **Headers**, request cookies, `Authorization`, access tokens, account IDs, or email addresses. The generator rejects common credential and identity keys before writing artifacts.
 
-The endpoint above is an internal webpage endpoint, not a documented public API. Its name and fields may change. The Skill must fail clearly on an unfamiliar schema instead of guessing.
+The endpoint above is an internal webpage endpoint, not a documented public API. Its name and fields may change. Automatic and manual collection must both fail clearly on an unfamiliar schema instead of guessing.
 
 ## Generate and validate
 

@@ -31,7 +31,7 @@ const VALUE_OPTIONS = new Set([
   "timezone",
 ]);
 const BOOLEAN_OPTIONS = new Set(["replace-output"]);
-const SENSITIVE_KEY_PATTERN = /^(?:authorization|proxy-authorization|cookie|cookies|set-cookie|access[-_]?token|refresh[-_]?token|id[-_]?token|session[-_]?token|api[-_]?key|apikey|password|secret|email|account[-_]?id|user[-_]?id)$/i;
+const SENSITIVE_KEY_PATTERN = /^(?:authorization|proxy-authorization|cookie|cookies|set-cookie|access[-_]?token|refresh[-_]?token|id[-_]?token|session[-_]?token|api[-_]?key|apikey|password|secret|email|account[-_]?id|user[-_]?id|workspace[-_]?id|organization[-_]?id|org[-_]?id)$/i;
 const CREDENTIAL_VALUE_PATTERN = /(?:authorization\s*[:=]|proxy-authorization\s*[:=]|set-cookie\s*[:=]|bearer\s+[a-z0-9._~-]{12,}|(?:access|refresh|session)[-_]?token\s*[:=])/iu;
 const ENDPOINTS = {
   usage: "daily-workspace-usage-counts",
